@@ -1,0 +1,9 @@
+RandomGenerationFramework
+=========================
+
+This code has been developed and distributed under GNU license.
+Please see http://www.gnu.org/copyleft/gpl.html
+
+Source for male, female and family names is the 1990 US Census data (public domain).
+Source for the words is en-GB dictionary of OpenOffice which is under GNU lesser license.
+For more information please see http://wwww.openoffice.org

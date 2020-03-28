@@ -50,28 +50,28 @@ namespace AppRolesTesting
             // applications.ForEach(async (u) => await PrintApplicationDetailsAsync(u, betaClient));
             // Beta.Application rolesapp = applications.FirstOrDefault(x => x.DisplayName == "WebApp-RolesClaims");
 
-            IEnumerable<Beta.User> allUsersInTenant = AsyncHelper.RunSync(async () => await GetUsersAsync(betaClient));
+            //IEnumerable<Beta.User> allUsersInTenant = AsyncHelper.RunSync(async () => await UserOperations.GetUsersAsync(betaClient));
 
-            Beta.Application newApp = AsyncHelper.RunSync(async () => await CreateApplicationAsync(betaClient));
+            //Beta.Application newApp = AsyncHelper.RunSync(async () => await CreateApplicationAsync(betaClient));
 
-            try
-            {
-                AsyncHelper.RunSync(async () => await PrintApplicationDetailsAsync(newApp, betaClient));
-                AsyncHelper.RunSync(async () => await AssignUsersToAppRoles(betaClient, newApp, allUsersInTenant.ToList()));
-                AsyncHelper.RunSync(async () => await PrintServicePrincipalDetailsAsync(newApp, betaClient));
-                AsyncHelper.RunSync(async () => await UpdateServicePrincipalSettings(betaClient, newApp, allUsersInTenant));
-                AsyncHelper.RunSync(async () => await PrintServicePrincipalDetailsAsync(newApp, betaClient));
-            }
-            catch (Exception ex)
-            {
-                ColorConsole.WriteLine(ConsoleColor.Red, $"{ex}");
-            }
-            finally
-            {
-                ColorConsole.WriteLine(ConsoleColor.Green, "Press any key to delete this app");
-                Console.ReadKey();
-                AsyncHelper.RunSync(async () => await DeleteApplicationAsync(newApp, betaClient));
-            }
+            //try
+            //{
+            //    AsyncHelper.RunSync(async () => await PrintApplicationDetailsAsync(newApp, betaClient));
+            //    AsyncHelper.RunSync(async () => await AssignUsersToAppRoles(betaClient, newApp, allUsersInTenant.ToList()));
+            //    AsyncHelper.RunSync(async () => await PrintServicePrincipalDetailsAsync(newApp, betaClient));
+            //    AsyncHelper.RunSync(async () => await UpdateServicePrincipalSettings(betaClient, newApp, allUsersInTenant));
+            //    AsyncHelper.RunSync(async () => await PrintServicePrincipalDetailsAsync(newApp, betaClient));
+            //}
+            //catch (Exception ex)
+            //{
+            //    ColorConsole.WriteLine(ConsoleColor.Red, $"{ex}");
+            //}
+            //finally
+            //{
+            //    ColorConsole.WriteLine(ConsoleColor.Green, "Press any key to delete this app");
+            //    Console.ReadKey();
+            //    AsyncHelper.RunSync(async () => await DeleteApplicationAsync(newApp, betaClient));
+            //}
 
             #endregion Application operations
 
@@ -81,6 +81,51 @@ namespace AppRolesTesting
             //usersApproleAssignments.ForEach(u => PrintAppRoleAssignment(u));
 
             #endregion appRoleAssignments
+
+            #region Groups operations
+
+            GroupOperations groupOperations = new GroupOperations(betaClient);
+            UserOperations userOperations = new UserOperations(betaClient);
+            Beta.Group newGroup = null;
+
+            try
+            {
+                IEnumerable<Beta.User> allUsersInTenant = AsyncHelper.RunSync(async () => await userOperations.GetUsersAsync());
+                IEnumerable<Beta.User> allNonGuestUsersInTenant = AsyncHelper.RunSync(async () => await userOperations.GetNonGuestUsersAsync());
+
+                IEnumerable<Beta.User> membersToAdd = GenericUtility<Beta.User>.GetaRandomNumberOfItemsFromList(allUsersInTenant, 10);
+                IEnumerable<Beta.User> ownersToAdd = GenericUtility<Beta.User>.GetaRandomNumberOfItemsFromList(allNonGuestUsersInTenant, 2);
+
+                IEnumerable<Beta.User> ownersToUpdate = allNonGuestUsersInTenant.Except(ownersToAdd).Take(2);
+                IEnumerable<Beta.User> membersToUpdate = allUsersInTenant.Except(membersToAdd);
+
+                newGroup = AsyncHelper.RunSync(async () => await groupOperations.CreateGroupAsync(tenant, membersToAdd, ownersToAdd));
+                AsyncHelper.RunSync(async () => await groupOperations.PrintGroupDetails(newGroup, true));
+
+                // Update List
+
+                ownersToUpdate.ToList().ForEach(y => AsyncHelper.RunSync(async () =>
+                    await groupOperations.AddOwnerToGroup(newGroup, y)));
+
+                membersToUpdate.ToList().ForEach(y => AsyncHelper.RunSync(async () =>
+                    await groupOperations.AddMemberToGroup(newGroup, y)));
+
+                //newGroup = AsyncHelper.RunSync(async () => await groupOperations.AllowExternalSendersAsync(newGroup));
+                
+                AsyncHelper.RunSync(async () => await groupOperations.PrintGroupDetails(newGroup, true));
+            }
+            catch (Exception ex)
+            {
+                ColorConsole.WriteLine(ConsoleColor.Red, $"{ex}");
+            }
+            finally
+            {
+                ColorConsole.WriteLine(ConsoleColor.Green, "Press any key to delete this group");
+                Console.ReadKey();
+                AsyncHelper.RunSync(async () => await groupOperations.DeleteGroupAsync(newGroup));
+            }
+
+            #endregion Groups operations
 
             #region user operations
 
@@ -756,6 +801,8 @@ namespace AppRolesTesting
             }
             else
             {
+                GroupOperations groupOperations = new GroupOperations(graphServiceClient);
+
                 Console.WriteLine($"Id-{servicePrincipal.Id}, Enabled- {servicePrincipal.AccountEnabled}, AppDisplayName-{servicePrincipal.AppDisplayName}, AppId-{servicePrincipal.AppId}, " +
                 $"AppOwnerOrganizationId-{servicePrincipal.AppOwnerOrganizationId}, AppRoleAssignmentRequired-{servicePrincipal?.AppRoleAssignmentRequired}, " +
                 $"DisplayName-{servicePrincipal.DisplayName}, Homepage-{servicePrincipal?.Homepage}PreferredTokenSigningKeyThumbprint-{servicePrincipal?.PreferredTokenSigningKeyThumbprint}, " +
@@ -845,7 +892,7 @@ namespace AppRolesTesting
 
                     foreach (var group in servicePrincipal.MemberOf)
                     {
-                        Beta.Group adGroup = await GetGroupByIdAsync(graphServiceClient, group);
+                        Beta.Group adGroup = await groupOperations.GetGroupByIdAsync(group);
 
                         Console.WriteLine($"    DisplayName-'{adGroup.DisplayName}'");
                     }
@@ -859,7 +906,7 @@ namespace AppRolesTesting
 
                     foreach (var group in servicePrincipal.TransitiveMemberOf)
                     {
-                        Beta.Group adGroup = await GetGroupByIdAsync(graphServiceClient, group);
+                        Beta.Group adGroup = await groupOperations.GetGroupByIdAsync(group);
 
                         Console.WriteLine($"    DisplayName-'{adGroup.DisplayName}'");
                     }
@@ -867,10 +914,10 @@ namespace AppRolesTesting
                     Console.WriteLine("----------------------------------------------------------");
                 }
 
-                if (servicePrincipal?.Oauth2Permissions?.Count() > 0)
+                if (servicePrincipal?.Oauth2PermissionGrants?.Count() > 0)
                 {
-                    Console.WriteLine("--------------------------Oauth2Permissions-------------------");
-                    foreach (var oAuth2Permission in servicePrincipal.Oauth2Permissions)
+                    Console.WriteLine("--------------------------PublishedPermissionScopes-------------------");
+                    foreach (var oAuth2Permission in servicePrincipal.PublishedPermissionScopes)
                     {
                         Console.WriteLine($"Id-{oAuth2Permission?.Id}, IsEnabled- {oAuth2Permission.IsEnabled}, Origin- {oAuth2Permission.Origin}, Type- {oAuth2Permission.Type} "
                             + $"UserConsentDescription-{oAuth2Permission.UserConsentDescription}, UserConsentDisplayName-{oAuth2Permission.UserConsentDisplayName}, Value-{oAuth2Permission.Value}");
@@ -1033,28 +1080,10 @@ namespace AppRolesTesting
             Console.WriteLine($"--------------------------------OAuth2PermissionGrants for '{servicePrincipal.DisplayName}' start----------------------------------------");
         }
 
-        private static async Task<Beta.Group> GetGroupByIdAsync(Beta.GraphServiceClient graphServiceClient, Beta.DirectoryObject group)
-        {
-            var groupspage = await graphServiceClient.Groups.Request().Filter($"id eq '{group.Id}'").GetAsync();
-            return groupspage.FirstOrDefault();
-        }
-
-        private static void PrintGroupDetails(Beta.Group group)
-        {
-            if (group != null)
-            {
-                Console.WriteLine($"DisplayName-{group.DisplayName}, MailNickname- {group.MailNickname}, Id-{group.Id}");
-                // TODO: More to print
-            }
-            else
-            {
-                Console.WriteLine("The provided group is null!");
-            }
-        }
-
         private static async Task<Beta.Application> GetApplicationByAppIdAsync(Beta.GraphServiceClient graphServiceClient, string appId)
         {
             var applications = await graphServiceClient.Applications.Request().Filter($"appId eq '{appId}'").GetAsync();
+            //Request.Header("Prefer","outlook.body-content-type=\"text\"")
             return applications.FirstOrDefault();
         }
 
@@ -1354,46 +1383,6 @@ namespace AppRolesTesting
             }
 
             return updatedUser;
-        }
-
-        private static async Task<List<Beta.User>> GetUsersAsync(Beta.GraphServiceClient graphServiceClient, int top = 15)
-        {
-            List<Beta.User> allUsers = new List<Beta.User>();
-
-            try
-            {
-                Beta.IGraphServiceUsersCollectionPage users = await graphServiceClient.Users.Request().Top(top).GetAsync();
-
-                if (users != null)
-                {
-                    do
-                    {
-                        // Page through results
-                        foreach (var user in users.CurrentPage)
-                        {
-                            //Console.WriteLine($"User:{user.DisplayName}");
-                            allUsers.Add(user);
-                        }
-
-                        // are there more pages (Has a @odata.nextLink ?)
-                        if (users.NextPageRequest != null)
-                        {
-                            users = await users.NextPageRequest.GetAsync();
-                        }
-                        else
-                        {
-                            users = null;
-                        }
-                    } while (users != null);
-                }
-            }
-            catch (ServiceException e)
-            {
-                Console.WriteLine($"We could not retrieve the user's list: {e}");
-                return null;
-            }
-
-            return allUsers;
         }
 
         private static async Task DeleteUserAsync(GraphServiceClient graphServiceClient, string userId)
