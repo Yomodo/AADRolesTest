@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AppRolesTesting
 {
@@ -36,7 +34,7 @@ namespace AppRolesTesting
                 int index = random.Next(0, sourceList.Count());
 
                 T item = sourceList.ElementAtOrDefault(index);
-                if(!toreturn.Contains(item))
+                if (!toreturn.Contains(item))
                 {
                     toreturn.Add(item);
                 }

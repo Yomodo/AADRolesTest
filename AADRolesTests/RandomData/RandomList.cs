@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
 
 namespace AppRolesTesting
 {
@@ -27,7 +24,7 @@ namespace AppRolesTesting
         /// </summary>
         /// <param name="list">The list.</param>
         public RandomList(IList<T> list) : this(list, false, false)
-        { 
+        {
         }
 
         /// <summary>
@@ -42,7 +39,7 @@ namespace AppRolesTesting
 
             if (unique && makeLocalCopyOfList)
             {
-                // make a copy 
+                // make a copy
                 this._list = new List<T>();
 
                 foreach (T o in list)

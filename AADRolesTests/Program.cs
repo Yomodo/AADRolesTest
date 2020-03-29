@@ -103,15 +103,23 @@ namespace AppRolesTesting
                 AsyncHelper.RunSync(async () => await groupOperations.PrintGroupDetails(newGroup, true));
 
                 // Update List
-
                 ownersToUpdate.ToList().ForEach(y => AsyncHelper.RunSync(async () =>
-                    await groupOperations.AddOwnerToGroup(newGroup, y)));
+                    await groupOperations.AddOwnerToGroupAsync(newGroup, y)));
 
                 membersToUpdate.ToList().ForEach(y => AsyncHelper.RunSync(async () =>
                     await groupOperations.AddMemberToGroup(newGroup, y)));
 
+                AsyncHelper.RunSync(async () => await groupOperations.PrintGroupDetails(newGroup, true));
+
                 //newGroup = AsyncHelper.RunSync(async () => await groupOperations.AllowExternalSendersAsync(newGroup));
-                
+
+                // Delete a bunch
+                ownersToAdd.ToList().ForEach(y => AsyncHelper.RunSync(async () =>
+                    await groupOperations.RemoveGroupOwnerAsync(newGroup, y)));
+
+                membersToAdd.ToList().ForEach(y => AsyncHelper.RunSync(async () =>
+                    await groupOperations.RemoveGroupMemberAsync(newGroup, y)));
+
                 AsyncHelper.RunSync(async () => await groupOperations.PrintGroupDetails(newGroup, true));
             }
             catch (Exception ex)

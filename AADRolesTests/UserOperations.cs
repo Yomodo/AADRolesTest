@@ -1,11 +1,8 @@
 ﻿extern alias BetaLib;
 
 using Microsoft.Graph;
-using Microsoft.Graph.Auth;
-using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Beta = BetaLib.Microsoft.Graph;
 
@@ -18,8 +15,8 @@ namespace AppRolesTesting
         public UserOperations(Beta.GraphServiceClient graphServiceClient)
         {
             this._graphServiceClient = graphServiceClient;
-
         }
+
         public async Task<List<Beta.User>> GetUsersAsync(int top = 15)
         {
             List<Beta.User> allUsers = new List<Beta.User>();
@@ -70,7 +67,6 @@ namespace AppRolesTesting
 
             try
             {
- 
                 if (users != null)
                 {
                     do

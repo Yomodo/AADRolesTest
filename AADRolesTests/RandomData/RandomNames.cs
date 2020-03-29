@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace AppRolesTesting
 {
@@ -16,7 +13,7 @@ namespace AppRolesTesting
         /// Master list of the various lists available
         /// </summary>
         private static Dictionary<NameType, List<string>> _nameLists = new Dictionary<NameType, List<string>>();
-        
+
         /// <summary>
         /// Cached list of male names
         /// </summary>
@@ -26,7 +23,7 @@ namespace AppRolesTesting
         /// Cached list for female names
         /// </summary>
         private static List<string> _femaleNames = new List<string>();
-        
+
         /// <summary>
         /// Cached list for words
         /// </summary>
@@ -77,7 +74,7 @@ namespace AppRolesTesting
                 return _femaleNames;
             }
         }
-        
+
         /// <summary>
         /// Gets the cached words.
         /// </summary>
@@ -131,12 +128,12 @@ namespace AppRolesTesting
             {
                 MergeLists(combinedlist, MaleNames);
             }
-           
+
             if ((type & NameType.FemaleName) == NameType.FemaleName)
             {
                 MergeLists(combinedlist, FemaleNames);
             }
-           
+
             if ((type & NameType.Word) == NameType.Word)
             {
                 MergeLists(combinedlist, Words);
@@ -167,9 +164,11 @@ namespace AppRolesTesting
                 case NameType.MaleName:
                     FillListFromResource(list, "RandomData.Resources.MaleName.txt", false);
                     break;
+
                 case NameType.FemaleName:
                     FillListFromResource(list, "RandomData.Resources.FemaleName.txt", false);
                     break;
+
                 case NameType.Word:
                     FillListFromResource(list, "RandomData.Resources.Word.txt", false);
                     break;
@@ -199,6 +198,6 @@ namespace AppRolesTesting
             }
 
             sr.Close();
-        }        
+        }
     }
 }

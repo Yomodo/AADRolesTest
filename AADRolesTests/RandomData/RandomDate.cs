@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace AppRolesTesting
 {
@@ -23,16 +20,16 @@ namespace AppRolesTesting
         /// <summary>
         /// Initializes a new instance of the <see cref="RandomDate" /> class.
         /// </summary>
-        public RandomDate() : this(DateTime.MinValue, DateTime.Now) 
-        { 
+        public RandomDate() : this(DateTime.MinValue, DateTime.Now)
+        {
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RandomDate" /> class.
         /// </summary>
         /// <param name="minDate">The min date.</param>
-        public RandomDate(DateTime minDate) : this(minDate, DateTime.Now) 
-        { 
+        public RandomDate(DateTime minDate) : this(minDate, DateTime.Now)
+        {
         }
 
         /// <summary>

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace AppRolesTesting
@@ -34,7 +32,7 @@ namespace AppRolesTesting
         /// Initializes a new instance of the <see cref="RandomStrings"/> class.
         /// </summary>
         /// <param name="maxLength">The max length of the string to generate</param>
-        public RandomStrings(int maxLength):this(maxLength, CharacterType.LowerCase | CharacterType.UpperCase)
+        public RandomStrings(int maxLength) : this(maxLength, CharacterType.LowerCase | CharacterType.UpperCase)
         {
             this._maxlength = maxLength;
         }
@@ -46,7 +44,7 @@ namespace AppRolesTesting
         /// <param name="charType">The character type enumeration</param>
         public RandomStrings(int maxLength, CharacterType charType)
             : this(0, maxLength, charType, false)
-        { 
+        {
         }
 
         /// <summary>
@@ -57,7 +55,7 @@ namespace AppRolesTesting
         /// <param name="padRight">Apply padding to ensure string length</param>
         public RandomStrings(int maxLength, CharacterType charType, bool padRight)
             : this(0, maxLength, charType, padRight)
-        { 
+        {
         }
 
         /// <summary>
@@ -68,7 +66,7 @@ namespace AppRolesTesting
         /// <param name="charType">The character type enumeration</param>
         public RandomStrings(int minLength, int maxLength, CharacterType charType)
             : this(minLength, maxLength, charType, false)
-        { 
+        {
         }
 
         /// <summary>

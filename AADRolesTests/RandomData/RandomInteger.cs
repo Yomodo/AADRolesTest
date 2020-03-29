@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace AppRolesTesting
+﻿namespace AppRolesTesting
 {
     /// <summary>
     /// Generates random integer values
@@ -75,6 +70,6 @@ namespace AppRolesTesting
         public override int GetRandom()
         {
             return _random.Next(this._min, this._max);
-        }        
+        }
     }
 }

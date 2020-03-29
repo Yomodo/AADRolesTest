@@ -102,8 +102,8 @@ namespace AppRolesTesting
                     SecurityEnabled = true,
                     MailNickname = mailNickName,
                     Visibility = "Public",
-                    OwnersODataBind = owners.Select(u => $"https://graph.microsoft.com/v1.0/users/{u.Id}").ToArray(),
-                    MembersODataBind = members.Select(u => $"https://graph.microsoft.com/v1.0/users/{u.Id}").ToArray(),
+                    OwnersReference = owners.Select(u => $"https://graph.microsoft.com/v1.0/users/{u.Id}").ToArray(),
+                    MembersReference = members.Select(u => $"https://graph.microsoft.com/v1.0/users/{u.Id}").ToArray(),
                 };
 
                 newGroupObject = await _graphServiceClient.Groups.Request().AddAsync(newGroup);
@@ -136,21 +136,33 @@ namespace AppRolesTesting
             return await _graphServiceClient.Groups[groupId].Request().GetAsync();
         }
 
-        public async Task<Beta.Group> GetGroupByMailNickName(string mailNickName)
+        public async Task<Beta.Group> GetGroupByMailNickNameAsync(string mailNickName)
         {
             var groups = await _graphServiceClient.Groups.Request().Filter($"mailNickName eq '{mailNickName}'").GetAsync();
             return groups.FirstOrDefault();
         }
 
-        public async Task<Beta.Group> AddOwnerToGroup(Beta.Group group, Beta.User owner)
+        public async Task<Beta.Group> AddOwnerToGroupAsync(Beta.Group group, Beta.User owner)
         {
             await _graphServiceClient.Groups[group.Id].Owners.References.Request().AddAsync(owner);
+            return await GetGroupByIdAsync(group);
+        }
+
+        public async Task<Beta.Group> RemoveGroupOwnerAsync(Beta.Group group, Beta.User owner)
+        {
+            await _graphServiceClient.Groups[group.Id].Owners[owner.Id].Reference.Request().DeleteAsync();
             return await GetGroupByIdAsync(group);
         }
 
         public async Task<Beta.Group> AddMemberToGroup(Beta.Group group, Beta.User member)
         {
             await _graphServiceClient.Groups[group.Id].Members.References.Request().AddAsync(member);
+            return await GetGroupByIdAsync(group);
+        }
+
+        public async Task<Beta.Group> RemoveGroupMemberAsync(Beta.Group group, Beta.User member)
+        {
+            await _graphServiceClient.Groups[group.Id].Members[member.Id].Reference.Request().DeleteAsync();
             return await GetGroupByIdAsync(group);
         }
 
