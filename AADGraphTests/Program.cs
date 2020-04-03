@@ -1,5 +1,6 @@
 ﻿extern alias BetaLib;
 
+using Common;
 using Microsoft.Graph;
 using Microsoft.Graph.Auth;
 using Microsoft.Identity.Client;
@@ -24,10 +25,9 @@ namespace AppRolesTesting
 
         // Change the following between each call to create/update user if not deleting the user
         private static string givenName = "test99";
-
         private static string surname = "user99";
 
-        private static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             // Initialize and prepare MSAL
             string[] scopes = new string[] { "user.read", "user.readwrite.all", "Directory.AccessAsUser.All", "Directory.ReadWrite.All", "Contacts.ReadWrite", "AppRoleAssignment.ReadWrite.All" };
@@ -47,20 +47,20 @@ namespace AppRolesTesting
             #region Application operations
 
             // List<Beta.Application> applications = GetAllApplicationsAsync(betaClient).Result;
-            // applications.ForEach(async (u) => await PrintApplicationDetailsAsync(u, betaClient));
+            // applications.ForEach(async (u) => await PrintApplicationDetailsAsync(u, betaClient);
             // Beta.Application rolesapp = applications.FirstOrDefault(x => x.DisplayName == "WebApp-RolesClaims");
 
-            //IEnumerable<Beta.User> allUsersInTenant = AsyncHelper.RunSync(async () => await UserOperations.GetUsersAsync(betaClient));
+            //IEnumerable<Beta.User> allUsersInTenant = await UserOperations.GetUsersAsync(betaClient);
 
-            //Beta.Application newApp = AsyncHelper.RunSync(async () => await CreateApplicationAsync(betaClient));
+            //Beta.Application newApp = await CreateApplicationAsync(betaClient);
 
             //try
             //{
-            //    AsyncHelper.RunSync(async () => await PrintApplicationDetailsAsync(newApp, betaClient));
-            //    AsyncHelper.RunSync(async () => await AssignUsersToAppRoles(betaClient, newApp, allUsersInTenant.ToList()));
-            //    AsyncHelper.RunSync(async () => await PrintServicePrincipalDetailsAsync(newApp, betaClient));
-            //    AsyncHelper.RunSync(async () => await UpdateServicePrincipalSettings(betaClient, newApp, allUsersInTenant));
-            //    AsyncHelper.RunSync(async () => await PrintServicePrincipalDetailsAsync(newApp, betaClient));
+            //    await PrintApplicationDetailsAsync(newApp, betaClient);
+            //    await AssignUsersToAppRoles(betaClient, newApp, allUsersInTenant.ToList());
+            //    await PrintServicePrincipalDetailsAsync(newApp, betaClient);
+            //    await UpdateServicePrincipalSettings(betaClient, newApp, allUsersInTenant);
+            //    await PrintServicePrincipalDetailsAsync(newApp, betaClient);
             //}
             //catch (Exception ex)
             //{
@@ -70,7 +70,7 @@ namespace AppRolesTesting
             //{
             //    ColorConsole.WriteLine(ConsoleColor.Green, "Press any key to delete this app");
             //    Console.ReadKey();
-            //    AsyncHelper.RunSync(async () => await DeleteApplicationAsync(newApp, betaClient));
+            //    await DeleteApplicationAsync(newApp, betaClient);
             //}
 
             #endregion Application operations
@@ -78,7 +78,7 @@ namespace AppRolesTesting
             #region appRoleAssignments
 
             //List<Beta.AppRoleAssignment> usersApproleAssignments = GetUsersAppRoleAssignmentsAsync(betaClient).Result;
-            //usersApproleAssignments.ForEach(u => PrintAppRoleAssignment(u));
+            //usersApproleAssignments.ForEach(u => PrintAppRoleAssignment(u);
 
             #endregion appRoleAssignments
 
@@ -90,8 +90,8 @@ namespace AppRolesTesting
 
             try
             {
-                IEnumerable<Beta.User> allUsersInTenant = AsyncHelper.RunSync(async () => await userOperations.GetUsersAsync());
-                IEnumerable<Beta.User> allNonGuestUsersInTenant = AsyncHelper.RunSync(async () => await userOperations.GetNonGuestUsersAsync());
+                IEnumerable<Beta.User> allUsersInTenant = await userOperations.GetUsersAsync();
+                IEnumerable<Beta.User> allNonGuestUsersInTenant = await userOperations.GetNonGuestUsersAsync();
 
                 IEnumerable<Beta.User> membersToAdd = GenericUtility<Beta.User>.GetaRandomNumberOfItemsFromList(allUsersInTenant, 10);
                 IEnumerable<Beta.User> ownersToAdd = GenericUtility<Beta.User>.GetaRandomNumberOfItemsFromList(allNonGuestUsersInTenant, 2);
@@ -99,8 +99,8 @@ namespace AppRolesTesting
                 IEnumerable<Beta.User> ownersToUpdate = allNonGuestUsersInTenant.Except(ownersToAdd).Take(2);
                 IEnumerable<Beta.User> membersToUpdate = allUsersInTenant.Except(membersToAdd);
 
-                newGroup = AsyncHelper.RunSync(async () => await groupOperations.CreateGroupAsync(tenant, membersToAdd, ownersToAdd));
-                AsyncHelper.RunSync(async () => await groupOperations.PrintGroupDetails(newGroup, true));
+                newGroup = await groupOperations.CreateGroupAsync(tenant, membersToAdd, ownersToAdd);
+                await groupOperations.PrintGroupDetails(newGroup, true);
 
                 // Update List
                 ownersToUpdate.ToList().ForEach(y => AsyncHelper.RunSync(async () =>
@@ -109,9 +109,9 @@ namespace AppRolesTesting
                 membersToUpdate.ToList().ForEach(y => AsyncHelper.RunSync(async () =>
                     await groupOperations.AddMemberToGroup(newGroup, y)));
 
-                AsyncHelper.RunSync(async () => await groupOperations.PrintGroupDetails(newGroup, true));
+                await groupOperations.PrintGroupDetails(newGroup, true);
 
-                //newGroup = AsyncHelper.RunSync(async () => await groupOperations.AllowExternalSendersAsync(newGroup));
+                //newGroup = await groupOperations.AllowExternalSendersAsync(newGroup);
 
                 // Delete a bunch
                 ownersToAdd.ToList().ForEach(y => AsyncHelper.RunSync(async () =>
@@ -120,7 +120,7 @@ namespace AppRolesTesting
                 membersToAdd.ToList().ForEach(y => AsyncHelper.RunSync(async () =>
                     await groupOperations.RemoveGroupMemberAsync(newGroup, y)));
 
-                AsyncHelper.RunSync(async () => await groupOperations.PrintGroupDetails(newGroup, true));
+                await groupOperations.PrintGroupDetails(newGroup, true);
             }
             catch (Exception ex)
             {
@@ -130,7 +130,7 @@ namespace AppRolesTesting
             {
                 ColorConsole.WriteLine(ConsoleColor.Green, "Press any key to delete this group");
                 Console.ReadKey();
-                AsyncHelper.RunSync(async () => await groupOperations.DeleteGroupAsync(newGroup));
+                await groupOperations.DeleteGroupAsync(newGroup);
             }
 
             #endregion Groups operations
@@ -193,7 +193,7 @@ namespace AppRolesTesting
             {
                 List<Beta.AppRole> userassignableroles = servicePrincipal.AppRoles.ToList().Where(x => x.AllowedMemberTypes.ToList().Contains("User")).ToList();
 
-                userassignableroles.ForEach(approle =>
+                userassignableroles.ForEach(async (approle) => 
                 {
                     ColorConsole.WriteLine($"Role name {approle.DisplayName}");
 
@@ -207,7 +207,8 @@ namespace AppRolesTesting
                         approleAssignment.AppRoleId = approle.Id;
 
                         // await graphServiceClient.AppRoleAssignments.Request().AddAsync(approleAssignment);
-                        var assignment = AsyncHelper.RunSync(async () => await graphServiceClient.ServicePrincipals[servicePrincipal.Id].AppRoleAssignedTo.Request().AddAsync(approleAssignment));
+                        var assignment = await graphServiceClient.ServicePrincipals[servicePrincipal.Id].AppRoleAssignedTo.Request().AddAsync(approleAssignment);
+
                         Console.WriteLine($"{assignment.PrincipalDisplayName} assigned to AppRole '{approle.DisplayName}' with id '{assignment.Id}' ");
                     }
                 });
@@ -266,9 +267,9 @@ namespace AppRolesTesting
 
             var assignmentsToDelete = GenericUtility<Beta.AppRoleAssignment>.GetaRandomNumberOfItemsFromList(approleassignments, 4).ToList();
 
-            assignmentsToDelete.ForEach(assignment =>
+            assignmentsToDelete.ForEach(async (assignment) =>
             {
-                AsyncHelper.RunSync(async () => await graphServiceClient.ServicePrincipals[servicePrincipal.Id].AppRoleAssignedTo[assignment.Id].Request().DeleteAsync());
+                await graphServiceClient.ServicePrincipals[servicePrincipal.Id].AppRoleAssignedTo[assignment.Id].Request().DeleteAsync();
                 Console.WriteLine($"'{approles[assignment.AppRoleId].DisplayName}' assigned to {assignment.PrincipalDisplayName} with id '{assignment.Id}' deleted");
             });
 
@@ -284,7 +285,7 @@ namespace AppRolesTesting
             {
                 List<Beta.AppRole> userassignableroles = servicePrincipal.AppRoles.ToList().Where(x => x.AllowedMemberTypes.ToList().Contains("User")).ToList();
 
-                userassignableroles.ForEach(approle =>
+                userassignableroles.ForEach(async (approle) =>
                 {
                     ColorConsole.WriteLine($"Role name {approle.DisplayName}");
 
@@ -298,7 +299,7 @@ namespace AppRolesTesting
                         approleAssignment.AppRoleId = approle.Id;
 
                         // await graphServiceClient.AppRoleAssignments.Request().AddAsync(approleAssignment);
-                        var assignment = AsyncHelper.RunSync(async () => await graphServiceClient.ServicePrincipals[servicePrincipal.Id].AppRoleAssignedTo.Request().AddAsync(approleAssignment));
+                        var assignment = await graphServiceClient.ServicePrincipals[servicePrincipal.Id].AppRoleAssignedTo.Request().AddAsync(approleAssignment);
                         Console.WriteLine($"{assignment.PrincipalDisplayName} assigned to '{approle.DisplayName}' with id '{assignment.Id}' ");
                     }
                 });

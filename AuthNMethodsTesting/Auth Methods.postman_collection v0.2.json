@@ -1,0 +1,545 @@
+{
+	"info": {
+		"_postman_id": "b2026161-8971-4129-9b64-ec5c4082cf8e",
+		"name": "Auth Methods",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Phone Auth Methods",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://graph.microsoft.com/beta/users/administrator@kkaad.onmicrosoft.com/authentication/phoneMethods",
+					"protocol": "https",
+					"host": [
+						"graph",
+						"microsoft",
+						"com"
+					],
+					"path": [
+						"beta",
+						"users",
+						"administrator@kkaad.onmicrosoft.com",
+						"authentication",
+						"phoneMethods"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Default Auth Method [NotImplemented]",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://graph.microsoft.com/beta/users/administrator@kkaad.onmicrosoft.com/authentication/defaultMethod",
+					"protocol": "https",
+					"host": [
+						"graph",
+						"microsoft",
+						"com"
+					],
+					"path": [
+						"beta",
+						"users",
+						"administrator@kkaad.onmicrosoft.com",
+						"authentication",
+						"defaultMethod"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New MOBILE Auth Phone Method",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"phoneType\": \"mobile\",\n\t\"phoneNumber\": \"+61417881110\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://graph.microsoft.com/beta/users/administrator@kkaad.onmicrosoft.com/authentication/phoneMethods",
+					"protocol": "https",
+					"host": [
+						"graph",
+						"microsoft",
+						"com"
+					],
+					"path": [
+						"beta",
+						"users",
+						"administrator@kkaad.onmicrosoft.com",
+						"authentication",
+						"phoneMethods"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Modify MOBILE Auth Phone Method",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"phoneType\": \"mobile\",\n\t\"phoneNumber\": \"+61417881110\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://graph.microsoft.com/beta/users/administrator@kkaad.onmicrosoft.com/authentication/phonemethods/3179e48a-750b-4051-897c-87b9720928f7",
+					"protocol": "https",
+					"host": [
+						"graph",
+						"microsoft",
+						"com"
+					],
+					"path": [
+						"beta",
+						"users",
+						"administrator@kkaad.onmicrosoft.com",
+						"authentication",
+						"phonemethods",
+						"3179e48a-750b-4051-897c-87b9720928f7"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Remove MOBILE Auth Phone Method",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://graph.microsoft.com/beta/users/administrator@kkaad.onmicrosoft.com/authentication/phonemethods/3179e48a-750b-4051-897c-87b9720928f7",
+					"protocol": "https",
+					"host": [
+						"graph",
+						"microsoft",
+						"com"
+					],
+					"path": [
+						"beta",
+						"users",
+						"administrator@kkaad.onmicrosoft.com",
+						"authentication",
+						"phonemethods",
+						"3179e48a-750b-4051-897c-87b9720928f7"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New AltMOBILE Auth Phone Method",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"phoneType\": \"alternateMobile\",\n\t\"phoneNumber\": \"+61417881110\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://graph.microsoft.com/beta/users/administrator@kkaad.onmicrosoft.com/authentication/phoneMethods",
+					"protocol": "https",
+					"host": [
+						"graph",
+						"microsoft",
+						"com"
+					],
+					"path": [
+						"beta",
+						"users",
+						"administrator@kkaad.onmicrosoft.com",
+						"authentication",
+						"phoneMethods"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Modify AltMOBILE Auth Phone Method",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"phoneType\": \"alternateMobile\",\n\t\"phoneNumber\": \"+61417881111\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://graph.microsoft.com/beta/users/administrator@kkaad.onmicrosoft.com/authentication/phonemethods/b6332ec1-7057-4abe-9331-3d72feddfe41",
+					"protocol": "https",
+					"host": [
+						"graph",
+						"microsoft",
+						"com"
+					],
+					"path": [
+						"beta",
+						"users",
+						"administrator@kkaad.onmicrosoft.com",
+						"authentication",
+						"phonemethods",
+						"b6332ec1-7057-4abe-9331-3d72feddfe41"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Remove AltMOBILE Auth Phone Method",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://graph.microsoft.com/beta/users/administrator@kkaad.onmicrosoft.com/authentication/phonemethods/b6332ec1-7057-4abe-9331-3d72feddfe41",
+					"protocol": "https",
+					"host": [
+						"graph",
+						"microsoft",
+						"com"
+					],
+					"path": [
+						"beta",
+						"users",
+						"administrator@kkaad.onmicrosoft.com",
+						"authentication",
+						"phonemethods",
+						"b6332ec1-7057-4abe-9331-3d72feddfe41"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New OFFICE Auth Phone Method",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"phoneType\": \"office\",\n\t\"phoneNumber\": \"+61732187073\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://graph.microsoft.com/beta/users/testuser1@kkaad.onmicrosoft.com/authentication/phoneMethods",
+					"protocol": "https",
+					"host": [
+						"graph",
+						"microsoft",
+						"com"
+					],
+					"path": [
+						"beta",
+						"users",
+						"testuser1@kkaad.onmicrosoft.com",
+						"authentication",
+						"phoneMethods"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Remove OFFICE Auth Phone Method",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://graph.microsoft.com/beta/users/user4@kkaad.onmicrosoft.com/authentication/phonemethods/e37fc753-ff3b-4958-9484-eaa9425c82bc",
+					"protocol": "https",
+					"host": [
+						"graph",
+						"microsoft",
+						"com"
+					],
+					"path": [
+						"beta",
+						"users",
+						"user4@kkaad.onmicrosoft.com",
+						"authentication",
+						"phonemethods",
+						"e37fc753-ff3b-4958-9484-eaa9425c82bc"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Enable SMS Sign In",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "https://graph.microsoft.com/beta/users/administrator@kkaad.onmicrosoft.com/authentication/phonemethods/3179e48a-750b-4051-897c-87b9720928f7/enableSmsSignIn",
+					"protocol": "https",
+					"host": [
+						"graph",
+						"microsoft",
+						"com"
+					],
+					"path": [
+						"beta",
+						"users",
+						"administrator@kkaad.onmicrosoft.com",
+						"authentication",
+						"phonemethods",
+						"3179e48a-750b-4051-897c-87b9720928f7",
+						"enableSmsSignIn"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Disable SMS Sign In",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "https://graph.microsoft.com/beta/users/administrator@kkaad.onmicrosoft.com/authentication/phonemethods/3179e48a-750b-4051-897c-87b9720928f7/disableSmsSignIn",
+					"protocol": "https",
+					"host": [
+						"graph",
+						"microsoft",
+						"com"
+					],
+					"path": [
+						"beta",
+						"users",
+						"administrator@kkaad.onmicrosoft.com",
+						"authentication",
+						"phonemethods",
+						"3179e48a-750b-4051-897c-87b9720928f7",
+						"disableSmsSignIn"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Password method [notworking]",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://graph.microsoft.com/beta/users/testuser1@kkaad.onmicrosoft.com/authentication/passwordMethods",
+					"protocol": "https",
+					"host": [
+						"graph",
+						"microsoft",
+						"com"
+					],
+					"path": [
+						"beta",
+						"users",
+						"testuser1@kkaad.onmicrosoft.com",
+						"authentication",
+						"passwordMethods"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Reset Password",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"newPassword\": \"ComplexPassword#2\"\n}"
+				},
+				"url": {
+					"raw": "https://graph.microsoft.com/beta/users/testuser1@kkaad.onmicrosoft.com/authentication/passwordmethods/28c10230-6103-485e-b985-444c60001490/resetPassword",
+					"protocol": "https",
+					"host": [
+						"graph",
+						"microsoft",
+						"com"
+					],
+					"path": [
+						"beta",
+						"users",
+						"testuser1@kkaad.onmicrosoft.com",
+						"authentication",
+						"passwordmethods",
+						"28c10230-6103-485e-b985-444c60001490",
+						"resetPassword"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Sample",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://graph.microsoft.com/beta/users/testuser1@kkaad.onmicrosoft.com/authentication/passwordMethods",
+					"protocol": "https",
+					"host": [
+						"graph",
+						"microsoft",
+						"com"
+					],
+					"path": [
+						"beta",
+						"users",
+						"testuser1@kkaad.onmicrosoft.com",
+						"authentication",
+						"passwordMethods"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "eyJ0eXAiOiJKV1QiLCJub25jZSI6ImZZTFZ1dFQ1SDlZdWk0cTE4YWNHZXlzZFlPWElQRDdXWWdmMDlqb2NrQjQiLCJhbGciOiJSUzI1NiIsIng1dCI6IllNRUxIVDBndmIwbXhvU0RvWWZvbWpxZmpZVSIsImtpZCI6IllNRUxIVDBndmIwbXhvU0RvWWZvbWpxZmpZVSJ9.eyJhdWQiOiJodHRwczovL2dyYXBoLm1pY3Jvc29mdC5jb20iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC8zMjI5NTBiZi0wYmFkLTRiZmEtOTkwZS0zZjdlMTc0N2I1YTYvIiwiaWF0IjoxNTg1Nzg1NTQyLCJuYmYiOjE1ODU3ODU1NDIsImV4cCI6MTU4NTc4OTQ0MiwiYWNjdCI6MCwiYWNyIjoiMSIsImFpbyI6IjQyZGdZUGhldHFlNVJLTG5SZW54aFZVdVBVWDhmN0pOSjA2b3I3NnQzM1gxcWxLUnNCMEEiLCJhbXIiOlsicHdkIl0sImFwcF9kaXNwbGF5bmFtZSI6IkNyZWRzIEFQSTIiLCJhcHBpZCI6ImM3OWMxMDZhLWJkZjAtNDc1Yy1hNmUwLTIxOTVjNGI5YTAxNyIsImFwcGlkYWNyIjoiMCIsImZhbWlseV9uYW1lIjoiQ2FuZWxsbyIsImdpdmVuX25hbWUiOiJBbmRyZXMiLCJpcGFkZHIiOiIxLjE1Ni4yMTYuMTEiLCJuYW1lIjoiQW5kcmVzIENhbmVsbG8iLCJvaWQiOiI0ODEwNWUxMS0xZmY3LTQ1N2UtOGNlZC1jMTMzNDJlZWQyYmYiLCJwbGF0ZiI6IjMiLCJwdWlkIjoiMTAwMzAwMDBBNEZEQzg1RCIsInNjcCI6IlVzZXJBdXRoZW50aWNhdGlvbk1ldGhvZC5SZWFkV3JpdGUuQWxsIHByb2ZpbGUgb3BlbmlkIGVtYWlsIiwic2lnbmluX3N0YXRlIjpbImttc2kiXSwic3ViIjoid3JSckJIMFdENzdZRjRFSmJLOHRaWUNidXg1VjdXUDRCMmVMV090SmpzZyIsInRpZCI6IjMyMjk1MGJmLTBiYWQtNGJmYS05OTBlLTNmN2UxNzQ3YjVhNiIsInVuaXF1ZV9uYW1lIjoiYWRtaW5AY2FuZWxsbzEub25taWNyb3NvZnQuY29tIiwidXBuIjoiYWRtaW5AY2FuZWxsbzEub25taWNyb3NvZnQuY29tIiwidXRpIjoiRGFSRU1FeHhNa1N4UU1kX3FNNEZBQSIsInZlciI6IjEuMCIsIndpZHMiOlsiMTk0YWU0Y2ItYjEyNi00MGIyLWJkNWItNjA5MWIzODA5NzdkIiwiNjJlOTAzOTQtNjlmNS00MjM3LTkxOTAtMDEyMTc3MTQ1ZTEwIiwiZTg2MTFhYjgtYzE4OS00NmU4LTk0ZTEtNjAyMTNhYjFmODE0Il0sInhtc19zdCI6eyJzdWIiOiJwZk9nYWFhODV6RFpodmVaeVlLUF9EdUg4cU40cDFhLU83S2F2LW9DZllrIn0sInhtc190Y2R0IjoxNTA1NzEyNzk0fQ.JJQhvA9qlrPe2Oh-A_Z1eJHl4CXHGIc6kSwZmNxnPVRS8N4pQyLkD7t0HpCf2AiNKukufwuWzJ6jQ8twHDHeFwEdQ4VcQwS36M7Howczr6NaJ5nYDabBonLK8m-2hApZL-QK6mqPaVnci1Jn4WjGR5MBnFm6npGNN2YpMOdX2Js8kDhk98NfbaAdjKM5Sl09z643BpNhRA6YBE1NFF0vmpkhlp1BdPNp95trUokuetx_6MM4rlk1KojEIHu-p_sSymkM3P6xoOJmO2smErLzJSiaDkmX_pBU0LmS0yrq3NA1sH5_EotQ3NxGXEeHi9sg82k7Sh3ss9xZTphoRaHPAQ",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "5a993406-f354-4dc4-9605-c0da0ff30ba4",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "de5d47f0-c1a6-4af4-ac2e-d89a7ea022f0",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"protocolProfileBehavior": {}
+}

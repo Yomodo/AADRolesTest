@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AppRolesTesting
+namespace Common
 {
     /// <summary>
     /// Enables Writing to console in various different colours

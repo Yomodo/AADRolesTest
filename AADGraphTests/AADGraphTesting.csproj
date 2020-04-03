@@ -96,7 +96,6 @@
   <ItemGroup>
     <Compile Include="ApplicationOperations.cs" />
     <Compile Include="AsyncHelper.cs" />
-    <Compile Include="ColorConsole.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="GenericUtility.cs" />
     <Compile Include="Models\GroupExtended.cs" />
@@ -126,6 +125,12 @@
     <EmbeddedResource Include="RandomData\MaleName.txt" />
     <EmbeddedResource Include="RandomData\Surname.txt" />
     <EmbeddedResource Include="RandomData\word.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{420f521d-a434-4993-b28e-57b05bf163f0}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="ChangeAliasesOfStrongNameAssemblies" BeforeTargets="FindReferenceAssembliesForReferences;ResolveReferences">
