@@ -3,7 +3,6 @@
 using AuthNMethodsTesting.Model;
 using Common;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Graph;
 using Microsoft.Graph.Auth;
 using Microsoft.Identity.Client;
 using Newtonsoft.Json.Linq;
@@ -32,9 +31,7 @@ namespace AuthNMethodsTesting
                 .AddJsonFile("appsettings.json");
 
             configuration = builder.Build();
-
-            appConfiguration = configuration
-                .Get<PublicClientApplicationOptions>();
+            appConfiguration = configuration.Get<PublicClientApplicationOptions>();
 
             _authority = string.Concat(appConfiguration.Instance, appConfiguration.TenantId);
 
@@ -48,63 +45,29 @@ namespace AuthNMethodsTesting
             InteractiveAuthenticationProvider authenticationProvider = new InteractiveAuthenticationProvider(app, scopes);
             Beta.GraphServiceClient betaClient = new Beta.GraphServiceClient(authenticationProvider);
 
-            //var approleassignments = await GetUsersAppRoleAssignmentsAsync(betaClient);
-
-            //if (approleassignments?.Count > 0)
-            //{
-            //    Console.WriteLine("--------------------AppRole Assignments-------------------");
-            //    foreach (var approleassignment in approleassignments)
-            //    {
-            //        Console.WriteLine($"PrincipalDisplayName - '{approleassignment.PrincipalDisplayName}'" +
-            //            $", ResourceDisplayName- '{approleassignment.ResourceDisplayName}'" +
-            //            $", PrincipalType- '{approleassignment.PrincipalType}'");
-            //    }
-            //    Console.WriteLine("----------------------------------------------------------");
-            //}
-
+            // await GetUsersAuthenticationMethodsAsync(betaClient);
             await GetUsersPhoneMethodsAsync(betaClient);
 
             Console.WriteLine("Press any key to exit");
             Console.ReadKey();
         }
 
-        private static async Task<List<Beta.AppRoleAssignment>> GetUsersAppRoleAssignmentsAsync(Beta.GraphServiceClient graphServiceClient)
+        private static async Task GetUsersAuthenticationMethodsAsync(Beta.GraphServiceClient graphServiceClient)
         {
-            List<Beta.AppRoleAssignment> allAssignments = new List<Beta.AppRoleAssignment>();
+            var requestUrl = "https://graph.microsoft.com/beta/me/authentication/methods";
+            HttpHelper httpHelper = new HttpHelper(new ColorConsoleLogger());
+            HttpClient httpClient = await GetHttpClientForMSGraphAsync(graphServiceClient);
 
-            try
-            {
-                var approleAssignedToPages = await graphServiceClient.Me.AppRoleAssignments.Request().GetAsync();
+            HttpResponseMessage rawResponse = await httpHelper.GetRawHttpResponseAsync(httpClient, async client => await client.GetAsync(requestUrl));
 
-                if (approleAssignedToPages != null)
-                {
-                    do
-                    {
-                        // Page through results
-                        foreach (var user in approleAssignedToPages.CurrentPage)
-                        {
-                            allAssignments.Add(user);
-                        }
+            string jsonresponse = ProcessHttpResponse(rawResponse);
 
-                        // are there more pages (Has a @odata.nextLink ?)
-                        if (approleAssignedToPages.NextPageRequest != null)
-                        {
-                            approleAssignedToPages = await approleAssignedToPages.NextPageRequest.GetAsync();
-                        }
-                        else
-                        {
-                            approleAssignedToPages = null;
-                        }
-                    } while (approleAssignedToPages != null);
-                }
-            }
-            catch (ServiceException e)
-            {
-                Console.WriteLine($"We could not retrieve the roles a user is assigned to: {e}");
-                return null;
-            }
+            JObject callresults = JObject.Parse(jsonresponse);
+            // get JSON result objects into a list
+            IList<JToken> results = callresults["value"].Children().ToList();
 
-            return allAssignments;
+            authenticationMethod authenticationMethod = results[0].ToObject<authenticationMethod>();
+            ColorConsole.WriteLine(ConsoleColor.Green, $"id-{authenticationMethod.id}, isUsable-{authenticationMethod.isUsable}, phoneNumber-{authenticationMethod.phoneNumber}");
         }
 
         private static async Task GetUsersPhoneMethodsAsync(Beta.GraphServiceClient graphServiceClient)
@@ -123,7 +86,6 @@ namespace AuthNMethodsTesting
 
             phoneAuthenticationMethod phoneMethod = results[0].ToObject<phoneAuthenticationMethod>();
             ColorConsole.WriteLine(ConsoleColor.Green, $"phoneType-{phoneMethod.phoneType}, phoneNumber-{phoneMethod.phoneNumber}, smsSignInState-{phoneMethod.smsSignInState}");
-
         }
 
         private static string ProcessHttpResponse(HttpResponseMessage httpResponseMessage)

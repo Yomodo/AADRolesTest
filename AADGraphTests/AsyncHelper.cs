@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AppRolesTesting
+namespace AADGraphTesting
 {
     /// <summary>
     /// Allows for running async methods synchronously

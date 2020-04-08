@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Beta = BetaLib.Microsoft.Graph;
 
-namespace AppRolesTesting
+namespace AADGraphTesting
 {
     public class GroupOperations
     {
@@ -63,7 +63,7 @@ namespace AppRolesTesting
             }
         }
 
-        public async Task<Beta.Group> CreateGroupAsync(
+        public async Task<Beta.Group> CreateUnifiedGroupAsync(
             string tenantDomain = "kkaad.onmicrosoft.com",
             IEnumerable<Beta.User> membersToAddList = null,
             IEnumerable<Beta.User> ownersToAddList = null)
@@ -86,7 +86,7 @@ namespace AppRolesTesting
 
             Beta.Group newGroupObject = null;
 
-            string displayname = $"My test group created on {DateTime.Now.ToString("F")} for testing";
+            string displayname = $"My Unified group created on {DateTime.Now.ToString("F")} for testing";
             string mailNickName = new RandomStrings(16).GetRandom();
             string upn = $"{mailNickName}@{tenantDomain}";
 
@@ -111,6 +111,38 @@ namespace AppRolesTesting
             catch (ServiceException e)
             {
                 Console.WriteLine("We could not add a new user: " + e.Error.Message);
+                return null;
+            }
+
+            return newGroupObject;
+        }
+
+        public async Task<Beta.Group> CreateDistributionGroupAsync(
+           string tenantDomain = "kkaad.onmicrosoft.com")
+        {
+            Beta.Group newGroupObject = null;
+
+            string displayname = $"My distribution group created on {DateTime.Now.ToString("F")} for testing";
+            string mailNickName = new RandomStrings(16).GetRandom();
+
+            try
+            {
+                Beta.Group newGroup = new Beta.Group
+                {
+                    GroupTypes = new List<string> { "Unified" },
+                    Description = displayname,
+                    DisplayName = displayname,
+                    MailEnabled = true,
+                    SecurityEnabled = false,
+                    MailNickname = mailNickName,
+                    Visibility = "Public"
+                };
+
+                newGroupObject = await _graphServiceClient.Groups.Request().AddAsync(newGroup);
+            }
+            catch (ServiceException e)
+            {
+                Console.WriteLine("We could not create the distribution group: " + e.Error.Message);
                 return null;
             }
 
@@ -142,28 +174,24 @@ namespace AppRolesTesting
             return groups.FirstOrDefault();
         }
 
-        public async Task<Beta.Group> AddOwnerToGroupAsync(Beta.Group group, Beta.User owner)
+        public async Task AddOwnerToGroupAsync(Beta.Group group, Beta.User owner)
         {
             await _graphServiceClient.Groups[group.Id].Owners.References.Request().AddAsync(owner);
-            return await GetGroupByIdAsync(group);
         }
 
-        public async Task<Beta.Group> RemoveGroupOwnerAsync(Beta.Group group, Beta.User owner)
+        public async Task RemoveGroupOwnerAsync(Beta.Group group, Beta.User owner)
         {
             await _graphServiceClient.Groups[group.Id].Owners[owner.Id].Reference.Request().DeleteAsync();
-            return await GetGroupByIdAsync(group);
         }
 
-        public async Task<Beta.Group> AddMemberToGroup(Beta.Group group, Beta.User member)
+        public async Task AddMemberToGroup(Beta.Group group, Beta.User member)
         {
             await _graphServiceClient.Groups[group.Id].Members.References.Request().AddAsync(member);
-            return await GetGroupByIdAsync(group);
         }
 
-        public async Task<Beta.Group> RemoveGroupMemberAsync(Beta.Group group, Beta.User member)
+        public async Task RemoveGroupMemberAsync(Beta.Group group, Beta.User member)
         {
             await _graphServiceClient.Groups[group.Id].Members[member.Id].Reference.Request().DeleteAsync();
-            return await GetGroupByIdAsync(group);
         }
 
         public async Task DeleteGroupAsync(Beta.Group group)

@@ -3,7 +3,7 @@
 using Newtonsoft.Json;
 using Beta = BetaLib.Microsoft.Graph;
 
-namespace AppRolesTesting
+namespace AADGraphTesting
 {
     public class GroupExtended : Beta.Group
     {

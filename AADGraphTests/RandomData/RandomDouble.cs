@@ -1,4 +1,4 @@
-﻿namespace AppRolesTesting
+﻿namespace AADGraphTesting
 {
     /// <summary>
     /// Generates random double values

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace AppRolesTesting
+namespace AADGraphTesting
 {
     /// <summary>
     /// Returns a random string.

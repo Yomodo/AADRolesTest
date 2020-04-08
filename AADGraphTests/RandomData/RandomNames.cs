@@ -2,7 +2,7 @@
 using System.IO;
 using System.Reflection;
 
-namespace AppRolesTesting
+namespace AADGraphTesting
 {
     /// <summary>
     /// Provides random names to be used in unit tests

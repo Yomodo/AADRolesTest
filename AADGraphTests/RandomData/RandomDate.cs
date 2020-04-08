@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AppRolesTesting
+namespace AADGraphTesting
 {
     /// <summary>
     /// Generates random date values

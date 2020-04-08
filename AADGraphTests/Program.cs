@@ -15,7 +15,7 @@ using Beta = BetaLib.Microsoft.Graph;
  * Author: Kalyan Krishna
  * *********************************************************/
 
-namespace AppRolesTesting
+namespace AADGraphTesting
 {
     internal class Program
     {
@@ -25,9 +25,10 @@ namespace AppRolesTesting
 
         // Change the following between each call to create/update user if not deleting the user
         private static string givenName = "test99";
+
         private static string surname = "user99";
 
-        static async Task Main(string[] args)
+        private static async Task Main(string[] args)
         {
             // Initialize and prepare MSAL
             string[] scopes = new string[] { "user.read", "user.readwrite.all", "Directory.AccessAsUser.All", "Directory.ReadWrite.All", "Contacts.ReadWrite", "AppRoleAssignment.ReadWrite.All" };
@@ -82,43 +83,94 @@ namespace AppRolesTesting
 
             #endregion appRoleAssignments
 
-            #region Groups operations
+            #region Unified Groups operations
+
+            //GroupOperations groupOperations = new GroupOperations(betaClient);
+            //UserOperations userOperations = new UserOperations(betaClient);
+            //Beta.Group newGroup = null;
+            //bool groupCreated = false;
+
+            //try
+            //{
+            //    IEnumerable<Beta.User> allUsersInTenant = await userOperations.GetUsersAsync();
+            //    IEnumerable<Beta.User> allNonGuestUsersInTenant = await userOperations.GetNonGuestUsersAsync();
+
+            //    IEnumerable<Beta.User> membersToAdd = GenericUtility<Beta.User>.GetaRandomNumberOfItemsFromList(allUsersInTenant, 10);
+            //    IEnumerable<Beta.User> ownersToAdd = GenericUtility<Beta.User>.GetaRandomNumberOfItemsFromList(allNonGuestUsersInTenant, 2);
+
+            //    IEnumerable<Beta.User> ownersToUpdate = allNonGuestUsersInTenant.Except(ownersToAdd).Take(2);
+            //    IEnumerable<Beta.User> membersToUpdate = allUsersInTenant.Except(membersToAdd);
+
+            //    newGroup = await groupOperations.CreateUnifiedGroupAsync(tenant, membersToAdd, ownersToAdd);
+            //    groupCreated = true;
+            //    await groupOperations.PrintGroupDetails(newGroup, true);
+
+            //    // Update List
+            //    ownersToUpdate.ToList().ForEach(y => AsyncHelper.RunSync(async () =>
+            //        await groupOperations.AddOwnerToGroupAsync(newGroup, y)));
+
+            //    membersToUpdate.ToList().ForEach(y => AsyncHelper.RunSync(async () =>
+            //        await groupOperations.AddMemberToGroup(newGroup, y)));
+
+            //    await groupOperations.PrintGroupDetails(newGroup, true);
+
+            //    //newGroup = await groupOperations.AllowExternalSendersAsync(newGroup);
+
+            //    // Delete a bunch
+            //    ownersToAdd.ToList().ForEach(y => AsyncHelper.RunSync(async () =>
+            //        await groupOperations.RemoveGroupOwnerAsync(newGroup, y)));
+
+            //    membersToAdd.ToList().ForEach(y => AsyncHelper.RunSync(async () =>
+            //        await groupOperations.RemoveGroupMemberAsync(newGroup, y)));
+
+            //    await groupOperations.PrintGroupDetails(newGroup, true);
+            //}
+            //catch (Exception ex)
+            //{
+            //    ColorConsole.WriteLine(ConsoleColor.Red, $"{ex}");
+            //}
+            //finally
+            //{
+            //    if (groupCreated)
+            //    {
+            //        ColorConsole.WriteLine(ConsoleColor.Green, "Press any key to delete this group");
+            //        Console.ReadKey();
+            //        await groupOperations.DeleteGroupAsync(newGroup);
+            //    }
+            //}
+
+            #endregion Unified Groups operations
+
+            #region Distribution Groups operations
 
             GroupOperations groupOperations = new GroupOperations(betaClient);
             UserOperations userOperations = new UserOperations(betaClient);
             Beta.Group newGroup = null;
+            bool groupCreated = false;
 
             try
             {
                 IEnumerable<Beta.User> allUsersInTenant = await userOperations.GetUsersAsync();
                 IEnumerable<Beta.User> allNonGuestUsersInTenant = await userOperations.GetNonGuestUsersAsync();
 
-                IEnumerable<Beta.User> membersToAdd = GenericUtility<Beta.User>.GetaRandomNumberOfItemsFromList(allUsersInTenant, 10);
-                IEnumerable<Beta.User> ownersToAdd = GenericUtility<Beta.User>.GetaRandomNumberOfItemsFromList(allNonGuestUsersInTenant, 2);
+                var signedInUser = await userOperations.GetMeAsync();
 
-                IEnumerable<Beta.User> ownersToUpdate = allNonGuestUsersInTenant.Except(ownersToAdd).Take(2);
-                IEnumerable<Beta.User> membersToUpdate = allUsersInTenant.Except(membersToAdd);
+                IEnumerable<Beta.User> membersToAdd = GenericUtility<Beta.User>.GetaRandomNumberOfItemsFromList(allUsersInTenant, 5);
+                // Remove the current user as they have been added as owner automatically
+                IEnumerable<Beta.User> ownersToAdd = GenericUtility<Beta.User>.GetaRandomNumberOfItemsFromList(allNonGuestUsersInTenant.Except(new List<Beta.User> { signedInUser }), 2);
 
-                newGroup = await groupOperations.CreateGroupAsync(tenant, membersToAdd, ownersToAdd);
+                newGroup = await groupOperations.CreateDistributionGroupAsync(tenant);
+                groupCreated = true;
+
                 await groupOperations.PrintGroupDetails(newGroup, true);
 
-                // Update List
-                ownersToUpdate.ToList().ForEach(y => AsyncHelper.RunSync(async () =>
+                // Add owners
+                ownersToAdd.ToList().ForEach(y => AsyncHelper.RunSync(async () =>
                     await groupOperations.AddOwnerToGroupAsync(newGroup, y)));
 
-                membersToUpdate.ToList().ForEach(y => AsyncHelper.RunSync(async () =>
-                    await groupOperations.AddMemberToGroup(newGroup, y)));
-
-                await groupOperations.PrintGroupDetails(newGroup, true);
-
-                //newGroup = await groupOperations.AllowExternalSendersAsync(newGroup);
-
-                // Delete a bunch
-                ownersToAdd.ToList().ForEach(y => AsyncHelper.RunSync(async () =>
-                    await groupOperations.RemoveGroupOwnerAsync(newGroup, y)));
-
+                // Add members
                 membersToAdd.ToList().ForEach(y => AsyncHelper.RunSync(async () =>
-                    await groupOperations.RemoveGroupMemberAsync(newGroup, y)));
+                    await groupOperations.AddMemberToGroup(newGroup, y)));
 
                 await groupOperations.PrintGroupDetails(newGroup, true);
             }
@@ -128,12 +180,15 @@ namespace AppRolesTesting
             }
             finally
             {
-                ColorConsole.WriteLine(ConsoleColor.Green, "Press any key to delete this group");
-                Console.ReadKey();
-                await groupOperations.DeleteGroupAsync(newGroup);
+                if (groupCreated)
+                {
+                    ColorConsole.WriteLine(ConsoleColor.Green, "Press any key to delete this group");
+                    Console.ReadKey();
+                    await groupOperations.DeleteGroupAsync(newGroup);
+                }
             }
 
-            #endregion Groups operations
+            #endregion Distribution Groups operations
 
             #region user operations
 
@@ -193,7 +248,7 @@ namespace AppRolesTesting
             {
                 List<Beta.AppRole> userassignableroles = servicePrincipal.AppRoles.ToList().Where(x => x.AllowedMemberTypes.ToList().Contains("User")).ToList();
 
-                userassignableroles.ForEach(async (approle) => 
+                userassignableroles.ForEach(async (approle) =>
                 {
                     ColorConsole.WriteLine($"Role name {approle.DisplayName}");
 
@@ -586,6 +641,8 @@ namespace AppRolesTesting
         {
             if (application != null)
             {
+                UserOperations userOperations = new UserOperations(graphServiceClient);
+
                 Console.WriteLine($"--------------------------------Application '{application.DisplayName}' start----------------------------------------");
                 Console.WriteLine($"Id-{application.Id}, AppId- {application.AppId}, DisplayName-{application.DisplayName}, " +
                     $"SignInAudience-{application.SignInAudience}, " +
@@ -596,7 +653,7 @@ namespace AppRolesTesting
                     Console.WriteLine("--------------------Owners-------------------");
                     foreach (var owner in application.Owners)
                     {
-                        Beta.User userOwner = await GetUserByIdAsync(graphServiceClient, owner);
+                        Beta.User userOwner = await userOperations.GetUserByIdAsync(owner);
 
                         PrintBetaUserDetails(userOwner);
                     }
@@ -811,6 +868,7 @@ namespace AppRolesTesting
             else
             {
                 GroupOperations groupOperations = new GroupOperations(graphServiceClient);
+                UserOperations userOperations = new UserOperations(graphServiceClient);
 
                 Console.WriteLine($"Id-{servicePrincipal.Id}, Enabled- {servicePrincipal.AccountEnabled}, AppDisplayName-{servicePrincipal.AppDisplayName}, AppId-{servicePrincipal.AppId}, " +
                 $"AppOwnerOrganizationId-{servicePrincipal.AppOwnerOrganizationId}, AppRoleAssignmentRequired-{servicePrincipal?.AppRoleAssignmentRequired}, " +
@@ -822,7 +880,7 @@ namespace AppRolesTesting
                     Console.WriteLine("--------------------Owners-------------------");
                     foreach (var owner in servicePrincipal.Owners)
                     {
-                        Beta.User userOwner = await GetUserByIdAsync(graphServiceClient, owner);
+                        Beta.User userOwner = await userOperations.GetUserByIdAsync(owner);
 
                         PrintBetaUserDetails(userOwner);
                     }
@@ -1007,6 +1065,8 @@ namespace AppRolesTesting
         {
             if (servicePrincipal != null)
             {
+                UserOperations userOperations = new UserOperations(graphServiceClient);
+
                 Console.WriteLine("");
                 Console.WriteLine($"--------------------------------OAuth2PermissionGrants for '{servicePrincipal.DisplayName}' start----------------------------------------");
 
@@ -1039,7 +1099,7 @@ namespace AppRolesTesting
                                     }
                                     else
                                     {
-                                        Beta.User grantPrincipal = await GetUserByIdAsync(graphServiceClient, OAuth2PermissionGrant.PrincipalId);
+                                        Beta.User grantPrincipal = await userOperations.GetUserByIdAsync(OAuth2PermissionGrant.PrincipalId);
 
                                         if (grantPrincipal != null)
                                         {
@@ -1112,17 +1172,6 @@ namespace AppRolesTesting
         {
             var servicePrincipals = await graphServiceClient.ServicePrincipals.Request().Filter($"id eq '{Id}'").GetAsync();
             return servicePrincipals.FirstOrDefault();
-        }
-
-        private static async Task<Beta.User> GetUserByIdAsync(Beta.GraphServiceClient graphServiceClient, string principalId)
-        {
-            var users = await graphServiceClient.Users.Request().Filter($"id eq '{principalId}'").GetAsync();
-            return users.CurrentPage.FirstOrDefault();
-        }
-
-        private static async Task<Beta.User> GetUserByIdAsync(Beta.GraphServiceClient graphServiceClient, Beta.DirectoryObject owner)
-        {
-            return await GetUserByIdAsync(graphServiceClient, owner.Id);
         }
 
         private static void PrintAppRoleAssignment(Beta.AppRoleAssignment assignment)
@@ -1302,20 +1351,6 @@ namespace AppRolesTesting
         }
 
         #region User
-
-        private static async Task GetMeAsync(GraphServiceClient graphServiceClient)
-        {
-            // Call /me Api
-            var me = await graphServiceClient.Me.Request().GetAsync();
-            Console.WriteLine($"Display Name from /me->{me.DisplayName}");
-
-            var directreports = await graphServiceClient.Me.DirectReports.Request().GetAsync();
-
-            foreach (User user in directreports.CurrentPage)
-            {
-                Console.WriteLine($"Report's Display Name ->{user.DisplayName}");
-            }
-        }
 
         private static async Task<User> CreateUserAsync(GraphServiceClient graphServiceClient)
         {

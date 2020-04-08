@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 using Beta = BetaLib.Microsoft.Graph;
 
-namespace AppRolesTesting
+namespace AADGraphTesting
 {
     public class ApplicationOperations
     {
