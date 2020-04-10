@@ -1,0 +1,12 @@
+{
+  "description": "Update basic properties of application registrations",
+  "displayName": "Application Registration Support Administrator",
+  "isEnabled": false,
+  "rolePermissions": [
+    {
+      "allowedResourceActions": [ "microsoft.directory/applications/basic/read" ],
+      "@odata.type": "microsoft.graph.unifiedRolePermission"
+    }
+  ],
+  "@odata.type": "microsoft.graph.unifiedRoleDefinition"
+}

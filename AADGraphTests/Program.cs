@@ -192,45 +192,48 @@ namespace AADGraphTesting
 
             #region user operations
 
+            //UserOperations userOperations = new UserOperations(betaClient);
+
             //// Get information from Graph about the currently signed-In user
             //Console.WriteLine("--Fetching details of the currently signed-in user--");
-            //GetMeAsync(graphServiceClient).GetAwaiter().GetResult();
+            //Beta.User currentUser = await userOperations.GetMeAsync();
+            //userOperations.PrintBetaUserDetails(currentUser);
             //Console.WriteLine("---------");
 
             //// Create a new user
             //Console.WriteLine($"--Creating a new user in the tenant '{tenant}'--");
-            //User newUser = CreateUserAsync(graphServiceClient).Result;
-            //PrintUserDetails(newUser);
+            //Beta.User newUser = await userOperations.CreateUserAsync(givenName, surname);
+            //userOperations.PrintBetaUserDetails(newUser);
             //Console.WriteLine("---------");
 
             //// Update an existing user
             //if (newUser != null)
             //{
             //    Console.WriteLine("--Updating the detail of an existing user--");
-            //    User updatedUser = UpdateUserAsync(graphServiceClient, userId: newUser.Id, jobTitle: "Program Manager").Result;
-            //    PrintUserDetails(updatedUser);
+            //    Beta.User updatedUser = await userOperations.UpdateUserAsync(userId: newUser.Id, jobTitle: "Program Manager");
+            //    userOperations.PrintBetaUserDetails(updatedUser);
             //    Console.WriteLine("---------");
             //}
 
             //// List existing users
             //Console.WriteLine("--Listing all users in the tenant--");
-            //List<User> users = GetUsersAsync(graphServiceClient).Result;
-            //users.ForEach(u => PrintUserDetails(u));
+            //List<Beta.User> users = await userOperations.GetUsersAsync();
+            //users.ForEach(u => userOperations.PrintBetaUserDetails(u));
             //Console.WriteLine("---------");
 
             //// Delete this user
             //Console.WriteLine("--Deleting a user in the tenant--");
             //if (newUser != null)
             //{
-            //    DeleteUserAsync(graphServiceClient, newUser?.Id).GetAwaiter().GetResult(); ;
+            //    await userOperations.DeleteUserAsync(newUser?.Id);
             //}
 
             //Console.WriteLine("---------");
 
             //// List existing users after deletion
             //Console.WriteLine("--Listing all users in the tenant after deleting a user.--");
-            //users = GetUsersAsync(graphServiceClient).Result;
-            //users.ForEach(u => PrintUserDetails(u));
+            //users = await userOperations.GetUsersAsync();
+            //users.ForEach(u => userOperations.PrintBetaUserDetails(u));
             //Console.WriteLine("---------");
 
             #endregion user operations
@@ -655,7 +658,7 @@ namespace AADGraphTesting
                     {
                         Beta.User userOwner = await userOperations.GetUserByIdAsync(owner);
 
-                        PrintBetaUserDetails(userOwner);
+                        userOperations.PrintBetaUserDetails(userOwner);
                     }
                     Console.WriteLine("----------------------------------------------------------");
                 }
@@ -882,7 +885,7 @@ namespace AADGraphTesting
                     {
                         Beta.User userOwner = await userOperations.GetUserByIdAsync(owner);
 
-                        PrintBetaUserDetails(userOwner);
+                        userOperations.PrintBetaUserDetails(userOwner);
                     }
                     Console.WriteLine("----------------------------------------------------------");
                 }
@@ -1352,94 +1355,7 @@ namespace AADGraphTesting
 
         #region User
 
-        private static async Task<User> CreateUserAsync(GraphServiceClient graphServiceClient)
-        {
-            User newUserObject = null;
 
-            string displayname = $"{givenName} {surname}";
-            string mailNickName = $"{givenName}{surname}";
-            string upn = $"{mailNickName}@kkaad.onmicrosoft.com";
-            string password = "p@$$w0rd!";
-
-            try
-            {
-                newUserObject = await graphServiceClient.Users.Request().AddAsync(new User
-                {
-                    AccountEnabled = true,
-                    DisplayName = displayname,
-                    MailNickname = mailNickName,
-                    GivenName = givenName,
-                    Surname = surname,
-                    PasswordProfile = new PasswordProfile
-                    {
-                        Password = password
-                    },
-                    UserPrincipalName = upn
-                });
-            }
-            catch (ServiceException e)
-            {
-                Console.WriteLine("We could not add a new user: " + e.Error.Message);
-                return null;
-            }
-
-            return newUserObject;
-        }
-
-        private static void PrintUserDetails(User user)
-        {
-            if (user != null)
-            {
-                Console.WriteLine($"DisplayName-{user.DisplayName}, MailNickname- {user.MailNickname}, GivenName-{user.GivenName}, Surname-{user.Surname}, Upn-{user.UserPrincipalName}, JobTitle-{user.JobTitle}, Id-{user.Id}");
-            }
-            else
-            {
-                Console.WriteLine("The provided User is null!");
-            }
-        }
-
-        private static void PrintBetaUserDetails(Beta.User user)
-        {
-            if (user != null)
-            {
-                Console.WriteLine($"DisplayName-{user.DisplayName}, MailNickname- {user.MailNickname}, GivenName-{user.GivenName}, Surname-{user.Surname}, Upn-{user.UserPrincipalName}, JobTitle-{user.JobTitle}, Id-{user.Id}");
-            }
-            else
-            {
-                Console.WriteLine("The provided User is null!");
-            }
-        }
-
-        private static async Task<User> UpdateUserAsync(GraphServiceClient graphServiceClient, string userId, string jobTitle)
-        {
-            User updatedUser = null;
-            try
-            {
-                // Update the user.
-                updatedUser = await graphServiceClient.Users[userId].Request().UpdateAsync(new User
-                {
-                    JobTitle = jobTitle
-                });
-            }
-            catch (ServiceException e)
-            {
-                Console.WriteLine($"We could not update details of the user with Id {userId}: {e}");
-            }
-
-            return updatedUser;
-        }
-
-        private static async Task DeleteUserAsync(GraphServiceClient graphServiceClient, string userId)
-        {
-            try
-            {
-                await graphServiceClient.Users[userId].Request().DeleteAsync();
-            }
-            catch (ServiceException e)
-            {
-                Console.WriteLine($"We could not delete the user with Id-{userId}: {e}");
-            }
-        }
 
         #endregion User
     }

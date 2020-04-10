@@ -32,11 +32,99 @@ namespace AADGraphTesting
 
         public async Task<Beta.User> GetUserByIdAsync(Beta.DirectoryObject owner)
         {
-            return await GetUserByIdAsync( owner.Id);
+            return await GetUserByIdAsync(owner.Id);
         }
 
+        public async Task<Beta.User> CreateUserAsync(string givenName, string surname)
+        {
+            Beta.User newUserObject = null;
 
-        private async Task<List<Beta.User>> GetMyDirectReportsAsync()
+            string displayname = $"{givenName} {surname}";
+            string mailNickName = $"{givenName}{surname}";
+            string upn = $"{mailNickName}@kkaad.onmicrosoft.com";
+            string password = "p@$$w0rd!";
+
+            try
+            {
+                newUserObject = await _graphServiceClient.Users.Request().AddAsync(new Beta.User
+                {
+                    AccountEnabled = true,
+                    DisplayName = displayname,
+                    MailNickname = mailNickName,
+                    GivenName = givenName,
+                    Surname = surname,
+                    PasswordProfile = new Beta.PasswordProfile
+                    {
+                        Password = password
+                    },
+                    UserPrincipalName = upn
+                });
+            }
+            catch (ServiceException e)
+            {
+                Console.WriteLine("We could not add a new user: " + e.Error.Message);
+                return null;
+            }
+
+            return newUserObject;
+        }
+
+        public void PrintUserDetails(User user)
+        {
+            if (user != null)
+            {
+                Console.WriteLine($"DisplayName-{user.DisplayName}, MailNickname- {user.MailNickname}, GivenName-{user.GivenName}, Surname-{user.Surname}, Upn-{user.UserPrincipalName}, JobTitle-{user.JobTitle}, Id-{user.Id}");
+            }
+            else
+            {
+                Console.WriteLine("The provided User is null!");
+            }
+        }
+
+        public void PrintBetaUserDetails(Beta.User user)
+        {
+            if (user != null)
+            {
+                Console.WriteLine($"DisplayName-{user.DisplayName}, MailNickname- {user.MailNickname}, GivenName-{user.GivenName}, Surname-{user.Surname}, Upn-{user.UserPrincipalName}, JobTitle-{user.JobTitle}, Id-{user.Id}");
+            }
+            else
+            {
+                Console.WriteLine("The provided User is null!");
+            }
+        }
+
+        public async Task<Beta.User> UpdateUserAsync(string userId, string jobTitle)
+        {
+            Beta.User updatedUser = null;
+            try
+            {
+                // Update the user.
+                updatedUser = await _graphServiceClient.Users[userId].Request().UpdateAsync(new Beta.User
+                {
+                    JobTitle = jobTitle
+                });
+            }
+            catch (ServiceException e)
+            {
+                Console.WriteLine($"We could not update details of the user with Id {userId}: {e}");
+            }
+
+            return updatedUser;
+        }
+
+        public async Task DeleteUserAsync(string userId)
+        {
+            try
+            {
+                await _graphServiceClient.Users[userId].Request().DeleteAsync();
+            }
+            catch (ServiceException e)
+            {
+                Console.WriteLine($"We could not delete the user with Id-{userId}: {e}");
+            }
+        }
+
+        public async Task<List<Beta.User>> GetMyDirectReportsAsync()
         {
             List<Beta.User> allReportees = new List<Beta.User>();
 
