@@ -1,5 +1,6 @@
 ﻿extern alias BetaLib;
 
+using Common;
 using Microsoft.Graph;
 using System;
 using System.Collections.Generic;

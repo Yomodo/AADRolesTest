@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AADGraphTesting
+namespace Common
 {
     public static class GenericUtility<T>
     {

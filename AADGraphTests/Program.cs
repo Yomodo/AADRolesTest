@@ -25,7 +25,6 @@ namespace AADGraphTesting
 
         // Change the following between each call to create/update user if not deleting the user
         private static string givenName = "test99";
-
         private static string surname = "user99";
 
         private static async Task Main(string[] args)
@@ -658,7 +657,7 @@ namespace AADGraphTesting
                     {
                         Beta.User userOwner = await userOperations.GetUserByIdAsync(owner);
 
-                        userOperations.PrintBetaUserDetails(userOwner);
+                        Console.WriteLine(userOperations.PrintBetaUserDetails(userOwner));
                     }
                     Console.WriteLine("----------------------------------------------------------");
                 }
@@ -885,7 +884,7 @@ namespace AADGraphTesting
                     {
                         Beta.User userOwner = await userOperations.GetUserByIdAsync(owner);
 
-                        userOperations.PrintBetaUserDetails(userOwner);
+                        Console.WriteLine(userOperations.PrintBetaUserDetails(userOwner));
                     }
                     Console.WriteLine("----------------------------------------------------------");
                 }

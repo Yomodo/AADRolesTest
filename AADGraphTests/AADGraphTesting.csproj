@@ -95,7 +95,6 @@
     <Compile Include="ApplicationOperations.cs" />
     <Compile Include="AsyncHelper.cs" />
     <Compile Include="ExtensionMethods.cs" />
-    <Compile Include="GenericUtility.cs" />
     <Compile Include="Models\GroupExtended.cs" />
     <Compile Include="GroupOperations.cs" />
     <Compile Include="Program.cs" />
@@ -110,7 +109,6 @@
     <Compile Include="RandomData\RandomList.cs" />
     <Compile Include="RandomData\RandomNames.cs" />
     <Compile Include="RandomData\RandomStrings.cs" />
-    <Compile Include="UserOperations.cs" />
     <Compile Include="Utility.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -7,7 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Beta = BetaLib.Microsoft.Graph;
 
-namespace AADGraphTesting
+namespace Common
 {
     public class UserOperations
     {
@@ -81,16 +81,25 @@ namespace AADGraphTesting
             }
         }
 
-        public void PrintBetaUserDetails(Beta.User user)
+        public string PrintBetaUserDetails(Beta.User user, bool verbose = true)
         {
+            string retval = string.Empty;
+
             if (user != null)
             {
-                Console.WriteLine($"DisplayName-{user.DisplayName}, MailNickname- {user.MailNickname}, GivenName-{user.GivenName}, Surname-{user.Surname}, Upn-{user.UserPrincipalName}, JobTitle-{user.JobTitle}, Id-{user.Id}");
+                retval = $"DisplayName-{user.DisplayName}, Upn-{user.UserPrincipalName}";
+
+                if (verbose)
+                {
+                    retval = retval + $" GivenName-{user.GivenName}, Surname-{user.Surname}, MailNickname- {user.MailNickname}, Id-{user.Id}, JobTitle-{user.JobTitle},";
+                }
             }
             else
             {
-                Console.WriteLine("The provided User is null!");
+                retval = "The provided User is null!";
             }
+
+            return retval;
         }
 
         public async Task<Beta.User> UpdateUserAsync(string userId, string jobTitle)
