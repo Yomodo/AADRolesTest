@@ -20,7 +20,7 @@ namespace ARMApi
 
         private static async Task Main(string[] args)
         {
-            string[] scopes = new string[] { "RoleManagement.ReadWrite.Directory" };
+            string[] scopes = new string[] {"user.readbasic.all", "RoleManagement.ReadWrite.Directory" };
 
             // Using appsettings.json as our configuration settings
             var builder = new ConfigurationBuilder()

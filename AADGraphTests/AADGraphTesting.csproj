@@ -39,17 +39,16 @@
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.1.1.0\lib\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Graph, Version=3.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Graph.3.2.0\lib\net461\Microsoft.Graph.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Graph.Auth, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Graph.Auth.1.0.0-preview.4\lib\net45\Microsoft.Graph.Auth.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Graph.Beta, Version=0.14.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Graph.Beta.0.14.0-preview\lib\net461\Microsoft.Graph.Beta.dll</HintPath>
+    <Reference Include="Microsoft.Graph.Beta, Version=0.17.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.Graph.Beta.0.17.0-preview\lib\net461\Microsoft.Graph.Beta.dll</HintPath>
+      <Aliases>BetaLib</Aliases>
     </Reference>
-    <Reference Include="Microsoft.Graph.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Graph.Core.2.0.0-preview.1\lib\net461\Microsoft.Graph.Core.dll</HintPath>
+    <Reference Include="Microsoft.Graph.Core, Version=1.20.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Graph.Core.1.20.1\lib\net45\Microsoft.Graph.Core.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Identity.Client, Version=4.11.0.0, Culture=neutral, PublicKeyToken=0a613f4dd989e8ae, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Identity.Client.4.11.0\lib\net45\Microsoft.Identity.Client.dll</HintPath>
@@ -77,6 +76,12 @@
     <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.5.0.0-preview.2.20160.6\lib\net45\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
+    <Reference Include="System.Text.Encodings.Web, Version=4.0.5.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Text.Encodings.Web.4.7.0\lib\netstandard2.0\System.Text.Encodings.Web.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Text.Json, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Text.Json.4.7.1\lib\net461\System.Text.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.4\lib\net461\System.Threading.Tasks.Extensions.dll</HintPath>
     </Reference>
@@ -93,8 +98,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApplicationOperations.cs" />
-    <Compile Include="AsyncHelper.cs" />
     <Compile Include="ExtensionMethods.cs" />
+    <Compile Include="GroupSettingOperations.cs" />
     <Compile Include="Models\GroupExtended.cs" />
     <Compile Include="GroupOperations.cs" />
     <Compile Include="Program.cs" />
@@ -129,11 +134,4 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Target Name="ChangeAliasesOfStrongNameAssemblies" BeforeTargets="FindReferenceAssembliesForReferences;ResolveReferences">
-    <ItemGroup>
-      <ReferencePath Condition="'%(FileName)' == 'Microsoft.Graph.Beta'">
-        <Aliases>BetaLib</Aliases>
-      </ReferencePath>
-    </ItemGroup>
-  </Target>
 </Project>

@@ -6,10 +6,25 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.2.7" />
-    <PackageReference Include="Microsoft.Graph" Version="3.2.0" />
-    <PackageReference Include="Microsoft.Graph.Beta" Version="0.14.0-preview" />
+    <PackageReference Include="Microsoft.Graph.Beta" Version="0.17.0-preview" />
+    <PackageReference Include="Microsoft.OData.Client" Version="7.6.4" />
+    <PackageReference Include="Microsoft.OData.Core" Version="7.6.4" />
+    <PackageReference Include="Microsoft.OData.Edm" Version="7.6.4" />
+    <PackageReference Include="Microsoft.Spatial" Version="7.6.4" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Connected Services\" />
   </ItemGroup>
   <Target Name="ChangeAliasesOfStrongNameAssemblies" BeforeTargets="FindReferenceAssembliesForReferences;ResolveReferences">
     <ItemGroup>

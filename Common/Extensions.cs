@@ -53,6 +53,28 @@ namespace Common
             return source;
         }
 
+        /// <summary>
+        /// Split an IEnumerable<T> into fixed-sized chunks (return an IEnumerable<IEnumerable<T>> where the inner sequences are of fixed
+        /// https://stackoverflow.com/questions/13709626/split-an-ienumerablet-into-fixed-sized-chunks-return-an-ienumerableienumerab
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="batchSize"></param>
+        /// <returns></returns>
+        public static IEnumerable<IEnumerable<T>> Batch<T>(this IEnumerable<T> source, int batchSize)
+        {
+            using (var enumerator = source.GetEnumerator())
+                while (enumerator.MoveNext())
+                    yield return YieldBatchElements(enumerator, batchSize - 1);
+        }
+
+        private static IEnumerable<T> YieldBatchElements<T>(IEnumerator<T> source, int batchSize)
+        {
+            yield return source.Current;
+            for (int i = 0; i < batchSize && source.MoveNext(); i++)
+                yield return source.Current;
+        }
+
         public static bool IsNullOrWhiteSpace(this string value)
         {
             return string.IsNullOrWhiteSpace(value);
@@ -143,7 +165,7 @@ namespace Common
             return await client.SendAsync(request, cancellationToken);
         }
 
-        public static async Task AuthenticateClient(this IAuthenticationProvider authenticationProvider , HttpClient client)
+        public static async Task AuthenticateClient(this IAuthenticationProvider authenticationProvider, HttpClient client)
         {
             HttpRequestMessage message = new HttpRequestMessage();
             await authenticationProvider.AuthenticateRequestAsync(message);
@@ -191,5 +213,43 @@ namespace Common
 
             return sb.ToString();
         }
+
+        public static string ProcessHttpResponse(this HttpResponseMessage httpResponseMessage)
+        {
+            using (httpResponseMessage)
+            {
+                string responseString = (httpResponseMessage.Content != null) ? httpResponseMessage.GetResponseString() : string.Empty;
+
+                if (httpResponseMessage.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"HttpResponse -{HttpHelper.GetFormattedJson(responseString)}");
+                    return responseString;
+                }
+                else
+                {
+                    ColorConsole.WriteLine(ConsoleColor.Red, $"Http call failed with response code {httpResponseMessage.StatusCode}. Http response is \n {HttpHelper.GetFormattedJson(responseString)}");
+                }
+            }
+
+            return string.Empty;
+        }
+
+        public static async Task<HttpClient> GetHttpClientForMSGraphAsync(this Beta.GraphServiceClient graphServiceClient)
+        {
+            HttpClient httpClient = new HttpClient();
+
+            await graphServiceClient.AuthenticationProvider.AuthenticateClient(httpClient);
+
+            return httpClient;
+        }
+
+        //public static async Task<HttpClient> GetHttpClientForMSGraphAsync(this GraphServiceClient graphServiceClient)
+        //{
+        //    HttpClient httpClient = new HttpClient();
+
+        //    await graphServiceClient.AuthenticationProvider.AuthenticateClient(httpClient);
+
+        //    return httpClient;
+        //}
     }
 }

@@ -69,17 +69,17 @@ namespace Common
             return newUserObject;
         }
 
-        public void PrintUserDetails(User user)
-        {
-            if (user != null)
-            {
-                Console.WriteLine($"DisplayName-{user.DisplayName}, MailNickname- {user.MailNickname}, GivenName-{user.GivenName}, Surname-{user.Surname}, Upn-{user.UserPrincipalName}, JobTitle-{user.JobTitle}, Id-{user.Id}");
-            }
-            else
-            {
-                Console.WriteLine("The provided User is null!");
-            }
-        }
+        //public void PrintUserDetails(User user)
+        //{
+        //    if (user != null)
+        //    {
+        //        Console.WriteLine($"DisplayName-{user.DisplayName}, MailNickname- {user.MailNickname}, GivenName-{user.GivenName}, Surname-{user.Surname}, Upn-{user.UserPrincipalName}, JobTitle-{user.JobTitle}, Id-{user.Id}");
+        //    }
+        //    else
+        //    {
+        //        Console.WriteLine("The provided User is null!");
+        //    }
+        //}
 
         public string PrintBetaUserDetails(Beta.User user, bool verbose = true)
         {
@@ -175,7 +175,7 @@ namespace Common
             return allReportees;
         }
 
-        public async Task<List<Beta.User>> GetUsersAsync(int top = 15, bool useSelect = true)
+        public async Task<List<Beta.User>> GetUsersAsync(int top = 150, bool useSelect = true)
         {
             List<Beta.User> allUsers = new List<Beta.User>();
             Beta.IGraphServiceUsersCollectionPage users = null;
@@ -207,7 +207,7 @@ namespace Common
             return allUsers;
         }
 
-        public async Task<List<Beta.User>> GetNonGuestUsersAsync(int top = 15, bool useSelect = true)
+        public async Task<List<Beta.User>> GetNonGuestUsersAsync(int top = 150, bool useSelect = true)
         {
             List<Beta.User> allUsers = new List<Beta.User>();
             Beta.IGraphServiceUsersCollectionPage users = null;
@@ -238,6 +238,47 @@ namespace Common
             }
 
             return allUsers;
+        }
+
+        public async Task<List<Beta.AppRoleAssignment>> GetUsersAppRoleAssignmentsAsync()
+        {
+            List<Beta.AppRoleAssignment> allAssignments = new List<Beta.AppRoleAssignment>();
+
+            try
+            {
+                Beta.IUserAppRoleAssignmentsCollectionPage assignments = await _graphServiceClient.Me.AppRoleAssignments.Request().GetAsync();
+
+                //Beta.IUserAppRoleAssignmentsCollectionPage assignments = await graphServiceClient.Me.AppRoleAssignments  .Request().GetAsync();
+
+                if (assignments?.CurrentPage.Count > 0)
+                {
+                    foreach (Beta.AppRoleAssignment appRoleAssignment in assignments)
+                    {
+                        allAssignments.Add(appRoleAssignment);
+                    }
+                }
+            }
+            catch (ServiceException e)
+            {
+                Console.WriteLine($"We could not retrieve the users app role assignments: {e}");
+                return null;
+            }
+
+            return allAssignments;
+        }
+
+        public void PrintAppRoleAssignment(Beta.AppRoleAssignment assignment)
+        {
+            if (assignment != null)
+            {
+                Console.WriteLine($"AppRoleId-{assignment.AppRoleId}, PrincipalDisplayName- {assignment.PrincipalDisplayName}, " +
+                    $"PrincipalType-{assignment.PrincipalType}, ResourceDisplayName-{assignment.ResourceDisplayName}, ResourceId-{assignment.ResourceId}, " +
+                    $"PrincipalId-{assignment.PrincipalId}, Id-{assignment.Id}");
+            }
+            else
+            {
+                Console.WriteLine("The provided AppRoleAssignment is null!");
+            }
         }
 
         private async Task<List<Beta.User>> ProcessIGraphServiceUsersCollectionPage(Beta.IGraphServiceUsersCollectionPage users)

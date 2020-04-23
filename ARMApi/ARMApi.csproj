@@ -17,7 +17,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="5.0.0-preview.2.20160.3" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0-preview.2.20160.3" />
     <PackageReference Include="Microsoft.Graph.Auth" Version="1.0.0-preview.4" />
-    <PackageReference Include="Microsoft.Graph.Beta" Version="0.14.0-preview" />
+    <PackageReference Include="Microsoft.Graph.Beta" Version="0.17.0-preview" />
     <PackageReference Include="Microsoft.Identity.Client" Version="4.11.0" />
   </ItemGroup>
   <ItemGroup>

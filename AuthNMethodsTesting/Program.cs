@@ -23,7 +23,7 @@ namespace AuthNMethodsTesting
 
         private static async Task Main(string[] args)
         {
-            string[] scopes = new string[] { "UserAuthenticationMethod.ReadWrite.All" };
+            string[] scopes = new string[] { "user.readbasic.all", "UserAuthenticationMethod.ReadWrite.All" };
 
             // Using appsettings.json as our configuration settings
             var builder = new ConfigurationBuilder()
@@ -56,11 +56,11 @@ namespace AuthNMethodsTesting
         {
             var requestUrl = "https://graph.microsoft.com/beta/me/authentication/methods";
             HttpHelper httpHelper = new HttpHelper(new ColorConsoleLogger());
-            HttpClient httpClient = await GetHttpClientForMSGraphAsync(graphServiceClient);
+            HttpClient httpClient = await graphServiceClient.GetHttpClientForMSGraphAsync();
 
             HttpResponseMessage rawResponse = await httpHelper.GetRawHttpResponseAsync(httpClient, async client => await client.GetAsync(requestUrl));
 
-            string jsonresponse = ProcessHttpResponse(rawResponse);
+            string jsonresponse = rawResponse.ProcessHttpResponse();
 
             JObject callresults = JObject.Parse(jsonresponse);
             // get JSON result objects into a list
@@ -74,11 +74,11 @@ namespace AuthNMethodsTesting
         {
             var requestUrl = "https://graph.microsoft.com/beta/me/authentication/phoneMethods";
             HttpHelper httpHelper = new HttpHelper(new ColorConsoleLogger());
-            HttpClient httpClient = await GetHttpClientForMSGraphAsync(graphServiceClient);
+            HttpClient httpClient = await graphServiceClient.GetHttpClientForMSGraphAsync();
 
             HttpResponseMessage rawResponse = await httpHelper.GetRawHttpResponseAsync(httpClient, async client => await client.GetAsync(requestUrl));
 
-            string jsonresponse = ProcessHttpResponse(rawResponse);
+            string jsonresponse = rawResponse.ProcessHttpResponse();
 
             JObject callresults = JObject.Parse(jsonresponse);
             // get JSON result objects into a list
@@ -88,33 +88,6 @@ namespace AuthNMethodsTesting
             ColorConsole.WriteLine(ConsoleColor.Green, $"phoneType-{phoneMethod.phoneType}, phoneNumber-{phoneMethod.phoneNumber}, smsSignInState-{phoneMethod.smsSignInState}");
         }
 
-        private static string ProcessHttpResponse(HttpResponseMessage httpResponseMessage)
-        {
-            using (httpResponseMessage)
-            {
-                string responseString = (httpResponseMessage.Content != null) ? httpResponseMessage.GetResponseString() : string.Empty;
-
-                if (httpResponseMessage.IsSuccessStatusCode)
-                {
-                    Console.WriteLine($"HttpResponse -{HttpHelper.GetFormattedJson(responseString)}");
-                    return responseString;
-                }
-                else
-                {
-                    ColorConsole.WriteLine(ConsoleColor.Red, $"Http call failed with response code {httpResponseMessage.StatusCode}. Http response is \n {HttpHelper.GetFormattedJson(responseString)}");
-                }
-            }
-
-            return string.Empty;
-        }
-
-        private static async Task<HttpClient> GetHttpClientForMSGraphAsync(Beta.GraphServiceClient graphServiceClient)
-        {
-            HttpClient httpClient = new HttpClient();
-
-            await graphServiceClient.AuthenticationProvider.AuthenticateClient(httpClient);
-
-            return httpClient;
-        }
+        
     }
 }

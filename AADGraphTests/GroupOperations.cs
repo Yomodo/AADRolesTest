@@ -75,13 +75,13 @@ namespace AADGraphTesting
 
             if (membersToAddList == null)
             {
-                membersToAddList = AsyncHelper.RunSync(async () => await userOperations.GetUsersAsync());
-                members = GenericUtility<Beta.User>.GetaRandomNumberOfItemsFromList(membersToAddList, 10);
+                membersToAddList = await userOperations.GetUsersAsync();
+                members = GenericUtility<Beta.User>.GetaRandomNumberOfItemsFromList(membersToAddList, 15);
             }
 
             if (ownersToAddList == null)
             {
-                ownersToAddList = AsyncHelper.RunSync(async () => await userOperations.GetNonGuestUsersAsync());
+                ownersToAddList = await userOperations.GetNonGuestUsersAsync();
                 owners = GenericUtility<Beta.User>.GetaRandomNumberOfItemsFromList(ownersToAddList, 2);
             }
 

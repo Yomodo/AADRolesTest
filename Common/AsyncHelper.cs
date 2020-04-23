@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AADGraphTesting
+namespace Common
 {
     /// <summary>
     /// Allows for running async methods synchronously
