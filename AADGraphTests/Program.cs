@@ -1,6 +1,7 @@
 ﻿extern alias BetaLib;
 
 using Common;
+using Microsoft.Graph;
 using Microsoft.Graph.Auth;
 using Microsoft.Identity.Client;
 using System;
@@ -30,7 +31,7 @@ namespace AADGraphTesting
         private static async Task Main(string[] args)
         {
             // Initialize and prepare MSAL
-            string[] scopes = new string[] { "user.read", "user.readwrite.all", "Directory.AccessAsUser.All", "Directory.ReadWrite.All", "Contacts.ReadWrite", "AppRoleAssignment.ReadWrite.All" };
+            string[] scopes = new string[] { "user.read", "user.readwrite.all", "Directory.AccessAsUser.All", "Directory.ReadWrite.All", "Contacts.ReadWrite", "AppRoleAssignment.ReadWrite.All", "Policy.ReadWrite.ApplicationConfiguration" };
 
             IPublicClientApplication app = PublicClientApplicationBuilder.Create(clientId)
                 .WithAuthority(new Uri($"https://login.microsoftonline.com/{tenant}"))
@@ -43,6 +44,15 @@ namespace AADGraphTesting
 
             Beta.GraphServiceClient betaClient = new Beta.GraphServiceClient(authenticationProvider);
             //Beta.ServicePrincipal graphServicePrincipal = GetServicePrincipalByAppDisplayNameAsync(betaClient, "Microsoft Graph").Result;
+
+            #region ActivityBasedTimeoutPolicy
+
+            PolicyOperations policyOperations = new PolicyOperations(betaClient);
+
+            var activityBasedTimeoutPolicies = await policyOperations.ListActivityBasedTimeoutPoliciesAsync();
+            activityBasedTimeoutPolicies.ForEach(x => policyOperations.PrintActivityBasedTimeoutPolicy(x));
+
+            #endregion ActivityBasedTimeoutPolicy
 
             #region groupSettings
 

@@ -104,7 +104,7 @@ namespace AADGraphTesting
                     MailNickname = mailNickName,
                     Visibility = "Public",
                     OwnersReference = owners.Select(u => $"https://graph.microsoft.com/v1.0/users/{u.Id}").ToArray(),
-                    MembersReference = members.Select(u => $"https://graph.microsoft.com/v1.0/users/{u.Id}").ToArray(),
+                    MembersReference = members.Select(u => $"https://graph.microsoft.com/v1.0/users/{u.Id}").ToArray()
                 };
 
                 newGroupObject = await _graphServiceClient.Groups.Request().AddAsync(newGroup);
@@ -117,7 +117,7 @@ namespace AADGraphTesting
 
             return newGroupObject;
         }
-
+                
         public async Task<Beta.Group> CreateDistributionGroupAsync(
            string tenantDomain = "kkaad.onmicrosoft.com")
         {

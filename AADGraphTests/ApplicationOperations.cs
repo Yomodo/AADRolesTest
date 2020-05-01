@@ -13,10 +13,12 @@ namespace AADGraphTesting
     public class ApplicationOperations
     {
         private Beta.GraphServiceClient _graphServiceClient;
+        private ServicePrincipalOperations _servicePrincipalOperations;
 
-        public ApplicationOperations(Beta.GraphServiceClient graphServiceClient)
+        public ApplicationOperations(Beta.GraphServiceClient graphServiceClient, ServicePrincipalOperations servicePrincipalOperations)
         {
             this._graphServiceClient = graphServiceClient;
+            this._servicePrincipalOperations = servicePrincipalOperations;
         }
 
         public async Task<List<Beta.Application>> GetAllApplicationsAsync()
@@ -59,7 +61,7 @@ namespace AADGraphTesting
             Beta.RequiredResourceAccess requiredResourceAccess = null;
 
             // ResourceAppId of Microsoft Graph
-            Beta.ServicePrincipal servicePrincipal = await GetServicePrincipalByAppDisplayNameAsync(apiDisplayName);
+            Beta.ServicePrincipal servicePrincipal = await this._servicePrincipalOperations.GetServicePrincipalByAppDisplayNameAsync(apiDisplayName);
 
             if (servicePrincipal != null)
             {
@@ -88,8 +90,6 @@ namespace AADGraphTesting
 
             return requiredResourceAccess;
         }
-
-
 
         public async Task PrintApplicationDetailsAsync(Beta.Application application)
         {
@@ -158,7 +158,7 @@ namespace AADGraphTesting
                             string resourceappName = string.Empty;
 
                             // Search for service principal first
-                            Beta.ServicePrincipal servicePrincipal = await GetServicePrincipalByAppIdAsync(requiredResourceAccess.ResourceAppId);
+                            Beta.ServicePrincipal servicePrincipal = await this._servicePrincipalOperations.GetServicePrincipalByAppIdAsync(requiredResourceAccess.ResourceAppId);
 
                             if (servicePrincipal == null)
                             {
@@ -313,7 +313,7 @@ namespace AADGraphTesting
             Console.WriteLine("");
             Console.WriteLine($"--------------------------------ServicePrincipal '{application.DisplayName}' start----------------------------------------");
 
-            Beta.ServicePrincipal servicePrincipal = await GetServicePrincipalByAppIdAsync(application.AppId);
+            Beta.ServicePrincipal servicePrincipal = await this._servicePrincipalOperations.GetServicePrincipalByAppIdAsync(application.AppId);
 
             if (servicePrincipal == null)
             {
@@ -451,7 +451,7 @@ namespace AADGraphTesting
                     Console.WriteLine("--------------------------Oauth2PermissionGrants-------------------");
                     foreach (var oAuth2PermissionGrants in servicePrincipal.Oauth2PermissionGrants)
                     {
-                        Beta.ServicePrincipal resourceServicePrincipal = await GetServicePrincipalByAppIdAsync(oAuth2PermissionGrants.ResourceId);
+                        Beta.ServicePrincipal resourceServicePrincipal = await this._servicePrincipalOperations.GetServicePrincipalByAppIdAsync(oAuth2PermissionGrants.ResourceId);
 
                         Console.WriteLine($"Resource Name-{resourceServicePrincipal.DisplayName}, Id-{oAuth2PermissionGrants?.Id}, PrincipalId- {oAuth2PermissionGrants.PrincipalId}, " +
                             $"ResourceId- {oAuth2PermissionGrants.ResourceId}, Scope- {oAuth2PermissionGrants.Scope}, ConsentType- {oAuth2PermissionGrants.ConsentType}  "
@@ -541,7 +541,7 @@ namespace AADGraphTesting
                                     $"PrincipalId:{OAuth2PermissionGrant.PrincipalId}, ResourceId:{OAuth2PermissionGrant.ResourceId}, " +
                                     $"StartTime:{OAuth2PermissionGrant.StartTime}, ExpiryTime:{OAuth2PermissionGrant.ExpiryTime}");
 
-                                Beta.ServicePrincipal resourceServicePrincipal = await GetServicePrincipalByIdAsync(OAuth2PermissionGrant.ResourceId);
+                                Beta.ServicePrincipal resourceServicePrincipal = await this._servicePrincipalOperations.GetServicePrincipalByIdAsync(OAuth2PermissionGrant.ResourceId);
 
                                 if (resourceServicePrincipal != null)
                                 {
@@ -766,7 +766,7 @@ namespace AADGraphTesting
 
         public async Task AssignUsersToAppRoles(Beta.Application application, IList<Beta.User> users)
         {
-            Beta.ServicePrincipal servicePrincipal = await GetServicePrincipalByAppIdAsync(application.AppId);
+            Beta.ServicePrincipal servicePrincipal = await this._servicePrincipalOperations.GetServicePrincipalByAppIdAsync(application.AppId);
 
             try
             {
@@ -801,9 +801,9 @@ namespace AADGraphTesting
             ColorConsole.WriteLine(ConsoleColor.Green, "All app role assignments complete");
         }
 
-        public async Task UpdateServicePrincipalSettings(Beta.Application application,            IEnumerable<Beta.User> allUsersInTenant)
+        public async Task UpdateServicePrincipalSettings(Beta.Application application, IEnumerable<Beta.User> allUsersInTenant)
         {
-            Beta.ServicePrincipal servicePrincipal = await GetServicePrincipalByAppIdAsync(application.AppId);
+            Beta.ServicePrincipal servicePrincipal = await this._servicePrincipalOperations.GetServicePrincipalByAppIdAsync(application.AppId);
 
             if (servicePrincipal == null)
             {
@@ -857,7 +857,7 @@ namespace AADGraphTesting
         public async Task RemoveUsersFromAppRoles(Beta.Application application,
             IList<Beta.User> users)
         {
-            Beta.ServicePrincipal servicePrincipal = await GetServicePrincipalByAppIdAsync(application.AppId);
+            Beta.ServicePrincipal servicePrincipal = await this._servicePrincipalOperations.GetServicePrincipalByAppIdAsync(application.AppId);
 
             try
             {
@@ -1035,7 +1035,7 @@ namespace AADGraphTesting
             Beta.RequiredResourceAccess requiredResourceAccess = null;
 
             // ResourceAppId of Microsoft Graph
-            Beta.ServicePrincipal servicePrincipal = await GetServicePrincipalByAppDisplayNameAsync(apiDisplayName);
+            Beta.ServicePrincipal servicePrincipal = await this._servicePrincipalOperations.GetServicePrincipalByAppDisplayNameAsync(apiDisplayName);
 
             if (servicePrincipal != null)
             {
@@ -1071,22 +1071,5 @@ namespace AADGraphTesting
             return applications.FirstOrDefault();
         }
 
-        private async Task<Beta.ServicePrincipal> GetServicePrincipalByAppIdAsync(string appId)
-        {
-            var servicePrincipals = await _graphServiceClient.ServicePrincipals.Request().Filter($"appId eq '{appId}'").GetAsync();
-            return servicePrincipals.FirstOrDefault();
-        }
-
-        private async Task<Beta.ServicePrincipal> GetServicePrincipalByAppDisplayNameAsync(string appDisplayName)
-        {
-            var servicePrincipals = await _graphServiceClient.ServicePrincipals.Request().Filter($"displayName eq '{appDisplayName}'").GetAsync();
-            return servicePrincipals.FirstOrDefault();
-        }
-
-        private async Task<Beta.ServicePrincipal> GetServicePrincipalByIdAsync(string Id)
-        {
-            var servicePrincipals = await _graphServiceClient.ServicePrincipals.Request().Filter($"id eq '{Id}'").GetAsync();
-            return servicePrincipals.FirstOrDefault();
-        }
     }
 }

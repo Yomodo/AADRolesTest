@@ -12,10 +12,12 @@ namespace Common
     public class UserOperations
     {
         private Beta.GraphServiceClient _graphServiceClient;
+        private Dictionary<string, Beta.User> _cachedUsers;
 
         public UserOperations(Beta.GraphServiceClient graphServiceClient)
         {
             this._graphServiceClient = graphServiceClient;
+            _cachedUsers = new Dictionary<string, Beta.User>();
         }
 
         public async Task<Beta.User> GetMeAsync()
@@ -24,10 +26,46 @@ namespace Common
             return await _graphServiceClient.Me.Request().GetAsync();
         }
 
-        public async Task<Beta.User> GetUserByIdAsync(string principalId)
+        public async Task<Beta.User> GetUserByIdAsync(string principalId, bool useSelect = true)
         {
-            var users = await _graphServiceClient.Users.Request().Filter($"id eq '{principalId}'").GetAsync();
-            return users.CurrentPage.FirstOrDefault();
+            Beta.User user = null;
+            Beta.IGraphServiceUsersCollectionPage users = null;
+
+            if (_cachedUsers.ContainsKey(principalId))
+            {
+                return _cachedUsers[principalId];
+            }
+
+            try
+            {
+                if (!useSelect)
+                {
+                    users = await _graphServiceClient.Users.Request().Filter($"id eq '{principalId}'")
+                                       .GetAsync();
+                }
+                else
+                {
+                    users = await _graphServiceClient.Users.Request().Filter($"id eq '{principalId}'")
+                                       .Select("id,displayName,givenName,surname,mail,mailNickname,userPrincipalName,imAddresses,userType,jobTitle,accountEnabled,country,usageLocation,otherMails,proxyAddresses,identities,passwordPolicies")
+                                       .GetAsync();
+                }
+
+                user = users.CurrentPage.FirstOrDefault();
+                _cachedUsers[principalId] = user;
+            }
+            catch (ServiceException sx)
+            {
+                if (sx.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    ColorConsole.WriteLine(ConsoleColor.Red, $"No user by id-{principalId} was found");
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return user;
         }
 
         public async Task<Beta.User> GetUserByIdAsync(Beta.DirectoryObject owner)
@@ -107,6 +145,8 @@ namespace Common
             Beta.User updatedUser = null;
             try
             {
+                _cachedUsers.Remove(userId);
+
                 // Update the user.
                 updatedUser = await _graphServiceClient.Users[userId].Request().UpdateAsync(new Beta.User
                 {
@@ -126,6 +166,7 @@ namespace Common
             try
             {
                 await _graphServiceClient.Users[userId].Request().DeleteAsync();
+                _cachedUsers.Remove(userId);
             }
             catch (ServiceException e)
             {
@@ -207,7 +248,7 @@ namespace Common
             return allUsers;
         }
 
-        public async Task<List<Beta.User>> GetNonGuestUsersAsync(int top = 150, bool useSelect = true)
+        public async Task<List<Beta.User>> GetNonGuestUsersAsync(int top = 999, bool useSelect = true)
         {
             List<Beta.User> allUsers = new List<Beta.User>();
             Beta.IGraphServiceUsersCollectionPage users = null;
@@ -247,8 +288,6 @@ namespace Common
             try
             {
                 Beta.IUserAppRoleAssignmentsCollectionPage assignments = await _graphServiceClient.Me.AppRoleAssignments.Request().GetAsync();
-
-                //Beta.IUserAppRoleAssignmentsCollectionPage assignments = await graphServiceClient.Me.AppRoleAssignments  .Request().GetAsync();
 
                 if (assignments?.CurrentPage.Count > 0)
                 {
@@ -295,6 +334,7 @@ namespace Common
                         foreach (var user in users.CurrentPage)
                         {
                             //Console.WriteLine($"User:{user.DisplayName}");
+                            _cachedUsers[user.Id] = user;
                             allUsers.Add(user);
                         }
 
