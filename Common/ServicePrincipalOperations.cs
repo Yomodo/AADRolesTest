@@ -12,12 +12,12 @@ namespace Common
     public class ServicePrincipalOperations
     {
         private Beta.GraphServiceClient _graphServiceClient;
-        private Dictionary<string, Beta.ServicePrincipal> _cachedServicePrincipals;
+        private readonly Dictionary<string, Beta.ServicePrincipal> _cachedServicePrincipals;
 
         public ServicePrincipalOperations(Beta.GraphServiceClient graphServiceClient)
         {
             this._graphServiceClient = graphServiceClient;
-            _cachedServicePrincipals = new Dictionary<string, Beta.ServicePrincipal>();
+            this._cachedServicePrincipals = new Dictionary<string, Beta.ServicePrincipal>();
         }
 
         public async Task<Beta.ServicePrincipal> GetServicePrincipalByAppIdAsync(string appId)

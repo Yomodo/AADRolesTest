@@ -112,6 +112,7 @@ namespace ARMApi
         {
             string toPrint = string.Empty;
             StringBuilder more = new StringBuilder();
+            int maxmembersToPrint = 999;
 
             if (directoryRole != null)
             {
@@ -132,8 +133,8 @@ namespace ARMApi
                     {
                         more.AppendLine($"Total assigned members - {roleMembers.Count()}");
 
-                        // Print first 50 assignments only
-                        int top = roleMembers.Count() > 50 ? 50 : roleMembers.Count();
+                        // Print first maxmembersToPrint assignments only
+                        int top = roleMembers.Count() > maxmembersToPrint ? maxmembersToPrint : roleMembers.Count();
 
                         for (int i = 0; i < top; i++)
                         {
@@ -163,8 +164,8 @@ namespace ARMApi
                     {
                         more.AppendLine($"Total scoped members - {scopedRoleMembers.Count()}");
 
-                        // Print first 50 assignments only
-                        int top = scopedRoleMembers.Count() > 50 ? 50 : scopedRoleMembers.Count();
+                        // Print first maxmembersToPrint assignments only
+                        int top = scopedRoleMembers.Count() > maxmembersToPrint ? maxmembersToPrint : scopedRoleMembers.Count();
 
                         for (int i = 0; i < top; i++)
                         {

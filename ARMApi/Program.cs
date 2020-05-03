@@ -6,6 +6,8 @@ using Microsoft.Graph.Auth;
 using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Beta = BetaLib.Microsoft.Graph;
 
@@ -19,6 +21,45 @@ namespace ARMApi
 
         private static async Task Main(string[] args)
         {
+            AsyncHelper.RunSync(async ()=> await DoARMThings());
+
+            await DoAADThings();
+
+            Console.WriteLine("Press any key to exit");
+            Console.ReadKey();
+        }
+
+
+        private async static Task DoARMThings()
+        {
+
+            AzureServiceManagement arm = new AzureServiceManagement();
+
+            //var subscriptions = arm.GetAllsubscriptionsForServicePrincipal();
+            //subscriptions.ToList().ForEach(sub => Console.WriteLine($"{sub.DisplayName}"));
+
+            //var tenants = arm.GetAllTenantsForServicePrincipal();
+            //tenants.ToList().ForEach(sub => Console.WriteLine($"{sub.TenantId}"));
+
+            //var roleAssignments = arm.GetAllRoleAssignmentsForServicePrincipal();
+            //roleAssignments.ToList().ForEach(sub => Console.WriteLine($"{sub.Name}"));
+
+
+            var tenants = await arm.GetAllTenantsForUserUsingMsalAsync();
+            tenants.ToList().ForEach(sub => Console.WriteLine($"{sub.TenantId}"));
+
+            var subscriptions = await arm.GetAllsubscriptionsForServicePrincipalUsingMsalAsync();
+            subscriptions.ToList().ForEach(sub => Console.WriteLine($"{sub.DisplayName}"));
+
+            // arm.PrintSubscriptionsUsingMsal();
+            // ArmCredentials armCredentials = new ArmCredentials();
+            // Console.WriteLine(armCredentials.AuthenticateUsingMsalAsync().Result);
+        }
+
+        private async static Task DoAADThings()
+        {
+            return;
+
             string[] scopes = new string[] { "user.readbasic.all", "RoleManagement.ReadWrite.Directory", "AdministrativeUnit.Read.All" };
 
             // Using appsettings.json as our configuration settings
@@ -53,64 +94,68 @@ namespace ARMApi
 
             #region Directory roles and assignment
 
-            // List
-            Console.WriteLine("Getting directory roles");
-
             var directoryroles = await roleManagementOperations.ListDirectoryRolesAsync();
-            IList<Beta.DirectoryRole> randomDirectoryRoles = GenericUtility<Beta.DirectoryRole>.GetaRandomNumberOfItemsFromList(directoryroles, 2);
 
-            foreach (var directoryRole in randomDirectoryRoles)
-            {
-                Console.WriteLine("Printing role details ");
-                ColorConsole.WriteLine(ConsoleColor.Green, await roleManagementOperations.PrintDirectoryRoleAsync(directoryRole, true, true));
 
-                Console.WriteLine("Adding users to role ");
-                foreach (var user in randomUsersFromTenant)
-                {
-                    Console.WriteLine($"Adding user '{user.DisplayName}' to role '{directoryRole.DisplayName}'");
-                    await roleManagementOperations.AddMemberToDirectoryRole(directoryRole, user);
-                }
+            //// List
+            //Console.WriteLine("Getting directory roles");
 
-                Console.WriteLine("Adding service principals to role ");
-                foreach (var servicePrincipal in randomServicePrincipals)
-                {
-                    Console.WriteLine($"Adding service principal '{servicePrincipal.DisplayName}' to role '{directoryRole.DisplayName}'");
-                    await roleManagementOperations.AddMemberToDirectoryRole(directoryRole, servicePrincipal);
-                }
+            //IList<Beta.DirectoryRole> randomDirectoryRoles = GenericUtility<Beta.DirectoryRole>.GetaRandomNumberOfItemsFromList(directoryroles, 2);
 
-                Console.WriteLine("Fetching updated role");
-                var updatedrole = await roleManagementOperations.GetDirectoryRoleByIdAsync(directoryRole.Id);
-
-                Console.WriteLine("Printing role details after update");
-                ColorConsole.WriteLine(ConsoleColor.Green, await roleManagementOperations.PrintDirectoryRoleAsync(updatedrole, true, true));
-
-                Console.WriteLine("Removing users from role ");
-                foreach (var user in randomUsersFromTenant)
-                {
-                    Console.WriteLine($"Removing user '{user.DisplayName}' to role '{directoryRole.DisplayName}'");
-                    await roleManagementOperations.RemoveMemberFromDirectoryRole(updatedrole, user);
-                }
-
-                Console.WriteLine("Removing service principal from role ");
-                foreach (var servicePrincipal in randomServicePrincipals)
-                {
-                    Console.WriteLine($"Removing service principal '{servicePrincipal.DisplayName}' from role '{directoryRole.DisplayName}'");
-                    await roleManagementOperations.RemoveMemberFromDirectoryRole(updatedrole, servicePrincipal);
-                }
-
-                Console.WriteLine("Fetching updated role");
-                updatedrole = await roleManagementOperations.GetDirectoryRoleByIdAsync(updatedrole.Id);
-
-                Console.WriteLine("Printing role details after update");
-                ColorConsole.WriteLine(ConsoleColor.Green, await roleManagementOperations.PrintDirectoryRoleAsync(updatedrole, true, true));
-            }
-
-            //// Print all directory roles and its members
-            //for (int i = 0; i < directoryroles.Count(); i++)
+            //foreach (var directoryRole in randomDirectoryRoles)
             //{
-            //    Console.WriteLine($"Printing role {i}/{directoryroles.Count()}");
-            //    Console.WriteLine(AsyncHelper.RunSync(async() => await roleManagementOperations.PrintDirectoryRoleAsync(directoryroles[i], true, true)));
+            //    Console.WriteLine("Printing role details ");
+            //    ColorConsole.WriteLine(ConsoleColor.Green, await roleManagementOperations.PrintDirectoryRoleAsync(directoryRole, true, true));
+
+            //    Console.WriteLine("Adding users to role ");
+            //    foreach (var user in randomUsersFromTenant)
+            //    {
+            //        Console.WriteLine($"Adding user '{user.DisplayName}' to role '{directoryRole.DisplayName}'");
+            //        await roleManagementOperations.AddMemberToDirectoryRole(directoryRole, user);
+            //    }
+
+            //    Console.WriteLine("Adding service principals to role ");
+            //    foreach (var servicePrincipal in randomServicePrincipals)
+            //    {
+            //        Console.WriteLine($"Adding service principal '{servicePrincipal.DisplayName}' to role '{directoryRole.DisplayName}'");
+            //        await roleManagementOperations.AddMemberToDirectoryRole(directoryRole, servicePrincipal);
+            //    }
+
+            //    Console.WriteLine("Fetching updated role");
+            //    var updatedrole = await roleManagementOperations.GetDirectoryRoleByIdAsync(directoryRole.Id);
+
+            //    Console.WriteLine("Printing role details after update");
+            //    ColorConsole.WriteLine(ConsoleColor.Green, await roleManagementOperations.PrintDirectoryRoleAsync(updatedrole, true, true));
+
+            //    Console.WriteLine("Removing users from role ");
+            //    foreach (var user in randomUsersFromTenant)
+            //    {
+            //        Console.WriteLine($"Removing user '{user.DisplayName}' to role '{directoryRole.DisplayName}'");
+            //        await roleManagementOperations.RemoveMemberFromDirectoryRole(updatedrole, user);
+            //    }
+
+            //    Console.WriteLine("Removing service principal from role ");
+            //    foreach (var servicePrincipal in randomServicePrincipals)
+            //    {
+            //        Console.WriteLine($"Removing service principal '{servicePrincipal.DisplayName}' from role '{directoryRole.DisplayName}'");
+            //        await roleManagementOperations.RemoveMemberFromDirectoryRole(updatedrole, servicePrincipal);
+            //    }
+
+            //    Console.WriteLine("Fetching updated role");
+            //    updatedrole = await roleManagementOperations.GetDirectoryRoleByIdAsync(updatedrole.Id);
+
+            //    Console.WriteLine("Printing role details after update");
+            //    ColorConsole.WriteLine(ConsoleColor.Green, await roleManagementOperations.PrintDirectoryRoleAsync(updatedrole, true, true));
             //}
+
+            // Print all directory roles and its members
+            Console.WriteLine("Printing all directory roles and assignments");
+
+            for (int i = 0; i < directoryroles.Count; i++)
+            {
+                Console.WriteLine($"Printing role {i}/{directoryroles.Count}");
+                Console.WriteLine(AsyncHelper.RunSync(async () => await roleManagementOperations.PrintDirectoryRoleAsync(directoryroles[i], true, true)));
+            }
 
             #endregion Directory roles and assignment
 
@@ -191,9 +236,8 @@ namespace ARMApi
             //}
 
             #endregion Unified role definition and assignment
-
-            Console.WriteLine("Press any key to exit");
-            Console.ReadKey();
         }
+
+
     }
 }
