@@ -7,6 +7,10 @@ using System.Threading.Tasks;
 
 namespace AADGraphTesting
 {
+    /// <summary>
+    /// Wraps group settings exposed at the tenant level
+    /// https://docs.microsoft.com/en-us/azure/active-directory/users-groups-roles/groups-settings-cmdlets
+    /// </summary>
     internal class GroupSettingOperations
     {
         private GraphServiceClient _graphServiceClient;
@@ -62,14 +66,16 @@ namespace AADGraphTesting
             if (groupSettingTemplate != null)
             {
                 ColorConsole.WriteLine(ConsoleColor.Green, $"Id-{groupSettingTemplate.Id}, DisplayName-{groupSettingTemplate.DisplayName}, Description-{groupSettingTemplate.Description}");
+                ColorConsole.WriteLine(ConsoleColor.Green, $"Description-{groupSettingTemplate.Description}");
+
                 groupSettingTemplate.Values.ForEach(x =>
                 {
-                    ColorConsole.WriteLine(ConsoleColor.Green, $"\tName-{x.Name}, Type-{x.Type}, Type-{x.DefaultValue}, Description-{x.Description}");
+                    ColorConsole.WriteLine(ConsoleColor.Cyan, $"\tName-{x.Name}[{x.Type}], DefaultValue-{x.DefaultValue}, Description-{x.Description}");
                 });
             }
             else
             {
-                ColorConsole.WriteLine(ConsoleColor.Green, $"The provided Group setting template is null");
+                ColorConsole.WriteLine(ConsoleColor.Red, $"The provided Group setting template is null");
             }
         }
 
@@ -97,15 +103,110 @@ namespace AADGraphTesting
             return allGroupSettings;
         }
 
+        public async Task<GroupSetting> GetGroupSettingByIdAsync(string groupSettingId)
+        {
+            try
+            {
+                var groupSetting = await _graphServiceClient.GroupSettings[groupSettingId].Request().GetAsync();
+                return groupSetting;
+            }
+            catch (Microsoft.Graph.ServiceException gex)
+            {
+                if (gex.StatusCode != System.Net.HttpStatusCode.NotFound)
+                {
+                    throw;
+                }
+            }
+            return null;
+        }
+
+        public async Task<GroupSetting> GetGroupSettingByTemplateIdAsync(string groupSettingTemplateId)
+        {
+
+            // NOT SUPPORTED
+            try
+            {
+                var groupSetting = await _graphServiceClient.GroupSettings.Request().Filter($"templateId eq '{groupSettingTemplateId}'").GetAsync();
+                return groupSetting.FirstOrDefault();
+            }
+            catch (Microsoft.Graph.ServiceException gex)
+            {
+                if (gex.StatusCode != System.Net.HttpStatusCode.NotFound)
+                {
+                    throw;
+                }
+            }
+            return null;
+        }
+
+        public async Task<GroupSetting> AddGroupSettingAsync(GroupSetting groupSetting)
+        {
+            GroupSetting newGroupSettingObject = null;
+
+            try
+            {
+                newGroupSettingObject = await _graphServiceClient.GroupSettings.Request().AddAsync(groupSetting);
+            }
+            catch (ServiceException e)
+            {
+                Console.WriteLine("We could not add a new Group setting: " + e.Error.Message);
+                return null;
+            }
+
+            return newGroupSettingObject;
+        }
+
+        public async Task<GroupSetting> UpdateGroupSettingAsync(GroupSetting groupSetting, string settingValueName, string settingValue)
+        {
+            GroupSetting updatedGroupSettingObject = null;
+
+            var settingToUpdate = groupSetting.Values.FirstOrDefault(x => x.Name == settingValueName);
+
+            try
+            {
+                if (settingToUpdate != null)
+                {
+                    settingToUpdate.Value = settingValue;
+                }
+
+                updatedGroupSettingObject = await _graphServiceClient.GroupSettings[groupSetting.Id].Request().UpdateAsync(groupSetting);
+            }
+            catch (ServiceException e)
+            {
+                Console.WriteLine($"We could not update the Group setting with Id-{groupSetting.Id}: " + e.Error.Message);
+                return null;
+            }
+
+            return updatedGroupSettingObject;
+        }
+
+        public async Task<GroupSetting> UpdateGroupSettingAsync(string groupSettingId, string settingValueName, string settingValue)
+        {
+            return await this.UpdateGroupSettingAsync(await this.GetGroupSettingByIdAsync(groupSettingId), settingValueName, settingValue);
+        }
+
+        public async Task DeleteGroupSettingAsync(GroupSetting groupSetting)
+        {
+            try
+            {
+                await _graphServiceClient.GroupSettings[groupSetting.Id].Request().DeleteAsync();
+            }
+            catch (ServiceException e)
+            {
+                Console.WriteLine($"Could not delete the groupSetting with Id-{groupSetting.Id}: {e}");
+            }
+        }
+
         public async Task PrintGroupSettingsAsync(GroupSetting groupSetting)
         {
             if (groupSetting != null)
             {
                 GroupSettingTemplate groupSettingTemplate = await GetGroupSettingTemplateByIdAsync(groupSetting.TemplateId);
-                ColorConsole.WriteLine(ConsoleColor.Green, $"Id-{groupSetting.Id}, DisplayName-{groupSetting.DisplayName}, Template-{groupSettingTemplate.DisplayName}");
+                ColorConsole.WriteLine(ConsoleColor.Green, $"DisplayName-{groupSetting.DisplayName}, TemplateId-{groupSetting.TemplateId}, Id-{groupSetting.Id} ");
+                ColorConsole.WriteLine(ConsoleColor.Green, $"Description -{ groupSettingTemplate.Description}");
                 groupSetting.Values.ForEach(x =>
                 {
-                    ColorConsole.WriteLine(ConsoleColor.Green, $"\tName-{x.Name}, Type-{x.Value.ToString()}");
+                    ColorConsole.WriteLine(ConsoleColor.Cyan, $"\tName-{x.Name}, Value-{x.Value.ToString()}");
                 });
             }
             else

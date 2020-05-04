@@ -818,6 +818,8 @@ namespace AADGraphTesting
                 "https://www.kkaad.onmicrosoft.com/myotherapp/landingpage2"
             };
 
+            // TODO: Update servcie principals name
+
             //servicePrincipal.ReplyUrls.ToList().Add("https://www.kkaad.onmicrosoft.com/myotherapp/landingpage");
             //servicePrincipal.ReplyUrls = GenericUtility<string>.BackupAddAndReplace(servicePrincipal.ReplyUrls, replyUrlsToAdd);
 
