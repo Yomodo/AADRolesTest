@@ -3,6 +3,7 @@
 using Common;
 using Microsoft.Graph;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,10 +15,29 @@ namespace AADGraphTesting
     public class GroupOperations
     {
         private Beta.GraphServiceClient _graphServiceClient;
+        private ConcurrentDictionary<string, Beta.Group> _cachedGroups;
 
         public GroupOperations(Beta.GraphServiceClient graphServiceClient)
         {
             this._graphServiceClient = graphServiceClient;
+            _cachedGroups = new ConcurrentDictionary<string, Beta.Group>();
+        }
+
+        public string PrintGroupBasic(Beta.Group group)
+        {
+            string toPrint = string.Empty;
+
+            if (group != null)
+            {
+                toPrint = $"DisplayName-{group.DisplayName}, MailNickname- {group.MailNickname}";
+
+            }
+            else
+            {
+                Console.WriteLine("The provided group is null!");
+            }
+
+            return toPrint;
         }
 
         public async Task PrintGroupDetails(Beta.Group group, bool verbose = false)
@@ -117,7 +137,7 @@ namespace AADGraphTesting
 
             return newGroupObject;
         }
-                
+
         public async Task<Beta.Group> CreateDistributionGroupAsync(
            string tenantDomain = "kkaad.onmicrosoft.com")
         {
@@ -166,7 +186,26 @@ namespace AADGraphTesting
 
         public async Task<Beta.Group> GetGroupByIdAsync(string groupId)
         {
-            return await _graphServiceClient.Groups[groupId].Request().GetAsync();
+            if (_cachedGroups.ContainsKey(groupId))
+            {
+                return _cachedGroups[groupId];
+            }
+
+            try
+            {
+                var group = await _graphServiceClient.Groups[groupId].Request().GetAsync();
+                this._cachedGroups[group.Id] = group;
+                return group;
+            }
+            catch (ServiceException gex)
+            {
+                if (gex.StatusCode != System.Net.HttpStatusCode.NotFound)
+                {
+                    throw;
+                }
+            }
+
+            return null;
         }
 
         public async Task<Beta.Group> GetGroupByMailNickNameAsync(string mailNickName)
@@ -199,6 +238,9 @@ namespace AADGraphTesting
         {
             try
             {
+                Beta.Group removedGroup = null;
+                _cachedGroups.TryRemove(group.Id, out removedGroup);
+
                 await _graphServiceClient.Groups[group.Id].Request().DeleteAsync();
             }
             catch (ServiceException e)

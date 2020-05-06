@@ -43,14 +43,19 @@ namespace Common
         /// <param name="source">The IEnumerable to enumerate</param>
         /// <param name="action">The action to perform on each element in the IEnumerable</param>
         /// <returns>The original IEnumerable</returns>
-        public static IEnumerable<T> ForEach<T>(this IEnumerable<T> source, Action<T> action)
+        public static async Task ForEach<T>(this IEnumerable<T> source, Action<T> action)
         {
-            foreach (var v in source)
+            foreach (var item in source)
             {
-                action(v);
+                await Task.Run(() => { action(item); }).ConfigureAwait(false);
             }
 
-            return source;
+        }
+
+        public static async Task ForEachAsync<T>(this List<T> enumerable, Action<T> action)
+        {
+            foreach (var item in enumerable)
+                await Task.Run(() => { action(item); }).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -200,7 +205,7 @@ namespace Common
             return sb.ToString();
         }
 
-        public static string ToString<T>(this IList<T> list)
+        public static async Task<string> ToString<T>(this IList<T> list)
         {
             if (list == null || list.Count == 0)
             {
@@ -209,7 +214,7 @@ namespace Common
 
             StringBuilder sb = new StringBuilder();
 
-            list.ForEach((item) => sb.AppendLine($"{item}"));
+            await list.ForEach((item) => sb.AppendLine($"{item}"));
 
             return sb.ToString();
         }
@@ -251,5 +256,7 @@ namespace Common
 
         //    return httpClient;
         //}
+
+       
     }
 }

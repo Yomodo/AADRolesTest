@@ -1,5 +1,6 @@
 ﻿extern alias BetaLib;
 
+using AADGraphTesting;
 using AuthNMethodsTesting.Model;
 using Common;
 using Microsoft.Extensions.Configuration;
@@ -23,7 +24,7 @@ namespace AuthNMethodsTesting
 
         private static async Task Main(string[] args)
         {
-            string[] scopes = new string[] { "user.readbasic.all", "UserAuthenticationMethod.ReadWrite.All" };
+            string[] scopes = new string[] { "user.readbasic.all", "UserAuthenticationMethod.ReadWrite.All", "Policy.Read.All" };
 
             // Using appsettings.json as our configuration settings
             var builder = new ConfigurationBuilder()
@@ -45,8 +46,24 @@ namespace AuthNMethodsTesting
             InteractiveAuthenticationProvider authenticationProvider = new InteractiveAuthenticationProvider(app, scopes);
             Beta.GraphServiceClient betaClient = new Beta.GraphServiceClient(authenticationProvider);
 
+            ServicePrincipalOperations servicePrincipalOperations = new ServicePrincipalOperations(betaClient);
+            UserOperations userOperations = new UserOperations(betaClient);
+            GroupOperations groupOperations = new GroupOperations(betaClient);
+
+            ConditionalAccessPolicyOperations conditionalAccessPolicyOperations = new ConditionalAccessPolicyOperations(betaClient, userOperations, servicePrincipalOperations, groupOperations);
+
+            // List
+            Console.WriteLine("Getting CA Policies");
+            IList<Beta.ConditionalAccessPolicy> conditionalAccessPolicies = await conditionalAccessPolicyOperations.ListConditionalAccessPoliciesAsync();
+
+            for (int i = 0; i < conditionalAccessPolicies.Count; i++)
+            {
+                Console.WriteLine(await conditionalAccessPolicyOperations.PrintConditionalAccessPolicyAsync(conditionalAccessPolicies[i], true));
+                Console.WriteLine("-------------------------------------------------------------------------------");
+            }          
+
             // await GetUsersAuthenticationMethodsAsync(betaClient);
-            await GetUsersPhoneMethodsAsync(betaClient);
+            // await GetUsersPhoneMethodsAsync(betaClient);
 
             Console.WriteLine("Press any key to exit");
             Console.ReadKey();
@@ -88,6 +105,6 @@ namespace AuthNMethodsTesting
             ColorConsole.WriteLine(ConsoleColor.Green, $"phoneType-{phoneMethod.phoneType}, phoneNumber-{phoneMethod.phoneNumber}, smsSignInState-{phoneMethod.smsSignInState}");
         }
 
-        
+
     }
 }

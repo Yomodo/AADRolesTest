@@ -2,6 +2,7 @@
 
 using Microsoft.Graph;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,12 +13,12 @@ namespace Common
     public class UserOperations
     {
         private Beta.GraphServiceClient _graphServiceClient;
-        private Dictionary<string, Beta.User> _cachedUsers;
+        private ConcurrentDictionary<string, Beta.User> _cachedUsers;
 
         public UserOperations(Beta.GraphServiceClient graphServiceClient)
         {
             this._graphServiceClient = graphServiceClient;
-            _cachedUsers = new Dictionary<string, Beta.User>();
+            _cachedUsers = new ConcurrentDictionary<string, Beta.User>();
         }
 
         public async Task<Beta.User> GetMeAsync()
@@ -57,7 +58,8 @@ namespace Common
             {
                 if (sx.StatusCode == System.Net.HttpStatusCode.NotFound)
                 {
-                    ColorConsole.WriteLine(ConsoleColor.Red, $"No user by id-{principalId} was found");
+                    //ColorConsole.WriteLine(ConsoleColor.Red, $"No user by id-{principalId} was found");
+                    return null;
                 }
                 else
                 {
@@ -119,7 +121,7 @@ namespace Common
         //    }
         //}
 
-        public string PrintBetaUserDetails(Beta.User user, bool verbose = true)
+        public string PrintBetaUserDetails(Beta.User user, bool verbose = true, string userId = "")
         {
             string retval = string.Empty;
 
@@ -134,7 +136,7 @@ namespace Common
             }
             else
             {
-                retval = "The provided User is null!";
+                retval = $"The provided User is null! The Id provided was '{userId}'.";
             }
 
             return retval;
@@ -145,7 +147,7 @@ namespace Common
             Beta.User updatedUser = null;
             try
             {
-                _cachedUsers.Remove(userId);
+                bool removed = _cachedUsers.TryRemove(userId, out updatedUser);
 
                 // Update the user.
                 updatedUser = await _graphServiceClient.Users[userId].Request().UpdateAsync(new Beta.User
@@ -166,7 +168,9 @@ namespace Common
             try
             {
                 await _graphServiceClient.Users[userId].Request().DeleteAsync();
-                _cachedUsers.Remove(userId);
+
+                Beta.User removedUser = null;
+                bool removed = _cachedUsers.TryRemove(userId, out removedUser);
             }
             catch (ServiceException e)
             {

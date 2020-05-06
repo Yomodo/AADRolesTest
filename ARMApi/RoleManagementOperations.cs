@@ -144,7 +144,7 @@ namespace ARMApi
                             {
                                 Beta.User principal = await _userOperations.GetUserByIdAsync(member.Id);
 
-                                more.AppendLine($"  Role Member[User]:- {_userOperations.PrintBetaUserDetails(principal, false)}");
+                                more.AppendLine($"  Role Member[User]:- {_userOperations.PrintBetaUserDetails(principal, false, member.Id)}");
                             }
                             else if (member is Beta.ServicePrincipal)
                             {
@@ -640,7 +640,7 @@ namespace ARMApi
                 Beta.User principal = await _userOperations.GetUserByIdAsync(roleAssignment.PrincipalId);
                 Beta.UnifiedRoleDefinition roleDefinition = await GetRoleDefinitionByIdAsync(roleAssignment.RoleDefinitionId);
 
-                toPrint = $"Role Assignment:- Role-{roleDefinition.DisplayName}, User-{_userOperations.PrintBetaUserDetails(principal, false)}";
+                toPrint = $"Role Assignment:- Role-{roleDefinition.DisplayName}, User-{_userOperations.PrintBetaUserDetails(principal, false, roleAssignment.PrincipalId)}";
             }
             else
             {

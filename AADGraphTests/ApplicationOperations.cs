@@ -14,11 +14,13 @@ namespace AADGraphTesting
     {
         private Beta.GraphServiceClient _graphServiceClient;
         private ServicePrincipalOperations _servicePrincipalOperations;
+        private Dictionary<string, Beta.Application> _cachedApplications;
 
         public ApplicationOperations(Beta.GraphServiceClient graphServiceClient, ServicePrincipalOperations servicePrincipalOperations)
         {
             this._graphServiceClient = graphServiceClient;
             this._servicePrincipalOperations = servicePrincipalOperations;
+            _cachedApplications = new Dictionary<string, Beta.Application>();
         }
 
         public async Task<List<Beta.Application>> GetAllApplicationsAsync()
@@ -44,6 +46,7 @@ namespace AADGraphTesting
                     foreach (Beta.Application application in applications)
                     {
                         allApplications.Add(application);
+                        _cachedApplications[application.Id] = application;
                     }
                 }
             }
@@ -1024,6 +1027,7 @@ namespace AADGraphTesting
         {
             try
             {
+                _cachedApplications.Remove(application.Id);
                 await graphServiceClient.Applications[application.Id].Request().DeleteAsync();
             }
             catch (ServiceException e)
@@ -1066,12 +1070,30 @@ namespace AADGraphTesting
             return requiredResourceAccess;
         }
 
-        private async Task<Beta.Application> GetApplicationByAppIdAsync(string appId)
+        public async Task<Beta.Application> GetApplicationByAppIdAsync(string appId)
         {
-            var applications = await _graphServiceClient.Applications.Request().Filter($"appId eq '{appId}'").GetAsync();
-            //Request.Header("Prefer","outlook.body-content-type=\"text\"")
-            return applications.FirstOrDefault();
-        }
+            try
+            {
+                if (_cachedApplications.ContainsKey(appId))
+                {
+                    return _cachedApplications[appId];
+                }
 
+                var app = await _graphServiceClient.Applications[appId].Request().GetAsync();
+                //Request.Header("Prefer","outlook.body-content-type=\"text\"")
+
+                _cachedApplications[app.Id] = app;
+                return app;
+            }
+            catch (ServiceException gex)
+            {
+                if (gex.StatusCode != System.Net.HttpStatusCode.NotFound)
+                {
+                    throw;
+                }
+            }
+
+            return null;
+        }
     }
 }

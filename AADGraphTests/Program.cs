@@ -30,7 +30,8 @@ namespace AADGraphTesting
         private static async Task Main(string[] args)
         {
             // Initialize and prepare MSAL
-            string[] scopes = new string[] { "user.read", "user.readwrite.all", "Directory.AccessAsUser.All", "Directory.ReadWrite.All", "Contacts.ReadWrite", "AppRoleAssignment.ReadWrite.All", "Policy.ReadWrite.ApplicationConfiguration" };
+            string[] scopes = new string[] { "user.read", "user.readwrite.all", "Directory.AccessAsUser.All", "Directory.ReadWrite.All", 
+                "Contacts.ReadWrite", "AppRoleAssignment.ReadWrite.All", "Policy.ReadWrite.ApplicationConfiguration" };
 
             IPublicClientApplication app = PublicClientApplicationBuilder.Create(clientId)
                 .WithAuthority(new Uri($"https://login.microsoftonline.com/{tenant}"))
@@ -55,29 +56,29 @@ namespace AADGraphTesting
 
             #region groupSettings
 
-            //GroupSettingOperations groupSettingOperations = new GroupSettingOperations(graphServiceClient);
+            GroupSettingOperations groupSettingOperations = new GroupSettingOperations(graphServiceClient);
 
-            //Console.WriteLine("Fetching group settings templates");
-            //var groupSettingsTemplates = await groupSettingOperations.ListGroupSettingTemplatesAsync();
+            Console.WriteLine("Fetching group settings templates");
+            var groupSettingsTemplates = await groupSettingOperations.ListGroupSettingTemplatesAsync();
 
-            //Console.WriteLine("Printing group settings templates");
-            //groupSettingsTemplates.ForEach(t =>
-            //{
-            //    Console.WriteLine("---------------------------------------------------------------------");
-            //    groupSettingOperations.PrintGroupSettingTemplates(t);
-            //    Console.WriteLine("---------------------------------------------------------------------");
-            //});
+            Console.WriteLine("Printing group settings templates");
+            groupSettingsTemplates.ForEach(t =>
+            {
+                Console.WriteLine("---------------------------------------------------------------------");
+                groupSettingOperations.PrintGroupSettingTemplates(t);
+                Console.WriteLine("---------------------------------------------------------------------");
+            });
 
-            //Console.WriteLine("Fetching group settings ");
-            //var groupSettings = await groupSettingOperations.ListGroupSettingsAsync();
+            Console.WriteLine("Fetching group settings ");
+            var groupSettings = await groupSettingOperations.ListGroupSettingsAsync();
 
-            //Console.WriteLine("Printing group settings ");
-            //groupSettings.ForEach(async t =>
-            //{
-            //    Console.WriteLine("---------------------------------------------------------------------");
-            //    await groupSettingOperations.PrintGroupSettingsAsync(t);
-            //    Console.WriteLine("---------------------------------------------------------------------");
-            //});
+            Console.WriteLine("Printing group settings ");
+            groupSettings.ForEach(async t =>
+            {
+                Console.WriteLine("---------------------------------------------------------------------");
+                await groupSettingOperations.PrintGroupSettingsAsync(t);
+                Console.WriteLine("---------------------------------------------------------------------");
+            });
 
             //// WARNING: Cross check with the listed printed above before fiddling with the group settings
 

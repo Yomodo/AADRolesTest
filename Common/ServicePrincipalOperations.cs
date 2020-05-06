@@ -2,6 +2,7 @@
 
 using Microsoft.Graph;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,12 +13,12 @@ namespace Common
     public class ServicePrincipalOperations
     {
         private Beta.GraphServiceClient _graphServiceClient;
-        private readonly Dictionary<string, Beta.ServicePrincipal> _cachedServicePrincipals;
+        private readonly ConcurrentDictionary<string, Beta.ServicePrincipal> _cachedServicePrincipals;
 
         public ServicePrincipalOperations(Beta.GraphServiceClient graphServiceClient)
         {
             this._graphServiceClient = graphServiceClient;
-            this._cachedServicePrincipals = new Dictionary<string, Beta.ServicePrincipal>();
+            this._cachedServicePrincipals = new ConcurrentDictionary<string, Beta.ServicePrincipal>();
         }
 
         public async Task<Beta.ServicePrincipal> GetServicePrincipalByAppIdAsync(string appId)
@@ -38,6 +39,7 @@ namespace Common
             {
                 var servicePrincipals = await _graphServiceClient.ServicePrincipals.Request().Filter(searchFilter).GetAsync();
                 servicePrincipal = servicePrincipals.FirstOrDefault();
+                _cachedServicePrincipals[servicePrincipal.Id] = servicePrincipal;
             }
             catch (ServiceException sx)
             {
