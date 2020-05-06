@@ -4,6 +4,7 @@ using AADGraphTesting;
 using AuthNMethodsTesting.Model;
 using Common;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Graph;
 using Microsoft.Graph.Auth;
 using Microsoft.Identity.Client;
 using Newtonsoft.Json.Linq;
@@ -24,7 +25,7 @@ namespace AuthNMethodsTesting
 
         private static async Task Main(string[] args)
         {
-            string[] scopes = new string[] { "user.readbasic.all", "UserAuthenticationMethod.ReadWrite.All", "Policy.Read.All" };
+            string[] scopes = new string[] { "user.readbasic.all", "UserAuthenticationMethod.ReadWrite.All", "Policy.Read.All", "IdentityRiskyUser.ReadWrite.All" };
 
             // Using appsettings.json as our configuration settings
             var builder = new ConfigurationBuilder()
@@ -47,26 +48,109 @@ namespace AuthNMethodsTesting
             Beta.GraphServiceClient betaClient = new Beta.GraphServiceClient(authenticationProvider);
 
             ServicePrincipalOperations servicePrincipalOperations = new ServicePrincipalOperations(betaClient);
-            UserOperations userOperations = new UserOperations(betaClient);
+            UserOperations userOperations = new UserOperations(betaClient, "woodgrove.ms");
             GroupOperations groupOperations = new GroupOperations(betaClient);
 
-            ConditionalAccessPolicyOperations conditionalAccessPolicyOperations = new ConditionalAccessPolicyOperations(betaClient, userOperations, servicePrincipalOperations, groupOperations);
+            //IEnumerable<Beta.User> allUsersInTenant = await userOperations.GetUsersAsync();
+            //IList<Beta.User> randomUsersFromTenant = GenericUtility<Beta.User>.GetaRandomNumberOfItemsFromList(allUsersInTenant, 5);
 
-            // List
-            Console.WriteLine("Getting CA Policies");
-            IList<Beta.ConditionalAccessPolicy> conditionalAccessPolicies = await conditionalAccessPolicyOperations.ListConditionalAccessPoliciesAsync();
+            //// Conditional Access operations
+            //ConditionalAccessPolicyOperations conditionalAccessPolicyOperations = new ConditionalAccessPolicyOperations(betaClient, userOperations, servicePrincipalOperations, groupOperations);
 
-            for (int i = 0; i < conditionalAccessPolicies.Count; i++)
+            //// List
+            //Console.WriteLine("Getting CA Policies");
+            //IList<Beta.ConditionalAccessPolicy> conditionalAccessPolicies = await conditionalAccessPolicyOperations.ListConditionalAccessPoliciesAsync();
+
+            //for (int i = 0; i < conditionalAccessPolicies.Count; i++)
+            //{
+            //    Console.WriteLine(await conditionalAccessPolicyOperations.PrintConditionalAccessPolicyAsync(conditionalAccessPolicies[i], true));
+            //    Console.WriteLine("-------------------------------------------------------------------------------");
+            //}
+
+            // Risky users operations
+            // create five random users
+            RandomNames randomNames = new RandomNames(NameType.MaleName);
+
+            IList<Beta.User> randomUsersFromTenant = new List<Beta.User>();
+
+            for (int i = 0; i < 4; i++)
             {
-                Console.WriteLine(await conditionalAccessPolicyOperations.PrintConditionalAccessPolicyAsync(conditionalAccessPolicies[i], true));
-                Console.WriteLine("-------------------------------------------------------------------------------");
-            }          
+                var user = await userOperations.CreateUserAsync(
+                    givenName: randomNames.GetRandom(),
+                    surname: randomNames.GetRandom());
 
+                randomUsersFromTenant.Add(user);
+            }
+
+            RiskyUserOperations riskyUserOperations = new RiskyUserOperations(betaClient, userOperations);
+
+            var riskyUsers = await riskyUserOperations.ListRiskyUsersAsync();
+            riskyUsers.ForEach(async user => Console.WriteLine(await riskyUserOperations.PrintRiskyUser(user)));
+
+            ColorConsole.WriteLine(ConsoleColor.Green, "Marking a random number of users as compromised");
+            await randomUsersFromTenant.ForEachAsync(async user => await riskyUserOperations.ConfirmCompromisedAsync(user.Id));
+
+            await randomUsersFromTenant.ForEachAsync(async user =>
+            {
+                var trialRslt = await Retry.WithExpBackoff_StopOn<Beta.RiskyUser>(
+                    async () =>
+                    {
+                        return await riskyUserOperations.GetRiskyUserByIdUnsafeAsync(user.Id);
+                    },
+                    TestforMissingRiskEvent);
+
+                Console.WriteLine($"User {user.UserPrincipalName} is marked as a risky user now");
+                Console.WriteLine(await riskyUserOperations.PrintRiskyUser(trialRslt.Result, true, true));
+
+                // If retries occurred, log this fact
+                if (trialRslt.Latencies.Count > 1)
+                {
+                    ColorConsole.WriteLine(ConsoleColor.Yellow, $"For {nameof(riskyUserOperations.GetRiskyUserByIdUnsafeAsync)}, {trialRslt.Latencies.Count - 1} retries needed");
+                }
+
+                Console.WriteLine(await riskyUserOperations.PrintRiskyUser(trialRslt.Result, true, true));
+            });
+
+            ColorConsole.WriteLine(ConsoleColor.Green, "Dismissing a random number of compromised users ");
+            await randomUsersFromTenant.ForEachAsync(async user => await riskyUserOperations.DismissAsync(user.Id));
+
+            // Wait 5 seconds
+            //await Task.Delay(10000);
+
+            await randomUsersFromTenant.ForEachAsync(async user =>
+            {
+                Beta.RiskyUser riskyUser = null;
+
+                do
+                {
+                    // wait 10 secs
+                    await Task.Delay(10000);
+                    riskyUser = await riskyUserOperations.GetRiskyUserByIdAsync(user.Id);
+                } while (riskyUser != null);
+
+                Console.WriteLine($"User {user.UserPrincipalName} is no longer a risky user");
+            });
+
+            // Authenticated methods operations
             // await GetUsersAuthenticationMethodsAsync(betaClient);
             // await GetUsersPhoneMethodsAsync(betaClient);
 
             Console.WriteLine("Press any key to exit");
             Console.ReadKey();
+        }
+
+        private static bool TestforMissingRiskEvent(Exception ex)
+        {
+            if (ex is ServiceException)
+            {
+                var dce = ex as ServiceException;
+                if (dce.StatusCode != System.Net.HttpStatusCode.NotFound)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static async Task GetUsersAuthenticationMethodsAsync(Beta.GraphServiceClient graphServiceClient)
@@ -104,7 +188,5 @@ namespace AuthNMethodsTesting
             phoneAuthenticationMethod phoneMethod = results[0].ToObject<phoneAuthenticationMethod>();
             ColorConsole.WriteLine(ConsoleColor.Green, $"phoneType-{phoneMethod.phoneType}, phoneNumber-{phoneMethod.phoneNumber}, smsSignInState-{phoneMethod.smsSignInState}");
         }
-
-
     }
 }

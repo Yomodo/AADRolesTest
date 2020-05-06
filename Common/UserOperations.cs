@@ -14,10 +14,12 @@ namespace Common
     {
         private Beta.GraphServiceClient _graphServiceClient;
         private ConcurrentDictionary<string, Beta.User> _cachedUsers;
+        private string _aadDomain = "kkaad.onmicrosoft.com";
 
-        public UserOperations(Beta.GraphServiceClient graphServiceClient)
+        public UserOperations(Beta.GraphServiceClient graphServiceClient, string domain= "kkaad.onmicrosoft.com")
         {
             this._graphServiceClient = graphServiceClient;
+            this._aadDomain = domain;
             _cachedUsers = new ConcurrentDictionary<string, Beta.User>();
         }
 
@@ -81,7 +83,7 @@ namespace Common
 
             string displayname = $"{givenName} {surname}";
             string mailNickName = $"{givenName}{surname}";
-            string upn = $"{mailNickName}@kkaad.onmicrosoft.com";
+            string upn = $"{mailNickName}@{_aadDomain}";
             string password = "p@$$w0rd!";
 
             try

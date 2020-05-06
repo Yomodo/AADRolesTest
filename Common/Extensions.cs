@@ -43,7 +43,7 @@ namespace Common
         /// <param name="source">The IEnumerable to enumerate</param>
         /// <param name="action">The action to perform on each element in the IEnumerable</param>
         /// <returns>The original IEnumerable</returns>
-        public static async Task ForEach<T>(this IEnumerable<T> source, Action<T> action)
+        public static async Task ForEachAsync<T>(this IEnumerable<T> source, Action<T> action)
         {
             foreach (var item in source)
             {
@@ -52,7 +52,7 @@ namespace Common
 
         }
 
-        public static async Task ForEachAsync<T>(this List<T> enumerable, Action<T> action)
+        public static async Task ForEachAsync2<T>(this List<T> enumerable, Action<T> action)
         {
             foreach (var item in enumerable)
                 await Task.Run(() => { action(item); }).ConfigureAwait(false);
@@ -214,9 +214,21 @@ namespace Common
 
             StringBuilder sb = new StringBuilder();
 
-            await list.ForEach((item) => sb.AppendLine($"{item}"));
+            await list.ForEachAsync((item) => sb.AppendLine($"{item}"));
 
             return sb.ToString();
+        }
+
+        public static string ToCommaSeparatedString<T>(this IEnumerable<T> enumerable)
+        {
+            IList<T> list = enumerable.ToList();
+
+            if (list == null || list.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            return String.Join(",", list);
         }
 
         public static string ProcessHttpResponse(this HttpResponseMessage httpResponseMessage)

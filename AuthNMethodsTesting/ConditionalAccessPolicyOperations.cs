@@ -79,7 +79,7 @@ namespace AuthNMethodsTesting
                     {
                         more.AppendLine($"\t\tIncluded applications");
 
-                        await conditionalAccessPolicy.Conditions.Applications.IncludeApplications.ForEach(async appId =>
+                        await conditionalAccessPolicy.Conditions.Applications.IncludeApplications.ForEachAsync(async appId =>
                         {
                             Guid actualAppId;
                             bool isguid = Guid.TryParse(appId, out actualAppId);
@@ -100,7 +100,7 @@ namespace AuthNMethodsTesting
                     {
                         more.AppendLine($"\tExcluded applications");
 
-                        await conditionalAccessPolicy.Conditions.Applications.ExcludeApplications.ForEach(async appId =>
+                        await conditionalAccessPolicy.Conditions.Applications.ExcludeApplications.ForEachAsync(async appId =>
                         {
                             Guid actualAppId;
                             bool isguid = Guid.TryParse(appId, out actualAppId);
@@ -121,7 +121,7 @@ namespace AuthNMethodsTesting
                     {
                         more.AppendLine($"\tIncluded User Actions");
 
-                        await conditionalAccessPolicy.Conditions.Applications.IncludeUserActions.ForEach(act =>
+                        await conditionalAccessPolicy.Conditions.Applications.IncludeUserActions.ForEachAsync(act =>
                         {
                             more.AppendLine($"\t\t\t{act}");
                         });
@@ -131,7 +131,7 @@ namespace AuthNMethodsTesting
                     {
                         more.AppendLine($"\tAdditional Data");
 
-                        await conditionalAccessPolicy.Conditions.Applications.AdditionalData.ForEach(data =>
+                        await conditionalAccessPolicy.Conditions.Applications.AdditionalData.ForEachAsync(data =>
                         {
                             more.AppendLine($"\t\t\t{data}");
                         });
@@ -142,7 +142,7 @@ namespace AuthNMethodsTesting
                     {
                         more.AppendLine($"\tClient App Types");
 
-                        await conditionalAccessPolicy.Conditions.ClientAppTypes.ForEach(app =>
+                        await conditionalAccessPolicy.Conditions.ClientAppTypes.ForEachAsync(app =>
                         {
                             more.AppendLine($"\t\t{app}");
                         });
@@ -155,7 +155,7 @@ namespace AuthNMethodsTesting
                     {
                         more.AppendLine($"\t\tDevice included states");
 
-                        conditionalAccessPolicy.Conditions?.DeviceStates?.IncludeStates.ForEach(state =>
+                        conditionalAccessPolicy.Conditions?.DeviceStates?.IncludeStates.ForEachAsync(state =>
                         {
                             more.AppendLine($"\t\t\t{state}");
                         });
@@ -165,7 +165,7 @@ namespace AuthNMethodsTesting
                     {
                         more.AppendLine($"\t\tDevice excluded states");
 
-                        conditionalAccessPolicy.Conditions?.DeviceStates?.ExcludeStates.ForEach(state =>
+                        conditionalAccessPolicy.Conditions?.DeviceStates?.ExcludeStates.ForEachAsync(state =>
                         {
                             more.AppendLine($"\t\t\t{state}");
                         });
@@ -175,7 +175,7 @@ namespace AuthNMethodsTesting
                     {
                         more.AppendLine($"\t AdditionalData");
 
-                        conditionalAccessPolicy.Conditions?.DeviceStates?.AdditionalData.ForEach(data =>
+                        conditionalAccessPolicy.Conditions?.DeviceStates?.AdditionalData.ForEachAsync(data =>
                         {
                             more.AppendLine($"\t\t\t{data}");
                         });
@@ -188,7 +188,7 @@ namespace AuthNMethodsTesting
                     {
                         more.AppendLine($"\t Included users");
 
-                        await conditionalAccessPolicy.Conditions.Users.IncludeUsers.ForEach(async userId =>
+                        await conditionalAccessPolicy.Conditions.Users.IncludeUsers.ForEachAsync(async userId =>
                         {
                             Guid actualUserId;
                             bool isguid = Guid.TryParse(userId, out actualUserId);
@@ -209,7 +209,7 @@ namespace AuthNMethodsTesting
                     {
                         more.AppendLine($"\t Excluded users");
 
-                        await conditionalAccessPolicy.Conditions.Users.ExcludeUsers.ForEach(async userId =>
+                        await conditionalAccessPolicy.Conditions.Users.ExcludeUsers.ForEachAsync(async userId =>
                         {
                             Guid actualUserId;
                             bool isguid = Guid.TryParse(userId, out actualUserId);
@@ -233,7 +233,7 @@ namespace AuthNMethodsTesting
                     {
                         more.AppendLine($"\t Included groups");
 
-                        conditionalAccessPolicy.Conditions?.Users.IncludeGroups.ForEach(async grpId =>
+                        conditionalAccessPolicy.Conditions?.Users.IncludeGroups.ForEachAsync(async grpId =>
                         {
                             var Group = await _groupOperations.GetGroupByIdAsync(grpId);
                             more.AppendLine($"\t\t\t{_groupOperations.PrintGroupBasic(Group)}");
@@ -244,7 +244,7 @@ namespace AuthNMethodsTesting
                     {
                         more.AppendLine($"\t Excluded groups");
 
-                        await conditionalAccessPolicy.Conditions.Users.ExcludeGroups.ForEach(async grpId =>
+                        await conditionalAccessPolicy.Conditions.Users.ExcludeGroups.ForEachAsync(async grpId =>
                         {
                             var Group = await _groupOperations.GetGroupByIdAsync(grpId);
                             more.AppendLine($"\t\t\t{Group.DisplayName}");
@@ -257,7 +257,7 @@ namespace AuthNMethodsTesting
                     {
                         more.AppendLine($"\t Included roles");
 
-                        await conditionalAccessPolicy.Conditions.Users.IncludeRoles.ForEach(role =>
+                        await conditionalAccessPolicy.Conditions.Users.IncludeRoles.ForEachAsync(role =>
                         {
                             more.AppendLine($"\t\t\t{role}");
                         });
@@ -267,7 +267,7 @@ namespace AuthNMethodsTesting
                     {
                         more.AppendLine($"\t Excluded roles");
 
-                        await conditionalAccessPolicy.Conditions.Users.ExcludeRoles.ForEach(role =>
+                        await conditionalAccessPolicy.Conditions.Users.ExcludeRoles.ForEachAsync(role =>
                         {
                             more.AppendLine($"\t\t\t{role}");
                         });
@@ -277,7 +277,7 @@ namespace AuthNMethodsTesting
                     {
                         more.AppendLine($"\t AdditionalData");
 
-                        await conditionalAccessPolicy.Conditions.Users.AdditionalData.ForEach(data =>
+                        await conditionalAccessPolicy.Conditions.Users.AdditionalData.ForEachAsync(data =>
                         {
                             more.AppendLine($"\t\t\t{data}");
                         });
@@ -289,7 +289,7 @@ namespace AuthNMethodsTesting
                     {
                         more.AppendLine($"\t Included locations");
 
-                        conditionalAccessPolicy.Conditions?.Locations?.IncludeLocations.ForEach(async locationId =>
+                        conditionalAccessPolicy.Conditions?.Locations?.IncludeLocations.ForEachAsync(async locationId =>
                         {
                             Guid actualLocationId;
                             bool isguid = Guid.TryParse(locationId, out actualLocationId);
@@ -306,7 +306,7 @@ namespace AuthNMethodsTesting
                     {
                         more.AppendLine($"\t Excluded locations");
 
-                        conditionalAccessPolicy.Conditions?.Locations?.ExcludeLocations.ForEach(async locationId =>
+                        conditionalAccessPolicy.Conditions?.Locations?.ExcludeLocations.ForEachAsync(async locationId =>
                         {
                             Guid actualLocationId;
                             bool isguid = Guid.TryParse(locationId, out actualLocationId);
@@ -323,7 +323,7 @@ namespace AuthNMethodsTesting
                     {
                         more.AppendLine($"\t AdditionalData");
 
-                        await conditionalAccessPolicy.Conditions.Locations.AdditionalData.ForEach(data =>
+                        await conditionalAccessPolicy.Conditions.Locations.AdditionalData.ForEachAsync(data =>
                         {
                             more.AppendLine($"\t\t\t{data}");
                         });
@@ -335,7 +335,7 @@ namespace AuthNMethodsTesting
                     {
                         more.AppendLine($"\t Included Platforms");
 
-                        conditionalAccessPolicy.Conditions?.Platforms?.IncludePlatforms.ForEach(platform =>
+                        conditionalAccessPolicy.Conditions?.Platforms?.IncludePlatforms.ForEachAsync(platform =>
                         {
                             more.AppendLine($"\t\t\t{platform}");
                         });
@@ -345,7 +345,7 @@ namespace AuthNMethodsTesting
                     {
                         more.AppendLine($"\t Excluded Platforms");
 
-                        conditionalAccessPolicy.Conditions?.Platforms?.ExcludePlatforms.ForEach(platform =>
+                        conditionalAccessPolicy.Conditions?.Platforms?.ExcludePlatforms.ForEachAsync(platform =>
                         {
                             more.AppendLine($"\t\t\t{platform}");
                         });
@@ -355,7 +355,7 @@ namespace AuthNMethodsTesting
                     {
                         more.AppendLine($"\t AdditionalData");
 
-                        conditionalAccessPolicy.Conditions?.Platforms?.AdditionalData.ForEach(data =>
+                        conditionalAccessPolicy.Conditions?.Platforms?.AdditionalData.ForEachAsync(data =>
                         {
                             more.AppendLine($"\t\t\t{data}");
                         });
@@ -371,7 +371,7 @@ namespace AuthNMethodsTesting
                     {
                         more.AppendLine($"\tBuiltIn Controls");
 
-                        conditionalAccessPolicy?.GrantControls?.BuiltInControls.ForEach(control =>
+                        conditionalAccessPolicy?.GrantControls?.BuiltInControls.ForEachAsync(control =>
                         {
                             more.AppendLine($"\t\t{control}");
                         });
@@ -381,7 +381,7 @@ namespace AuthNMethodsTesting
                     {
                         more.AppendLine($"\tCustom Authentication Factors");
 
-                        conditionalAccessPolicy?.GrantControls?.CustomAuthenticationFactors.ForEach(control =>
+                        conditionalAccessPolicy?.GrantControls?.CustomAuthenticationFactors.ForEachAsync(control =>
                         {
                             more.AppendLine($"\t\t{control}");
                         });
@@ -391,7 +391,7 @@ namespace AuthNMethodsTesting
                     {
                         more.AppendLine($"\tTerms Of Use");
 
-                        conditionalAccessPolicy?.GrantControls?.TermsOfUse.ForEach(control =>
+                        conditionalAccessPolicy?.GrantControls?.TermsOfUse.ForEachAsync(control =>
                         {
                             more.AppendLine($"\t\t{control}");
                         });
@@ -401,7 +401,7 @@ namespace AuthNMethodsTesting
                     {
                         more.AppendLine($"\tAdditional Data");
 
-                        conditionalAccessPolicy?.Conditions.Applications.AdditionalData.ForEach(data =>
+                        conditionalAccessPolicy?.Conditions.Applications.AdditionalData.ForEachAsync(data =>
                         {
                             more.AppendLine($"\t\t{data}");
                         });

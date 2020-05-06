@@ -1,4 +1,4 @@
-﻿namespace AADGraphTesting
+﻿namespace Common
 {
     /// <summary>
     /// Generates random Boolean values

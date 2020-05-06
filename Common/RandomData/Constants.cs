@@ -5,7 +5,7 @@ using System.Text;
 
 [assembly: CLSCompliant(false)]
 
-namespace AADGraphTesting
+namespace Common
 {
     /// <summary>
     /// The character type when generating random strings

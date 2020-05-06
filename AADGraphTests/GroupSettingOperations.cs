@@ -68,7 +68,7 @@ namespace AADGraphTesting
                 ColorConsole.WriteLine(ConsoleColor.Green, $"Id-{groupSettingTemplate.Id}, DisplayName-{groupSettingTemplate.DisplayName}");
                 ColorConsole.WriteLine(ConsoleColor.Green, $"Description-{groupSettingTemplate.Description}");
 
-                await groupSettingTemplate.Values.ForEach(x =>
+                await groupSettingTemplate.Values.ForEachAsync(x =>
                 {
                     ColorConsole.WriteLine(ConsoleColor.Cyan, $"\tName-{x.Name}[{x.Type}], DefaultValue-{x.DefaultValue}, Description-{x.Description}");
                 });
@@ -204,7 +204,7 @@ namespace AADGraphTesting
                 GroupSettingTemplate groupSettingTemplate = await GetGroupSettingTemplateByIdAsync(groupSetting.TemplateId);
                 ColorConsole.WriteLine(ConsoleColor.Green, $"DisplayName-{groupSetting.DisplayName}, TemplateId-{groupSetting.TemplateId}, Id-{groupSetting.Id} ");
                 ColorConsole.WriteLine(ConsoleColor.Green, $"Description -{ groupSettingTemplate.Description}");
-                await groupSetting.Values.ForEach(x =>
+                await groupSetting.Values.ForEachAsync(x =>
                 {
                     ColorConsole.WriteLine(ConsoleColor.Cyan, $"\tName-{x.Name}, Value-{x.Value.ToString()}");
                 });

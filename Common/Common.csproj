@@ -5,6 +5,25 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="RandomData\FemaleName.txt" />
+    <None Remove="RandomData\License.txt" />
+    <None Remove="RandomData\MaleName.txt" />
+    <None Remove="RandomData\Surname.txt" />
+    <None Remove="RandomData\word.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="RandomData\License.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="RandomData\FemaleName.txt" />
+    <EmbeddedResource Include="RandomData\MaleName.txt" />
+    <EmbeddedResource Include="RandomData\Surname.txt" />
+    <EmbeddedResource Include="RandomData\word.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.2.7" />
     <PackageReference Include="Microsoft.Graph.Beta" Version="0.17.0-preview" />
     <PackageReference Include="Microsoft.OData.Client" Version="7.6.4" />

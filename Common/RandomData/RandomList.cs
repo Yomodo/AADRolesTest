@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace AADGraphTesting
+namespace Common
 {
     /// <summary>
     /// Takes a list as input and returns a random value from this list

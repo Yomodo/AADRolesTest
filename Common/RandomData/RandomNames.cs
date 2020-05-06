@@ -2,7 +2,7 @@
 using System.IO;
 using System.Reflection;
 
-namespace AADGraphTesting
+namespace Common
 {
     /// <summary>
     /// Provides random names to be used in unit tests
@@ -162,15 +162,15 @@ namespace AADGraphTesting
             switch (type)
             {
                 case NameType.MaleName:
-                    FillListFromResource(list, "RandomData.Resources.MaleName.txt", false);
+                    FillListFromResource(list, "Common.RandomData.MaleName.txt", false);
                     break;
 
                 case NameType.FemaleName:
-                    FillListFromResource(list, "RandomData.Resources.FemaleName.txt", false);
+                    FillListFromResource(list, "Common.RandomData.FemaleName.txt", false);
                     break;
 
                 case NameType.Word:
-                    FillListFromResource(list, "RandomData.Resources.Word.txt", false);
+                    FillListFromResource(list, "Common.RandomData.Word.txt", false);
                     break;
             }
         }

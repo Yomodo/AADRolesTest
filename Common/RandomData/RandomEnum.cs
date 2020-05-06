@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
-namespace AADGraphTesting
+namespace Common
 {
     /// <summary>
     /// Generates random enumerated values

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace AADGraphTesting
+namespace Common
 {
     /// <summary>
     /// Base class for all random data generators

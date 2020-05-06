@@ -108,28 +108,11 @@
     <Compile Include="PolicyOperations.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RandomData\Constants.cs" />
-    <Compile Include="RandomData\RandomBoolean.cs" />
-    <Compile Include="RandomData\RandomDataBase.cs" />
-    <Compile Include="RandomData\RandomDate.cs" />
-    <Compile Include="RandomData\RandomDouble.cs" />
-    <Compile Include="RandomData\RandomEnum.cs" />
-    <Compile Include="RandomData\RandomInteger.cs" />
-    <Compile Include="RandomData\RandomList.cs" />
-    <Compile Include="RandomData\RandomNames.cs" />
-    <Compile Include="RandomData\RandomStrings.cs" />
     <Compile Include="Utility.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="RandomData\FemaleName.txt" />
-    <Content Include="RandomData\License.txt" />
-    <EmbeddedResource Include="RandomData\MaleName.txt" />
-    <EmbeddedResource Include="RandomData\Surname.txt" />
-    <EmbeddedResource Include="RandomData\word.txt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj">
