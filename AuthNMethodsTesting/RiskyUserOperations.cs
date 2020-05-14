@@ -44,7 +44,7 @@ namespace AuthNMethodsTesting
             return allLocations;
         }
 
-        public async Task<string> PrintRiskyUser(Beta.RiskyUser riskyUser, bool verbose = false, bool printHistory = false)
+        public async Task<string> PrintRiskyUsersAsync(Beta.RiskyUser riskyUser, bool verbose = false, bool printHistory = false)
         {
             string toPrint = string.Empty;
             StringBuilder more = new StringBuilder();
@@ -61,20 +61,14 @@ namespace AuthNMethodsTesting
 
                 if (printHistory)
                 {
-                    var riskHistoryEvents = await ProcessIRiskyUserHistoryCollectionPage(await GetRiskyUserHistoryByIdAsync(riskyUser.Id));
+                    var riskHistoryEvents = await ProcessIRiskyUserHistoryCollectionPage(await GetRiskyUsersHistoryByIdAsync(riskyUser.Id));
 
                     if (riskHistoryEvents.Count > 0)
                     {
                         more.AppendLine($"Total History events - {riskHistoryEvents.Count}");
 
-                        riskHistoryEvents.ForEach(async evt =>
+                        riskHistoryEvents.ForEach(evt =>
                         {
-                            //if (evt.InitiatedBy != null)
-                            //{
-                            //    var initiator = await this._userOperations.GetUserByIdAsync(evt.InitiatedBy);
-                            //}
-                            //string initiatedBy = initiator?.DisplayName;
-
                             more.AppendLine($"InitiatedBy-{evt.InitiatedBy}, RiskLevel-{evt?.RiskLevel.Value}, RiskState-{evt?.RiskState.Value}, RiskDetail-{evt?.RiskDetail.Value}, IsProcessing-{evt.IsProcessing}, InitiatedBy-{evt.InitiatedBy}, Last updated-{evt.RiskLastUpdatedDateTime}");
                             more.AppendLine($"Activity details-> Detail-{evt.Activity?.Detail.Value}, EventTypes-{evt.Activity.EventTypes.ToCommaSeparatedString()}");
                         });
@@ -109,7 +103,7 @@ namespace AuthNMethodsTesting
             await _graphServiceClient.RiskyUsers.Dismiss(userIds).Request().PostAsync();
         }
 
-        public async Task<Beta.IRiskyUserHistoryCollectionPage> GetRiskyUserHistoryByIdAsync(string riskyUserId)
+        public async Task<Beta.IRiskyUserHistoryCollectionPage> GetRiskyUsersHistoryByIdAsync(string riskyUserId)
         {
             try
             {
@@ -126,12 +120,18 @@ namespace AuthNMethodsTesting
             return null;
         }
 
-        public async Task<Beta.RiskyUser> GetRiskyUserByIdUnsafeAsync(string riskyUserId)
+        public async Task<Beta.RiskyUser> GetRiskyUsersByIdUnsafeAsync(string riskyUserRecordId)
         {
-            return await _graphServiceClient.RiskyUsers[riskyUserId].Request().GetAsync();
+            // Note record id != userId
+            return await _graphServiceClient.RiskyUsers[riskyUserRecordId].Request().GetAsync();
         }
 
-        public async Task<Beta.RiskyUser> GetRiskyUserByIdAsync(string riskyUserId)
+        public async Task<List<Beta.RiskyUser>> GetRiskyUsersByUPNUnsafeAsync(string userPrincipalName)
+        {
+            return await ProcessIGraphServiceRiskyUsersCollectionPage( await _graphServiceClient.RiskyUsers.Request().Filter($"userPrincipalName eq '{userPrincipalName}'").GetAsync());
+        }
+
+        public async Task<Beta.RiskyUser> GetRiskyUsersByIdAsync(string riskyUserId)
         {
             try
             {

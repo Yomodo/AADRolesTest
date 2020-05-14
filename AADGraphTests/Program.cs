@@ -20,7 +20,8 @@ namespace AADGraphTesting
     {
         private const string clientId = "10d8a46c-3059-4fe4-a779-c38415c04a4b";
         private const string tenant = "woodgrove.ms";
-        private const string redirectUri = "msal10d8a46c-3059-4fe4-a779-c38415c04a4b://auth";
+        private const string redirectUri = "https://localhost";
+        //private const string redirectUri = "msal10d8a46c-3059-4fe4-a779-c38415c04a4b://auth";
 
         // Change the following between each call to create/update user if not deleting the user
         private static string givenName = "test99";

@@ -21,7 +21,9 @@ namespace ARMApi
 
         private static async Task Main(string[] args)
         {
-            AsyncHelper.RunSync(async ()=> await DoARMThings());
+            //AsyncHelper.RunSync(async ()=> await DoARMThings());
+
+            //await DoARMThings();
 
             await DoAADThings();
 
@@ -32,24 +34,31 @@ namespace ARMApi
 
         private async static Task DoARMThings()
         {
-
             AzureServiceManagement arm = new AzureServiceManagement();
 
-            //var subscriptions = arm.GetAllsubscriptionsForServicePrincipal();
-            //subscriptions.ToList().ForEach(sub => Console.WriteLine($"{sub.DisplayName}"));
+            var subscriptions = await arm.GetAllSubscriptionsForServicePrincipalAsync();
+            subscriptions.ToList().ForEach(sub => Console.WriteLine($"{sub.DisplayName}"));
 
-            //var tenants = arm.GetAllTenantsForServicePrincipal();
-            //tenants.ToList().ForEach(sub => Console.WriteLine($"{sub.TenantId}"));
-
-            //var roleAssignments = arm.GetAllRoleAssignmentsForServicePrincipal();
-            //roleAssignments.ToList().ForEach(sub => Console.WriteLine($"{sub.Name}"));
-
-
-            var tenants = await arm.GetAllTenantsForUserUsingMsalAsync();
+            var tenants = await arm.GetAllTenantsForServicePrincipalAsync();
             tenants.ToList().ForEach(sub => Console.WriteLine($"{sub.TenantId}"));
 
-            var subscriptions = await arm.GetAllsubscriptionsForServicePrincipalUsingMsalAsync();
-            subscriptions.ToList().ForEach(sub => Console.WriteLine($"{sub.DisplayName}"));
+            // TODO Research more
+            //var roleAssignments = await arm.GetAllRoleAssignmentsForServicePrincipalAsync();
+            //roleAssignments.ToList().ForEach(sub => Console.WriteLine($"{sub.Name}"));
+
+            // ADAL device code flow
+            // subscriptions = await arm.GetAllSubscriptionsForUserAsync();
+            //subscriptions.ToList().ForEach(sub => Console.WriteLine($"{sub.DisplayName}"));
+
+            // tenants = await arm.GetAllTenantsForUserAsync();
+            //tenants.ToList().ForEach(sub => Console.WriteLine($"{sub.TenantId}"));
+
+            // MSAL 
+            tenants = await arm.GetAllTenantsForUserUsingMsalAsync();
+            tenants.ToList().ForEach(sub => Console.WriteLine($"{sub.TenantId}"));
+
+            //var subscriptions = await arm.GetAllsubscriptionsForServicePrincipalUsingMsalAsync();
+            //subscriptions.ToList().ForEach(sub => Console.WriteLine($"{sub.DisplayName}"));
 
             // arm.PrintSubscriptionsUsingMsal();
             // ArmCredentials armCredentials = new ArmCredentials();
@@ -58,9 +67,10 @@ namespace ARMApi
 
         private async static Task DoAADThings()
         {
-            return;
+            //return;
 
-            string[] scopes = new string[] { "user.readbasic.all", "RoleManagement.ReadWrite.Directory", "AdministrativeUnit.Read.All" };
+            string[] scopes = new string[] { "user.readbasic.all", "RoleManagement.ReadWrite.Directory", "AdministrativeUnit.Read.All", "PrivilegedAccess.ReadWrite.AzureAD"
+                , "Directory.AccessAsUser.All" };
 
             // Using appsettings.json as our configuration settings
             var builder = new ConfigurationBuilder()
@@ -83,18 +93,30 @@ namespace ARMApi
             Beta.GraphServiceClient betaClient = new Beta.GraphServiceClient(authenticationProvider);
 
             UserOperations userOperations = new UserOperations(betaClient);
-            ServicePrincipalOperations servicePrincipalOperations = new ServicePrincipalOperations(betaClient);
-            RoleManagementOperations roleManagementOperations = new RoleManagementOperations(betaClient, userOperations, servicePrincipalOperations);
+            //ServicePrincipalOperations servicePrincipalOperations = new ServicePrincipalOperations(betaClient);
+            //RoleManagementOperations roleManagementOperations = new RoleManagementOperations(betaClient, userOperations);
+            //DirectoryRolesOperations directoryRolesOperations = new DirectoryRolesOperations(betaClient, userOperations, servicePrincipalOperations);
 
-            IEnumerable<Beta.User> allUsersInTenant = await userOperations.GetUsersAsync();
-            IList<Beta.User> randomUsersFromTenant = GenericUtility<Beta.User>.GetaRandomNumberOfItemsFromList(allUsersInTenant, 5);
+            //IEnumerable<Beta.User> allUsersInTenant = await userOperations.GetUsersAsync();
+            //IList<Beta.User> randomUsersFromTenant = GenericUtility<Beta.User>.GetaRandomNumberOfItemsFromList(allUsersInTenant, 5);
 
-            IEnumerable<Beta.ServicePrincipal> allServicePrincipals = await servicePrincipalOperations.GetAllServicePrincipalsAsync();
-            IList<Beta.ServicePrincipal> randomServicePrincipals = GenericUtility<Beta.ServicePrincipal>.GetaRandomNumberOfItemsFromList(allServicePrincipals, 3);
+            //IEnumerable<Beta.ServicePrincipal> allServicePrincipals = await servicePrincipalOperations.GetAllServicePrincipalsAsync();
+            //IList<Beta.ServicePrincipal> randomServicePrincipals = GenericUtility<Beta.ServicePrincipal>.GetaRandomNumberOfItemsFromList(allServicePrincipals, 3);
+
+            #region Privileged Identity Management
+
+            PIMOperations pIMOperations = new PIMOperations(betaClient, userOperations);
+
+            var myassignments = await pIMOperations.GetMyPrivilegedRoleAssignmentsAsync();
+            myassignments.ForEach(assignment => {
+                Console.WriteLine(pIMOperations.PrintPrivilegedRoleAssignment(assignment));
+            });
+
+            #endregion Privileged Identity Management
 
             #region Directory roles and assignment
 
-            var directoryroles = await roleManagementOperations.ListDirectoryRolesAsync();
+            //var directoryroles = await directoryRolesOperations.ListDirectoryRolesAsync();
 
 
             //// List
@@ -148,14 +170,20 @@ namespace ARMApi
             //    ColorConsole.WriteLine(ConsoleColor.Green, await roleManagementOperations.PrintDirectoryRoleAsync(updatedrole, true, true));
             //}
 
-            // Print all directory roles and its members
-            Console.WriteLine("Printing all directory roles and assignments");
+            //// Print all directory roles and its members
+            //Console.WriteLine("Printing all directory roles and assignments");
 
-            for (int i = 0; i < directoryroles.Count; i++)
-            {
-                Console.WriteLine($"Printing role {i}/{directoryroles.Count}");
-                Console.WriteLine(AsyncHelper.RunSync(async () => await roleManagementOperations.PrintDirectoryRoleAsync(directoryroles[i], true, true)));
-            }
+            //for (int i = 0; i < directoryroles.Count; i++)
+            //{
+            //    Console.WriteLine($"Printing role {i}/{directoryroles.Count}");
+
+            //    var directoryRole = await directoryRolesOperations.GetDirectoryRoleByIdAsync(directoryroles[i].Id);
+            //    Console.WriteLine(AsyncHelper.RunSync(async () => await directoryRolesOperations.PrintDirectoryRoleAsync(directoryroles[i], true, true)));
+            //    //i++;
+
+            //    //directoryRole = await directoryRolesOperations.GetDirectoryRoleByDisplayNameAsync(directoryroles[i].DisplayName);
+            //    //Console.WriteLine(AsyncHelper.RunSync(async () => await directoryRolesOperations.PrintDirectoryRoleAsync(directoryroles[i], true, true)));
+            //}
 
             #endregion Directory roles and assignment
 

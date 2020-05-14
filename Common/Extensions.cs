@@ -45,6 +45,11 @@ namespace Common
         /// <returns>The original IEnumerable</returns>
         public static async Task ForEachAsync<T>(this IEnumerable<T> source, Action<T> action)
         {
+            if(source == null)
+            {
+                return;
+            }
+
             foreach (var item in source)
             {
                 await Task.Run(() => { action(item); }).ConfigureAwait(false);

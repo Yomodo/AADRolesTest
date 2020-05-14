@@ -25,7 +25,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.2.7" />
-    <PackageReference Include="Microsoft.Graph.Beta" Version="0.17.0-preview" />
+    <PackageReference Include="Microsoft.Graph.Beta" Version="0.18.0-preview" />
     <PackageReference Include="Microsoft.OData.Client" Version="7.6.4" />
     <PackageReference Include="Microsoft.OData.Core" Version="7.6.4" />
     <PackageReference Include="Microsoft.OData.Edm" Version="7.6.4" />
