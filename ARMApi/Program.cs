@@ -2,12 +2,11 @@
 
 using Common;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Graph;
 using Microsoft.Graph.Auth;
 using Microsoft.Identity.Client;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Beta = BetaLib.Microsoft.Graph;
 
@@ -31,7 +30,6 @@ namespace ARMApi
             Console.ReadKey();
         }
 
-
         private async static Task DoARMThings()
         {
             AzureServiceManagement arm = new AzureServiceManagement();
@@ -53,7 +51,7 @@ namespace ARMApi
             // tenants = await arm.GetAllTenantsForUserAsync();
             //tenants.ToList().ForEach(sub => Console.WriteLine($"{sub.TenantId}"));
 
-            // MSAL 
+            // MSAL
             tenants = await arm.GetAllTenantsForUserUsingMsalAsync();
             tenants.ToList().ForEach(sub => Console.WriteLine($"{sub.TenantId}"));
 
@@ -69,7 +67,7 @@ namespace ARMApi
         {
             //return;
 
-            string[] scopes = new string[] { "user.readbasic.all", "RoleManagement.ReadWrite.Directory", "AdministrativeUnit.Read.All", "PrivilegedAccess.ReadWrite.AzureAD"
+            string[] scopes = new string[] { "user.readbasic.all", "RoleManagement.ReadWrite.Directory", "AdministrativeUnit.Read.All", "PrivilegedAccess.ReadWrite.AzureResources"
                 , "Directory.AccessAsUser.All" };
 
             // Using appsettings.json as our configuration settings
@@ -91,9 +89,12 @@ namespace ARMApi
             // Initialize the Graph SDK authentication provider
             InteractiveAuthenticationProvider authenticationProvider = new InteractiveAuthenticationProvider(app, scopes);
             Beta.GraphServiceClient betaClient = new Beta.GraphServiceClient(authenticationProvider);
+            GraphServiceClient graphServiceClient = new GraphServiceClient(authenticationProvider);
 
             UserOperations userOperations = new UserOperations(betaClient);
-            //ServicePrincipalOperations servicePrincipalOperations = new ServicePrincipalOperations(betaClient);
+            ServicePrincipalOperations servicePrincipalOperations = new ServicePrincipalOperations(betaClient);
+            //GroupOperations groupOperations = new GroupOperations(graphServiceClient);
+
             //RoleManagementOperations roleManagementOperations = new RoleManagementOperations(betaClient, userOperations);
             //DirectoryRolesOperations directoryRolesOperations = new DirectoryRolesOperations(betaClient, userOperations, servicePrincipalOperations);
 
@@ -105,11 +106,12 @@ namespace ARMApi
 
             #region Privileged Identity Management
 
-            PIMOperations pIMOperations = new PIMOperations(betaClient, userOperations);
+            PIMOperations pIMOperations = new PIMOperations(betaClient, userOperations, servicePrincipalOperations);
 
-            var myassignments = await pIMOperations.GetMyPrivilegedRoleAssignmentsAsync();
-            myassignments.ForEach(assignment => {
-                Console.WriteLine(pIMOperations.PrintPrivilegedRoleAssignment(assignment));
+            var governanceResources = await pIMOperations.ListGovernanceResourcesAsync();
+            governanceResources.ForEach(async resource =>
+            {
+                Console.WriteLine(await pIMOperations.PrintGovernanceResourceAsync(resource));
             });
 
             #endregion Privileged Identity Management
@@ -117,7 +119,6 @@ namespace ARMApi
             #region Directory roles and assignment
 
             //var directoryroles = await directoryRolesOperations.ListDirectoryRolesAsync();
-
 
             //// List
             //Console.WriteLine("Getting directory roles");
@@ -265,7 +266,5 @@ namespace ARMApi
 
             #endregion Unified role definition and assignment
         }
-
-
     }
 }
