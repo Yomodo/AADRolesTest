@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Security.Cryptography;
 using Beta = BetaLib.Microsoft.Graph;
 
-namespace AADGraphTesting
+namespace Common
 {
     public static class Utility
     {

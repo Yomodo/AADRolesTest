@@ -1,6 +1,5 @@
 ﻿extern alias BetaLib;
 
-using AADGraphTesting;
 using Common;
 using Microsoft.Graph;
 using System;

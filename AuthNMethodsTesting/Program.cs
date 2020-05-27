@@ -1,6 +1,6 @@
 ﻿extern alias BetaLib;
 
-using AADGraphTesting;
+using Common;
 using AuthNMethodsTesting.Model;
 using Common;
 using Microsoft.Extensions.Configuration;

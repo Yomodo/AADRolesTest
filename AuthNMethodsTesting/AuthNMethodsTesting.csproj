@@ -18,7 +18,7 @@
     <PackageReference Include="Microsoft.Graph.Auth" Version="1.0.0-preview.4" />
     <PackageReference Include="Microsoft.Graph.Beta" Version="0.18.0-preview" />
     <PackageReference Include="Microsoft.Graph.Core" Version="1.20.1" />
-    <PackageReference Include="Microsoft.Identity.Client" Version="4.13.0" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.14.0" />
   </ItemGroup>
 
   <ItemGroup>

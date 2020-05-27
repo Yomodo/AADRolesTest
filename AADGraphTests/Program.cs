@@ -14,7 +14,7 @@ using Beta = BetaLib.Microsoft.Graph;
  * Author: Kalyan Krishna
  * *********************************************************/
 
-namespace AADGraphTesting
+namespace Common
 {
     internal class Program
     {
@@ -46,6 +46,30 @@ namespace AADGraphTesting
             Beta.GraphServiceClient betaClient = new Beta.GraphServiceClient(authenticationProvider);
             //Beta.ServicePrincipal graphServicePrincipal = GetServicePrincipalByAppDisplayNameAsync(betaClient, "Microsoft Graph").Result;
 
+            #region Invitations API
+            UserOperations userOperations = new UserOperations(betaClient, "woodgrove.ms");
+            InvitationOperations invitationOperations = new InvitationOperations(betaClient);
+
+            Console.WriteLine("Sending invitation");
+            var invitation = await invitationOperations.SendInvitation("Kalyan", "krishna", "kalyankrishna1@gmail.com");
+
+            ColorConsole.WriteLine(ConsoleColor.Red, $"Invitation sent to user with redeem URL -{invitation.InviteRedeemUrl}, " +
+                $"Status-{invitation.Status}, resetRedemption-{invitation?.ResetRedemption.Value}");
+
+            Beta.User inviteduser = await userOperations.GetUserByIdAsync(invitation.InvitedUser.Id);
+
+            if (inviteduser != null)
+            {
+                ColorConsole.WriteLine(ConsoleColor.Green, userOperations.PrintBetaUserDetails(inviteduser));
+                ColorConsole.WriteLine(ConsoleColor.Green, $"UserType-{inviteduser.UserType}, ExternalUserState-{inviteduser.ExternalUserState}, ExternalUserStateChangeDateTime-{inviteduser.ExternalUserStateChangeDateTime}");
+
+                // Delete user
+                Console.WriteLine("Deleting the invited user");
+                await userOperations.DeleteUserAsync(inviteduser.Id);
+                Console.WriteLine("User deleted successfully");
+            }
+            #endregion Invitations API
+
             #region ActivityBasedTimeoutPolicy
 
             //PolicyOperations policyOperations = new PolicyOperations(betaClient);
@@ -57,29 +81,29 @@ namespace AADGraphTesting
 
             #region groupSettings
 
-            GroupSettingOperations groupSettingOperations = new GroupSettingOperations(graphServiceClient);
+            //GroupSettingOperations groupSettingOperations = new GroupSettingOperations(graphServiceClient);
 
-            Console.WriteLine("Fetching group settings templates");
-            var groupSettingsTemplates = await groupSettingOperations.ListGroupSettingTemplatesAsync();
+            //Console.WriteLine("Fetching group settings templates");
+            //var groupSettingsTemplates = await groupSettingOperations.ListGroupSettingTemplatesAsync();
 
-            Console.WriteLine("Printing group settings templates");
-            groupSettingsTemplates.ForEach(t =>
-            {
-                Console.WriteLine("---------------------------------------------------------------------");
-                groupSettingOperations.PrintGroupSettingTemplates(t);
-                Console.WriteLine("---------------------------------------------------------------------");
-            });
+            //Console.WriteLine("Printing group settings templates");
+            //groupSettingsTemplates.ForEach(async t =>
+            //{
+            //    Console.WriteLine("---------------------------------------------------------------------");
+            //    await groupSettingOperations.PrintGroupSettingTemplates(t);
+            //    Console.WriteLine("---------------------------------------------------------------------");
+            //});
 
-            Console.WriteLine("Fetching group settings ");
-            var groupSettings = await groupSettingOperations.ListGroupSettingsAsync();
+            //Console.WriteLine("Fetching group settings ");
+            //var groupSettings = await groupSettingOperations.ListGroupSettingsAsync();
 
-            Console.WriteLine("Printing group settings ");
-            groupSettings.ForEach(async t =>
-            {
-                Console.WriteLine("---------------------------------------------------------------------");
-                await groupSettingOperations.PrintGroupSettingsAsync(t);
-                Console.WriteLine("---------------------------------------------------------------------");
-            });
+            //Console.WriteLine("Printing group settings ");
+            //groupSettings.ForEach(async t =>
+            //{
+            //    Console.WriteLine("---------------------------------------------------------------------");
+            //    await groupSettingOperations.PrintGroupSettingsAsync(t);
+            //    Console.WriteLine("---------------------------------------------------------------------");
+            //});
 
             //// WARNING: Cross check with the listed printed above before fiddling with the group settings
 

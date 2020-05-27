@@ -29,6 +29,47 @@ namespace Common
             return await _graphServiceClient.Me.Request().GetAsync();
         }
 
+        public async Task<Beta.User> GetUserByDisplayNameAsync(string displayName, bool useSelect = true)
+        {
+            Beta.User user = null;
+            Beta.IGraphServiceUsersCollectionPage users = null;
+
+            try
+            {
+                if (!useSelect)
+                {
+                    users = await _graphServiceClient.Users.Request().Filter($"displayName eq '{displayName}'")
+                                       .GetAsync();
+                }
+                else
+                {
+                    users = await _graphServiceClient.Users.Request().Filter($"displayName eq '{displayName}'")
+                                       .Select("id,displayName,givenName,surname,mail,mailNickname,userPrincipalName,imAddresses,userType,jobTitle,accountEnabled,country,usageLocation,otherMails,proxyAddresses,identities,passwordPolicies,onPremisesDomainName,onPremisesImmutableId,onPremisesSecurityIdentifier,onPremisesSamAccountName,onPremisesSyncEnabled,onPremisesUserPrincipalName")
+                                       .GetAsync();
+                }
+
+                user = users.CurrentPage.FirstOrDefault();
+                if (user != null)
+                {
+                    _cachedUsers[user.Id] = user;
+                }
+            }
+            catch (ServiceException sx)
+            {
+                if (sx.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    //ColorConsole.WriteLine(ConsoleColor.Red, $"No user by display name-{displayName} was found");
+                    return null;
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return user;
+        }
+
         public async Task<Beta.User> GetUserByIdAsync(string principalId, bool useSelect = true)
         {
             Beta.User user = null;
@@ -49,7 +90,7 @@ namespace Common
                 else
                 {
                     users = await _graphServiceClient.Users.Request().Filter($"id eq '{principalId}'")
-                                       .Select("id,displayName,givenName,surname,mail,mailNickname,userPrincipalName,imAddresses,userType,jobTitle,accountEnabled,country,usageLocation,otherMails,proxyAddresses,identities,passwordPolicies")
+                                       .Select("id,displayName,givenName,surname,mail,mailNickname,userPrincipalName,imAddresses,userType,jobTitle,accountEnabled,country,usageLocation,otherMails,proxyAddresses,identities,passwordPolicies,onPremisesDomainName,onPremisesImmutableId,onPremisesSecurityIdentifier,onPremisesSamAccountName,onPremisesSyncEnabled,onPremisesUserPrincipalName")
                                        .GetAsync();
                 }
 
@@ -236,7 +277,7 @@ namespace Common
                 else
                 {
                     users = await _graphServiceClient.Users.Request()
-                        .Select("id,displayName,givenName,surname,mail,mailNickname,userPrincipalName,imAddresses,userType,jobTitle,accountEnabled,country,usageLocation,otherMails,proxyAddresses,identities,passwordPolicies")
+                        .Select("id,displayName,givenName,surname,mail,mailNickname,userPrincipalName,imAddresses,userType,jobTitle,accountEnabled,country,usageLocation,otherMails,proxyAddresses,identities,passwordPolicies,onPremisesDomainName,onPremisesImmutableId,onPremisesSecurityIdentifier,onPremisesSamAccountName,onPremisesSyncEnabled,onPremisesUserPrincipalName")
                         .Top(top).GetAsync();
                 }
 

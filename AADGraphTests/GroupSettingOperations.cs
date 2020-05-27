@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace AADGraphTesting
+namespace Common
 {
     /// <summary>
     /// Wraps group settings exposed at the tenant level

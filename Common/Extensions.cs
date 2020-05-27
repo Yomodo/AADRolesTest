@@ -45,7 +45,7 @@ namespace Common
         /// <returns>The original IEnumerable</returns>
         public static async Task ForEachAsync<T>(this IEnumerable<T> source, Action<T> action)
         {
-            if(source == null)
+            if (source == null)
             {
                 return;
             }
@@ -54,7 +54,12 @@ namespace Common
             {
                 await Task.Run(() => { action(item); }).ConfigureAwait(false);
             }
+        }
 
+        public static void ForEach<T>(this IEnumerable<T> source, Action<T> action)
+        {
+            foreach (T element in source)
+                action(element);
         }
 
         public static async Task ForEachAsync2<T>(this List<T> enumerable, Action<T> action)
@@ -274,6 +279,6 @@ namespace Common
         //    return httpClient;
         //}
 
-       
+
     }
 }

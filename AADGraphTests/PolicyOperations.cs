@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Beta = BetaLib.Microsoft.Graph;
 
-namespace AADGraphTesting
+namespace Common
 {
     internal class PolicyOperations
     {
@@ -70,7 +70,7 @@ namespace AADGraphTesting
             //    return null;
             //}
 
-            return newActivityBasedTimeoutPolicy;
+            return await Task.FromResult(newActivityBasedTimeoutPolicy);
         }
 
 

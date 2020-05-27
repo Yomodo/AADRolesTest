@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Beta = BetaLib.Microsoft.Graph;
 
-namespace AADGraphTesting
+namespace Common
 {
     public class GroupOperations
     {
