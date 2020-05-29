@@ -1,2 +1,2 @@
 # AADRolesTest
-testing the Azure AD Application and roles Apis
+Personal repository to test various Azure AD and other Graph APIs 
