@@ -8,7 +8,7 @@
     using System.Net.Http;
     using System.Net.Http.Headers;
 
-    // Dummy Program.cs
+    // Dummy Program.cs, DONT EXECUTE !
     class Program
     {
         /// <summary>

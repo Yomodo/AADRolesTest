@@ -102,6 +102,7 @@
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="GroupSettingOperations.cs" />
     <Compile Include="InvitationOperations.cs" />
+    <Compile Include="MSALClient.cs" />
     <Compile Include="PolicyOperations.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -8,7 +8,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
-namespace ARMApi
+namespace AADGraphTesting
 {
     public class MSALClient
     {
@@ -22,12 +22,12 @@ namespace ARMApi
         /// <summary>
         /// Microsoft Graph resource.
         /// </summary>
-        static readonly string GraphResource = "https://graph.microsoft.com";
+        private static readonly string GraphResource = "https://graph.microsoft.com";
 
         /// <summary>
         /// Microsoft Graph invite endpoint.
         /// </summary>
-        static readonly string InviteEndPoint = "https://graph.microsoft.com/v1.0/invitations";
+        private static readonly string InviteEndPoint = "https://graph.microsoft.com/v1.0/invitations";
 
         /// <summary>
         /// This is the tenantid of the tenant you want to invite users to.
@@ -111,7 +111,7 @@ namespace ARMApi
         /// Get the access token for our application to talk to Microsoft Graph.
         /// </summary>
         /// <returns>Returns the access token for our application to talk to Microsoft Graph.</returns>
-        private static string GetAccessToken()
+        public static string GetAccessToken()
         {
             string accessToken = null;
 
@@ -149,21 +149,24 @@ namespace ARMApi
             return accessToken;
         }
 
-
         /// <summary>
         /// The application ID of the connector in AAD
         /// </summary>
-        private static readonly string ConnectorAppId = "55747057-9b5d-4bd4-b387-abf52a8bd489";
+        private static readonly string ConnectorAppId = "355ff52d-0ba5-4538-a042-2648602e7c9a";
 
         /// <summary>
         /// The reply address of the connector application in AAD
         /// </summary>
-        //static readonly Uri ConnectorRedirectAddress = new Uri("https://login.microsoftonline.com/common/oauth2/nativeclient");
+        private static readonly string ConnectorRedirectAddress = "https://login.microsoftonline.com/common/oauth2/nativeclient";
+
+        /// Incase of .NET Core
+        /// See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/System-Browser-on-.Net-Core
+        //static readonly string ConnectorRedirectAddress = "http:\\localhost";
 
         /// <summary>
         /// The AppIdUri of the registration service in AAD
         /// </summary>
-        private static readonly string RegistrationServiceAppIdUri = "https://proxy.cloudwebappproxy.net/registerapp/access_as_user";
+        private static readonly string RegistrationServiceAppIdUri = "https://kkaad.onmicrosoft.com/TodoListSPA-OBO-sample-v2/user_impersonation";
 
         #endregion constants
 
@@ -174,14 +177,14 @@ namespace ARMApi
 
         #endregion private members
 
-        public async Task GetAuthenticationToken()
+        public async Task<string> GetAuthenticationToken()
         {
             string Authority = string.Format(CultureInfo.InvariantCulture, AadInstance, TenantID);
             string[] Scopes = { RegistrationServiceAppIdUri };
 
             IPublicClientApplication app = PublicClientApplicationBuilder.Create(ConnectorAppId)
                .WithAuthority(new System.Uri(Authority))
-               .WithDefaultRedirectUri()
+               .WithRedirectUri(ConnectorRedirectAddress)
                .Build();
 
             var accounts = (await app.GetAccountsAsync()).ToList();
@@ -228,12 +231,14 @@ namespace ARMApi
 
             if (authResult == null || string.IsNullOrEmpty(authResult.AccessToken) || string.IsNullOrEmpty(authResult.TenantId))
             {
-                Trace.TraceError("Authentication result, token or tenant id returned are null");
+                Trace.TraceError("Authentication result, token is null");
                 throw new InvalidOperationException("Authentication result, token or tenant id returned are null");
             }
 
             token = authResult.AccessToken;
             tenantID = authResult.TenantId;
+
+            return token;
         }
     }
 

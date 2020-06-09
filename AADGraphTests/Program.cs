@@ -1,11 +1,11 @@
 ﻿extern alias BetaLib;
 
-using Common;
 using Microsoft.Graph;
 using Microsoft.Graph.Auth;
 using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Beta = BetaLib.Microsoft.Graph;
 
@@ -30,9 +30,15 @@ namespace Common
 
         private static async Task Main(string[] args)
         {
+            //MSALClient client = new MSALClient();
+            //var token = await client.GetAuthenticationToken();
+            //Console.WriteLine($"Token-{token}");
+
+            //return;
+
             // Initialize and prepare MSAL
-            string[] scopes = new string[] { "user.read", "user.readwrite.all", "Directory.AccessAsUser.All", "Directory.ReadWrite.All", 
-                "Contacts.ReadWrite", "AppRoleAssignment.ReadWrite.All", "Policy.ReadWrite.ApplicationConfiguration" };
+            string[] scopes = new string[] { "user.read", "user.readwrite.all", "Directory.AccessAsUser.All", "Directory.ReadWrite.All",
+                "Contacts.ReadWrite", "AppRoleAssignment.ReadWrite.All","Group.ReadWrite.All" };
 
             IPublicClientApplication app = PublicClientApplicationBuilder.Create(clientId)
                 .WithAuthority(new Uri($"https://login.microsoftonline.com/{tenant}"))
@@ -47,27 +53,29 @@ namespace Common
             //Beta.ServicePrincipal graphServicePrincipal = GetServicePrincipalByAppDisplayNameAsync(betaClient, "Microsoft Graph").Result;
 
             #region Invitations API
-            UserOperations userOperations = new UserOperations(betaClient, "woodgrove.ms");
-            InvitationOperations invitationOperations = new InvitationOperations(betaClient);
 
-            Console.WriteLine("Sending invitation");
-            var invitation = await invitationOperations.SendInvitation("Kalyan", "krishna", "kalyankrishna1@gmail.com");
+            //UserOperations userOperations = new UserOperations(betaClient, "woodgrove.ms");
+            //InvitationOperations invitationOperations = new InvitationOperations(betaClient);
 
-            ColorConsole.WriteLine(ConsoleColor.Red, $"Invitation sent to user with redeem URL -{invitation.InviteRedeemUrl}, " +
-                $"Status-{invitation.Status}, resetRedemption-{invitation?.ResetRedemption.Value}");
+            //Console.WriteLine("Sending invitation");
+            //var invitation = await invitationOperations.SendInvitation("Kalyan", "krishna", "kalyankrishna1@gmail.com");
 
-            Beta.User inviteduser = await userOperations.GetUserByIdAsync(invitation.InvitedUser.Id);
+            //ColorConsole.WriteLine(ConsoleColor.Red, $"Invitation sent to user with redeem URL -{invitation.InviteRedeemUrl}, " +
+            //    $"Status-{invitation.Status}, resetRedemption-{invitation?.ResetRedemption.Value}");
 
-            if (inviteduser != null)
-            {
-                ColorConsole.WriteLine(ConsoleColor.Green, userOperations.PrintBetaUserDetails(inviteduser));
-                ColorConsole.WriteLine(ConsoleColor.Green, $"UserType-{inviteduser.UserType}, ExternalUserState-{inviteduser.ExternalUserState}, ExternalUserStateChangeDateTime-{inviteduser.ExternalUserStateChangeDateTime}");
+            //Beta.User inviteduser = await userOperations.GetUserByIdAsync(invitation.InvitedUser.Id);
 
-                // Delete user
-                Console.WriteLine("Deleting the invited user");
-                await userOperations.DeleteUserAsync(inviteduser.Id);
-                Console.WriteLine("User deleted successfully");
-            }
+            //if (inviteduser != null)
+            //{
+            //    ColorConsole.WriteLine(ConsoleColor.Green, userOperations.PrintBetaUserDetails(inviteduser));
+            //    ColorConsole.WriteLine(ConsoleColor.Green, $"UserType-{inviteduser.UserType}, ExternalUserState-{inviteduser.ExternalUserState}, ExternalUserStateChangeDateTime-{inviteduser.ExternalUserStateChangeDateTime}");
+
+            //    // Delete user
+            //    Console.WriteLine("Deleting the invited user");
+            //    await userOperations.DeleteUserAsync(inviteduser.Id);
+            //    Console.WriteLine("User deleted successfully");
+            //}
+
             #endregion Invitations API
 
             #region ActivityBasedTimeoutPolicy
@@ -271,38 +279,108 @@ namespace Common
 
             #endregion Unified Groups operations
 
-            #region Distribution Groups operations
+            #region Delta Groups operations
 
-            //GroupOperations groupOperations = new GroupOperations(betaClient);
+            GroupOperations groupOperations = new GroupOperations(betaClient);
             //UserOperations userOperations = new UserOperations(betaClient);
+
+            //// Prepare to add a new group with members
+            //IEnumerable<Beta.User> allUsersInTenant = await userOperations.GetUsersAsync();
+            //IEnumerable<Beta.User> allNonGuestUsersInTenant = await userOperations.GetNonGuestUsersAsync();
+
+            //var signedInUser = await userOperations.GetMeAsync();
+
+            //IEnumerable<Beta.User> membersToAdd = GenericUtility<Beta.User>.GetaRandomNumberOfItemsFromList(allUsersInTenant, 5);
+
+            //// Remove the current user as they have been added as owner automatically
+            //// IEnumerable<Beta.User> ownersToAdd = GenericUtility<Beta.User>.GetaRandomNumberOfItemsFromList(allNonGuestUsersInTenant.Except(new List<Beta.User> { signedInUser }), 2);
+
+            //IList<Beta.User> ownersToAdd = GenericUtility<Beta.User>.GetaRandomNumberOfItemsFromList(allNonGuestUsersInTenant.Except(new List<Beta.User> { signedInUser }), 2);
+
+            //if (ownersToAdd.Where(x=> x.Id == signedInUser.Id).Count() == 0)
+            //{
+            //    ownersToAdd.Add(signedInUser);
+            //}
+
+            // Delta operations with groups
+            var groupswithDelta = await groupOperations.ListGroupsForDeltaAsync(true);
+            var groups = groupswithDelta.Item1;
+            string deltaLink = groupswithDelta.Item2;
+
+            ColorConsole.WriteLine(ConsoleColor.Green, $"Delta query fetched {groups.Count()} groups. Delta link is '{deltaLink}'");
+
+            groups.ForEach(async group =>
+            {
+                Console.WriteLine(await groupOperations.PrintGroupDetails(group, false));
+            });
+
+            //// Add a new group
             //Beta.Group newGroup = null;
             //bool groupCreated = false;
 
             //try
             //{
-            //    IEnumerable<Beta.User> allUsersInTenant = await userOperations.GetUsersAsync();
-            //    IEnumerable<Beta.User> allNonGuestUsersInTenant = await userOperations.GetNonGuestUsersAsync();
-
-            //    var signedInUser = await userOperations.GetMeAsync();
-
-            //    IEnumerable<Beta.User> membersToAdd = GenericUtility<Beta.User>.GetaRandomNumberOfItemsFromList(allUsersInTenant, 5);
-            //    // Remove the current user as they have been added as owner automatically
-            //    IEnumerable<Beta.User> ownersToAdd = GenericUtility<Beta.User>.GetaRandomNumberOfItemsFromList(allNonGuestUsersInTenant.Except(new List<Beta.User> { signedInUser }), 2);
-
-            //    newGroup = await groupOperations.CreateDistributionGroupAsync(tenant);
+            //    newGroup = await groupOperations.CreateUnifiedGroupAsync(tenant, membersToAdd, ownersToAdd);
             //    groupCreated = true;
 
-            //    await groupOperations.PrintGroupDetails(newGroup, true);
+            //    if (newGroup != null)
+            //    {
+            //        // Wait for group to be created
+            //        Beta.Group grp = null;
 
-            //    // Add owners
-            //    ownersToAdd.ToList().ForEach(y => AsyncHelper.RunSync(async () =>
-            //        await groupOperations.AddOwnerToGroupAsync(newGroup, y)));
+            //        while (grp == null)
+            //        {
+            //            await Task.Delay(3000);
+            //            ColorConsole.WriteLine(ConsoleColor.DarkGreen, $"Failed to pick details of the newly created group. Trying again.. ");
+            //            grp = await groupOperations.GetGroupByIdAsync(newGroup.Id, true);
+            //        }
 
-            //    // Add members
-            //    membersToAdd.ToList().ForEach(y => AsyncHelper.RunSync(async () =>
-            //        await groupOperations.AddMemberToGroup(newGroup, y)));
+            //        Console.WriteLine(await groupOperations.PrintGroupDetails(grp, true));
 
-            //    await groupOperations.PrintGroupDetails(newGroup, true);
+            //        // test delta changes
+            //        #region now get changes since last delta sync
+
+
+            //        Console.WriteLine("Press any key to execute delta query.");
+            //        Console.ReadKey();
+            //        Console.WriteLine("=== Getting delta changes....");
+
+            //        /// Get the first page using the delta link (to see the new group)
+            //        groupswithDelta = await groupOperations.ListGroupsForDeltaAsync(deltaLink);
+            //        groups = groupswithDelta.Item1;
+            //        string newDeltaLink = groupswithDelta.Item2;
+
+            //        groups.ForEach(async group =>
+            //        {
+            //            Console.WriteLine(await groupOperations.PrintGroupDetails(group, true));
+            //        });
+
+            //        /// <summary>
+            //        /// Display groups again and get NEW delta link... notice that only the added group is returned
+            //        /// Keep trying (in case there are replication delays) to get changes
+            //        /// </summary>
+            //        while (deltaLink.Equals(newDeltaLink))
+            //        {
+            //            ColorConsole.WriteLine(ConsoleColor.DarkGreen, $"Failed to pick delta changes, trying again ");
+            //            // If the two are equal, then we didn't receive changes yet query to get first page using the delta link
+            //            groupswithDelta = await groupOperations.ListGroupsForDeltaAsync(deltaLink);
+            //            groups = groupswithDelta.Item1;
+            //            newDeltaLink = groupswithDelta.Item2;
+            //        }
+
+            //        //Printing group details picked from delta query
+            //        ColorConsole.WriteLine(ConsoleColor.Green, $"Delta query # 2fetched {groups.Count()} groups. Delta link is '{deltaLink}'");
+            //        groups.ForEach(async group =>
+            //        {
+            //            Console.WriteLine(await groupOperations.PrintGroupDetails(group, false, true));
+            //        });
+
+            //        #endregion now get changes since last delta sync
+            //    }
+            //    else
+            //    {
+            //        ColorConsole.WriteLine(ConsoleColor.Red, "Failed to create a group");
+            //    }
             //}
             //catch (Exception ex)
             //{
@@ -318,7 +396,96 @@ namespace Common
             //    }
             //}
 
-            #endregion Distribution Groups operations
+            #endregion Delta Groups operations
+
+            #region Dynamic groups operations
+
+            //GroupOperations groupOperations = new GroupOperations(betaClient);
+
+            //var dynamicGroups = await groupOperations.ListDynamicGroupsAsync();
+
+            //ColorConsole.WriteLine(ConsoleColor.Green, $"Found {dynamicGroups.Count} dynamic groups. Listing");
+            //dynamicGroups.ForEach(group => 
+            //{
+            //    ColorConsole.WriteLine(ConsoleColor.Yellow, groupOperations.PrintGroupBasic(group));
+            //});
+
+            //dynamicGroups = await groupOperations.ListDynamicGroupsAsync(true);
+
+            //ColorConsole.WriteLine(ConsoleColor.Green, $"Found {dynamicGroups.Count} dynamic groups. Listing with members");
+            //dynamicGroups.ForEach(async group =>
+            //{
+            //    Console.WriteLine(await groupOperations.PrintGroupDetails(group, true, true));
+            //});
+
+            // Create a new dynamic group
+
+            //UserOperations userOperations = new UserOperations(betaClient);
+            //var signedInUser = await userOperations.GetMeAsync();
+
+            //IEnumerable<Beta.User> allNonGuestUsersInTenant = await userOperations.GetNonGuestUsersAsync();
+
+            //// Remove the current user as they have been added as owner automatically
+            //// IEnumerable<Beta.User> ownersToAdd = GenericUtility<Beta.User>.GetaRandomNumberOfItemsFromList(allNonGuestUsersInTenant.Except(new List<Beta.User> { signedInUser }), 2);
+
+            //IList<Beta.User> ownersToAdd = GenericUtility<Beta.User>.GetaRandomNumberOfItemsFromList(allNonGuestUsersInTenant.Except(new List<Beta.User> { signedInUser }), 2);
+
+            //if (ownersToAdd.Where(x => x.Id == signedInUser.Id).Count() == 0)
+            //{
+            //     ownersToAdd.Add(signedInUser);
+            //}
+
+            //// Add a new group
+            //Beta.Group newGroup = null;
+            //bool groupCreated = false;
+
+            //try
+            //{
+            //    newGroup = await groupOperations.CreateDynamicGroupAsync(tenant, ownersToAdd);
+            //    groupCreated = true;
+
+            //    if (newGroup != null)
+            //    {
+            //        // Wait for group to be created
+            //        Beta.Group grp = null;
+
+            //        while (grp == null)
+            //        {
+            //            await Task.Delay(3000);
+            //            ColorConsole.WriteLine(ConsoleColor.DarkGreen, $"Failed to pick details of the newly created dynamic group. Trying again.. ");
+            //            grp = await groupOperations.GetGroupByIdAsync(newGroup.Id, true);
+            //            if (grp != null)
+            //            {
+            //                Console.WriteLine($"\nMembershipRule-{grp.MembershipRule}, membershipRuleProcessingState-{grp.MembershipRuleProcessingState}, renewedDateTime-{grp.RenewedDateTime} ");
+            //            }
+            //        }
+
+            //        // TODO: Check processing status
+
+            //        Console.WriteLine(await groupOperations.PrintGroupDetails(grp, true, true));
+            //    }
+            //    else
+            //    {
+            //        ColorConsole.WriteLine(ConsoleColor.Red, "Failed to create a group");
+            //    }
+
+            //}
+            //catch (Exception ex)
+            //{
+            //    ColorConsole.WriteLine(ConsoleColor.Red, $"{ex}");
+
+            //}
+            //finally
+            //{
+            //    if (groupCreated && newGroup != null)
+            //    {
+            //        ColorConsole.WriteLine(ConsoleColor.Green, "Press any key to delete this dynamic group");
+            //        Console.ReadKey();
+            //        await groupOperations.DeleteGroupAsync(newGroup);
+            //    }
+            //}
+
+            #endregion Dynamic groups operations
 
             #region user operations
 

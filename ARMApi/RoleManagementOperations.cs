@@ -20,7 +20,7 @@ namespace ARMApi
         {
             this._graphServiceClient = graphServiceClient;
             this._userOperations = userOperations;
-        }        
+        }
 
         #region RoleDefinitions
 
@@ -57,8 +57,12 @@ namespace ARMApi
                 {
                     new Beta.UnifiedRolePermission()
                     {
-                        AllowedResourceActions = new string[] { "microsoft.directory/applications/basic/read" } ,
-                    ODataType = null // TEMP till bug fixed
+                        AllowedResourceActions = new string[]
+                        {
+                            "microsoft.directory/applications/basic/read",
+                            "microsoft.directory/applications/basic/update"
+                        } ,
+                        ODataType = null // TEMP till bug fixed
                     }
                 };
 

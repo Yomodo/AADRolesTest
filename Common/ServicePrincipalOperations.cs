@@ -155,7 +155,7 @@ namespace Common
                 retVal = "The provided service Principal object is null";
             }
 
-            retVal = $"AppDisplayName-{servicePrincipal.AppDisplayName}, DisplayName-{servicePrincipal.DisplayName}, ServicePrincipalType-{servicePrincipal.ServicePrincipalType}, Id-{servicePrincipal.Id}";
+            retVal = $"AppDisplayName-'{servicePrincipal.AppDisplayName}',ServicePrincipalType-'{servicePrincipal.ServicePrincipalType}', Id-'{servicePrincipal.Id}', DisplayName-'{servicePrincipal.DisplayName}'";
 
             if (appDetails)
             {

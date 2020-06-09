@@ -184,6 +184,35 @@ namespace ARMApi
             return null;
         }
 
+        //public async Task<Beta.GovernanceRoleAssignmentRequestObject> CreateGovernanceRoleAssignmentRequestAsync(Beta.GovernanceRoleAssignmentRequestObject governanceRoleAssignmentRequest)
+        //{
+
+        //}
+
+        //public async Task<Beta.GovernanceRoleAssignmentRequestObject> UpdateGovernanceRoleAssignmentRequestAsync(Beta.GovernanceRoleAssignmentRequestObject governanceRoleAssignmentRequest)
+        //{
+
+        //}
+
+        //public async Task<Beta.GovernanceRoleAssignmentRequestObject> CancelGovernanceRoleAssignmentRequestAsync(Beta.GovernanceRoleAssignmentRequestObject governanceRoleAssignmentRequest)
+        //{
+
+        //}
+
+        //public async Task<Beta.GovernanceRoleAssignmentRequestObject> GetGovernanceRoleAssignmentRequestBySubjectIdAsync(Beta.GovernanceRoleAssignmentRequestObject governanceRoleAssignmentRequest)
+        //{
+        //}
+
+        public async Task<List<Beta.GovernanceRoleAssignment>> GetGovernanceRoleAssignmentsBySubjectIdAsync(string subjectId)
+        {
+            List<Beta.GovernanceRoleAssignment> roleAssignments = new List<Beta.GovernanceRoleAssignment>();
+
+            var govassignments = await _graphServiceClient.PrivilegedAccess["azureResources"].RoleAssignments.Request().Filter($"subjectId eq '{subjectId}'").GetAsync();
+            roleAssignments = await ProcessIPrivilegedAccessRoleAssignmentsCollectionPage(govassignments);
+
+            return roleAssignments;
+        }
+
         public async Task<List<Beta.GovernanceRoleSetting>> ListGovernanceRoleSettingsAsync(Beta.GovernanceResource governanceResource)
         {
             List<Beta.GovernanceRoleSetting> roleAssignmentRequests = new List<Beta.GovernanceRoleSetting>();
@@ -237,17 +266,17 @@ namespace ARMApi
                     // role settings
                     int i = 1;
 
-                    //var roleSettings = await ListGovernanceRoleSettingsAsync(governanceResource);
-                    ////var rolesettings = await ProcessIGovernanceResourceRoleSettingMyCollectionPage(governanceResource.RoleSettings);
+                    var roleSettings = await ListGovernanceRoleSettingsAsync(governanceResource);
+                    //var rolesettings = await ProcessIGovernanceResourceRoleSettingMyCollectionPage(governanceResource.RoleSettings);
 
-                    //sb.AppendLine($"\tPrinting role settings of governance resource -'{governanceResource.DisplayName}'. Total count -{roleSettings.Count}");
+                    sb.AppendLine($"\tPrinting role settings of governance resource -'{governanceResource.DisplayName}'. Total count -{roleSettings.Count}");
 
-                    //await roleSettings.ForEachAsync(async roleSetting =>
-                    //{
-                    //    sb.AppendLine($"Printing {i}/{roleSettings.Count} role settings.");
-                    //    sb.AppendLine($"\t\t{await PrintGovernanceRoleSettingAsync(roleSetting, printVerbose)}");
-                    //    i++;
-                    //});
+                    await roleSettings.ForEachAsync(async roleSetting =>
+                    {
+                        sb.AppendLine($"Printing {i}/{roleSettings.Count} role settings.");
+                        sb.AppendLine($"\t\t{await PrintGovernanceRoleSettingAsync(roleSetting, printVerbose)}");
+                        i++;
+                    });
 
                     if (governanceResource.Parent != null)
                     {
@@ -270,33 +299,33 @@ namespace ARMApi
                     {
                         i = 1;
                         //Role definitions
-                        //var roledefinitions = await ListGovernanceRoleDefinitionsAsync(governanceResource);
-                        //sb.AppendLine($"\tPrinting roleDefintions of governance resource -'{governanceResource.DisplayName}'. Total count -{roledefinitions.Count}");
+                        var roledefinitions = await ListGovernanceRoleDefinitionsAsync(governanceResource);
+                        sb.AppendLine($"\tPrinting roleDefintions of governance resource -'{governanceResource.DisplayName}'. Total count -{roledefinitions.Count}");
 
-                        //await roledefinitions.ForEachAsync(async r =>
-                        //{
-                        //    sb.AppendLine($"Printing {i}/{roledefinitions.Count} role definition.");
-                        //    sb.AppendLine($"\t\t{await PrintGovernanceRoleDefinitionAsync(r, true)}");
-                        //    i++;
-                        //});
-                        //i = 1;
+                        await roledefinitions.ForEachAsync(async r =>
+                        {
+                            sb.AppendLine($"Printing {i}/{roledefinitions.Count} role definition.");
+                            sb.AppendLine($"\t\t{await PrintGovernanceRoleDefinitionAsync(r, true)}");
+                            i++;
+                        });
+                        i = 1;
 
                         //Role assignments
-                        //var roleassignments = await ListGovernanceRoleAssignmentsAsync(governanceResource);
-                        //sb.AppendLine($"\tPrinting role assignments of governance resource -'{governanceResource.DisplayName}. Total count -{roleassignments.Count}");
+                        var roleassignments = await ListGovernanceRoleAssignmentsAsync(governanceResource);
+                        sb.AppendLine($"\tPrinting role assignments of governance resource -'{governanceResource.DisplayName}. Total count -{roleassignments.Count}");
 
-                        //await roleassignments.ForEachAsync(async r =>
-                        //{
-                        //    var txt = await PrintGovernanceRoleAssignmentAsync(r, true);
-                        //    sb.AppendLine($"Printing {i}/{roleassignments.Count} roleassignments.");
-                        //    sb.AppendLine($"\t\t{txt}");
-                        //    i++;
-                        //});
-                        //i = 1;
+                        await roleassignments.ForEachAsync(async r =>
+                        {
+                            var txt = await PrintGovernanceRoleAssignmentAsync(r, true);
+                            sb.AppendLine($"Printing {i}/{roleassignments.Count} roleassignments.");
+                            sb.AppendLine($"\t\t{txt}");
+                            i++;
+                        });
+                        i = 1;
 
                         // role assignment requests
                         var roleassignmentRequests = await ListGovernanceRoleAssignmentRequestsAsync(governanceResource);
-                        sb.AppendLine($"\tPrinting role assignment reuests of governance resource -'{governanceResource.DisplayName}. Total count -{roleassignmentRequests.Count}");
+                        sb.AppendLine($"\tPrinting role assignment requests of governance resource -'{governanceResource.DisplayName}. Total count -{roleassignmentRequests.Count}");
 
                         roleassignmentRequests.ForEach(async r =>
                         {
@@ -492,7 +521,11 @@ namespace ARMApi
                 sb.AppendLine($"Id:{governanceRoleAssignment.Id}");
                 sb.AppendLine($"AssignmentState:{governanceRoleAssignment.AssignmentState}");
                 sb.AppendLine($"StartDateTime:{governanceRoleAssignment.StartDateTime}");
-                sb.AppendLine($"ResourceId:{governanceRoleAssignment.ResourceId}");
+
+                var resource = await GetGovernanceResourceByIdAsync(governanceRoleAssignment.ResourceId);
+                sb.AppendLine(await PrintGovernanceResourceAsync(resource, false, false));
+
+                //sb.AppendLine($"ResourceId:{governanceRoleAssignment.ResourceId}");
                 sb.AppendLine($"MemberType:{governanceRoleAssignment.MemberType}");
                 sb.AppendLine($"Status:{governanceRoleAssignment.Status}");
                 if (!string.IsNullOrWhiteSpace(governanceRoleAssignment.SubjectId))
@@ -504,6 +537,8 @@ namespace ARMApi
 
                 if (printVerbose)
                 {
+                   
+
                     if (governanceRoleAssignment.LinkedEligibleRoleAssignment != null)
                     {
                         sb.AppendLine($"\t LinkedEligibleRoleAssignment: {await PrintGovernanceRoleAssignmentAsync(governanceRoleAssignment.LinkedEligibleRoleAssignment)}");
@@ -873,6 +908,43 @@ namespace ARMApi
             }
 
             return allPrivilegedRoleAssignments;
+        }
+
+        private async Task<List<Beta.GovernanceRoleAssignment>> ProcessIPrivilegedAccessRoleAssignmentsCollectionPage(Beta.IPrivilegedAccessRoleAssignmentsCollectionPage roleassignments)
+        {
+            List<Beta.GovernanceRoleAssignment> allGovernanceRoleAssignments = new List<Beta.GovernanceRoleAssignment>();
+
+            try
+            {
+                if (roleassignments != null)
+                {
+                    do
+                    {
+                        // Page through results
+                        foreach (var roleAssignment in roleassignments.CurrentPage)
+                        {
+                            allGovernanceRoleAssignments.Add(roleAssignment);
+                        }
+
+                        // are there more pages (Has a @odata.nextLink ?)
+                        if (roleassignments.NextPageRequest != null)
+                        {
+                            roleassignments = await roleassignments.NextPageRequest.GetAsync();
+                        }
+                        else
+                        {
+                            roleassignments = null;
+                        }
+                    } while (roleassignments != null);
+                }
+            }
+            catch (ServiceException e)
+            {
+                Console.WriteLine($"We could not process the privileged access role assignments list: {e}");
+                return null;
+            }
+
+            return allGovernanceRoleAssignments;
         }
     }
 }

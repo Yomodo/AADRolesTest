@@ -54,18 +54,18 @@ namespace AuthNMethodsTesting
             //IEnumerable<Beta.User> allUsersInTenant = await userOperations.GetUsersAsync();
             //IList<Beta.User> randomUsersFromTenant = GenericUtility<Beta.User>.GetaRandomNumberOfItemsFromList(allUsersInTenant, 5);
 
-            //// Conditional Access operations
-            //ConditionalAccessPolicyOperations conditionalAccessPolicyOperations = new ConditionalAccessPolicyOperations(betaClient, userOperations, servicePrincipalOperations, groupOperations);
+            // Conditional Access operations
+            ConditionalAccessPolicyOperations conditionalAccessPolicyOperations = new ConditionalAccessPolicyOperations(betaClient, userOperations, servicePrincipalOperations, groupOperations);
 
-            //// List
-            //Console.WriteLine("Getting CA Policies");
-            //IList<Beta.ConditionalAccessPolicy> conditionalAccessPolicies = await conditionalAccessPolicyOperations.ListConditionalAccessPoliciesAsync();
+            // List
+            Console.WriteLine("Getting CA Policies");
+            IList<Beta.ConditionalAccessPolicy> conditionalAccessPolicies = await conditionalAccessPolicyOperations.ListConditionalAccessPoliciesAsync();
 
-            //for (int i = 0; i < conditionalAccessPolicies.Count; i++)
-            //{
-            //    Console.WriteLine(await conditionalAccessPolicyOperations.PrintConditionalAccessPolicyAsync(conditionalAccessPolicies[i], true));
-            //    Console.WriteLine("-------------------------------------------------------------------------------");
-            //}
+            for (int i = 0; i < conditionalAccessPolicies.Count; i++)
+            {
+                Console.WriteLine(await conditionalAccessPolicyOperations.PrintConditionalAccessPolicyAsync(conditionalAccessPolicies[i], true));
+                Console.WriteLine("-------------------------------------------------------------------------------");
+            }
 
             // Risk detection operations
 
@@ -78,109 +78,109 @@ namespace AuthNMethodsTesting
 
             // Risk detection end
 
-            // Risky users operations
-            // create five random users
-            RandomNames randomNames = new RandomNames(NameType.MaleName);
+            ////// Risky users operations
+            ////// create five random users
+            ////RandomNames randomNames = new RandomNames(NameType.MaleName);
 
-            IList<Beta.User> randomUsersFromTenant = new List<Beta.User>();
+            ////IList<Beta.User> randomUsersFromTenant = new List<Beta.User>();
 
-            try
-            {
-                for (int i = 0; i < 5; i++)
-                {
-                    var user = await userOperations.CreateUserAsync(
-                        givenName: randomNames.GetRandom(),
-                        surname: randomNames.GetRandom());
+            ////try
+            ////{
+            ////    for (int i = 0; i < 5; i++)
+            ////    {
+            ////        var user = await userOperations.CreateUserAsync(
+            ////            givenName: randomNames.GetRandom(),
+            ////            surname: randomNames.GetRandom());
 
-                    randomUsersFromTenant.Add(user);
-                }
+            ////        randomUsersFromTenant.Add(user);
+            ////    }
 
-                // Get newly created users
-                await randomUsersFromTenant.ForEachAsync(async user =>
-                {
-                    ColorConsole.WriteLine(ConsoleColor.Blue, userOperations.PrintBetaUserDetails(await userOperations.GetUserByIdAsync(user.Id)));
-                });
+            ////    // Get newly created users
+            ////    await randomUsersFromTenant.ForEachAsync(async user =>
+            ////    {
+            ////        ColorConsole.WriteLine(ConsoleColor.Blue, userOperations.PrintBetaUserDetails(await userOperations.GetUserByIdAsync(user.Id)));
+            ////    });
 
-                // Wait 10 seconds
-                await Task.Delay(10000);
+            ////    // Wait 10 seconds
+            ////    await Task.Delay(10000);
 
-                RiskDetectionOperations riskDetectionOperations = new RiskDetectionOperations(betaClient);
-                RiskyUserOperations riskyUserOperations = new RiskyUserOperations(betaClient, userOperations);
+            ////    RiskDetectionOperations riskDetectionOperations = new RiskDetectionOperations(betaClient);
+            ////    RiskyUserOperations riskyUserOperations = new RiskyUserOperations(betaClient, userOperations);
 
-                //var riskyUsers = await riskyUserOperations.ListRiskyUsersAsync();
-                //riskyUsers.ForEach(async user => Console.WriteLine(await riskyUserOperations.PrintRiskyUserAsync(user)));
+            ////    //var riskyUsers = await riskyUserOperations.ListRiskyUsersAsync();
+            ////    //riskyUsers.ForEach(async user => Console.WriteLine(await riskyUserOperations.PrintRiskyUserAsync(user)));
 
-                ColorConsole.WriteLine(ConsoleColor.Green, "Marking a random number of users as compromised");
-                await randomUsersFromTenant.ForEachAsync(async user => await riskyUserOperations.ConfirmCompromisedAsync(user.Id));
+            ////    ColorConsole.WriteLine(ConsoleColor.Green, "Marking a random number of users as compromised");
+            ////    await randomUsersFromTenant.ForEachAsync(async user => await riskyUserOperations.ConfirmCompromisedAsync(user.Id));
 
-                // Wait 10 seconds
-                await Task.Delay(10000);
+            ////    // Wait 10 seconds
+            ////    await Task.Delay(10000);
 
-                await randomUsersFromTenant.ForEachAsync(async user =>
-                {
-                    var trialRslt = await Retry.WithExpBackoff_StopOn<IList<Beta.RiskyUser>>(
-                        async () =>
-                        {
-                            return await riskyUserOperations.GetRiskyUsersByUPNUnsafeAsync(user.UserPrincipalName);
-                        },
-                        TestforMissingRiskEvent);
+            ////    await randomUsersFromTenant.ForEachAsync(async user =>
+            ////    {
+            ////        var trialRslt = await Retry.WithExpBackoff_StopOn<IList<Beta.RiskyUser>>(
+            ////            async () =>
+            ////            {
+            ////                return await riskyUserOperations.GetRiskyUsersByUPNUnsafeAsync(user.UserPrincipalName);
+            ////            },
+            ////            TestforMissingRiskEvent);
 
-                    Console.WriteLine($"User {user.UserPrincipalName} is marked as a risky user now");
+            ////        Console.WriteLine($"User {user.UserPrincipalName} is marked as a risky user now");
 
-                    var userriskresults = trialRslt.Result;
+            ////        var userriskresults = trialRslt.Result;
 
-                    await userriskresults.ForEachAsync(async r => { Console.WriteLine(await riskyUserOperations.PrintRiskyUsersAsync(r, true, true)); });
+            ////        await userriskresults.ForEachAsync(async r => { Console.WriteLine(await riskyUserOperations.PrintRiskyUsersAsync(r, true, true)); });
 
-                    // If retries occurred, log this fact
-                    if (trialRslt.Latencies.Count > 1)
-                    {
-                        ColorConsole.WriteLine(ConsoleColor.Yellow, $"For {nameof(riskyUserOperations.GetRiskyUsersByIdUnsafeAsync)}, {trialRslt.Latencies.Count - 1} retries needed");
-                    }
+            ////        // If retries occurred, log this fact
+            ////        if (trialRslt.Latencies.Count > 1)
+            ////        {
+            ////            ColorConsole.WriteLine(ConsoleColor.Yellow, $"For {nameof(riskyUserOperations.GetRiskyUsersByIdUnsafeAsync)}, {trialRslt.Latencies.Count - 1} retries needed");
+            ////        }
 
-                    //Console.WriteLine(await riskyUserOperations.PrintRiskyUsersAsync(trialRslt.Result, true, true));
-                });
+            ////        //Console.WriteLine(await riskyUserOperations.PrintRiskyUsersAsync(trialRslt.Result, true, true));
+            ////    });
 
-                // check risk detections
-                ColorConsole.WriteLine(ConsoleColor.Green, "Checking risk detection logs for compromised users ");
-                await randomUsersFromTenant.ForEachAsync(async user =>
-                {
-                    IList<Beta.RiskDetection> riskDetections = await riskDetectionOperations.ListRiskDetectionsByUpnAsync(user.UserPrincipalName);
-                    await riskDetections.ForEachAsync(async detection => Console.WriteLine(await riskDetectionOperations.PrintRiskDetectionAsync(detection)));
-                });
+            ////    // check risk detections
+            ////    ColorConsole.WriteLine(ConsoleColor.Green, "Checking risk detection logs for compromised users ");
+            ////    await randomUsersFromTenant.ForEachAsync(async user =>
+            ////    {
+            ////        IList<Beta.RiskDetection> riskDetections = await riskDetectionOperations.ListRiskDetectionsByUpnAsync(user.UserPrincipalName);
+            ////        await riskDetections.ForEachAsync(async detection => Console.WriteLine(await riskDetectionOperations.PrintRiskDetectionAsync(detection)));
+            ////    });
 
-                ColorConsole.WriteLine(ConsoleColor.Green, "Dismissing a random number of compromised users ");
-                await randomUsersFromTenant.ForEachAsync(async user => await riskyUserOperations.DismissAsync(user.Id));
+            ////    ColorConsole.WriteLine(ConsoleColor.Green, "Dismissing a random number of compromised users ");
+            ////    await randomUsersFromTenant.ForEachAsync(async user => await riskyUserOperations.DismissAsync(user.Id));
 
-                // TODO: re do
+            //    // TODO: re do
 
-                //// Wait 5 seconds
-                //await Task.Delay(10000);
+            //    //// Wait 5 seconds
+            //    //await Task.Delay(10000);
 
-                //await randomUsersFromTenant.ForEachAsync(async user =>
-                //{
-                //    Beta.RiskyUser riskyUser = null;
+            //    //await randomUsersFromTenant.ForEachAsync(async user =>
+            //    //{
+            //    //    Beta.RiskyUser riskyUser = null;
 
-                //    do
-                //    {
-                //        // wait 10 secs
-                //        await Task.Delay(10000);
-                //        var riskyUserresults = await riskyUserOperations.GetRiskyUsersByUPNUnsafeAsync(user.UserPrincipalName);
-                //    } while (riskyUser != null);
+            //    //    do
+            //    //    {
+            //    //        // wait 10 secs
+            //    //        await Task.Delay(10000);
+            //    //        var riskyUserresults = await riskyUserOperations.GetRiskyUsersByUPNUnsafeAsync(user.UserPrincipalName);
+            //    //    } while (riskyUser != null);
 
-                //    Console.WriteLine($"User {user.UserPrincipalName} is no longer a risky user");
-                //});
-            }
-            catch (Exception ex)
-            {
-                ColorConsole.WriteLine(ConsoleColor.Red, $"{ex}");
-            }
-            finally
-            {
-                await randomUsersFromTenant.ForEachAsync(async user =>
-                {
-                    await userOperations.DeleteUserAsync(user.Id);
-                });
-            }
+            //    //    Console.WriteLine($"User {user.UserPrincipalName} is no longer a risky user");
+            //    //});
+            //}
+            //catch (Exception ex)
+            //{
+            //    ColorConsole.WriteLine(ConsoleColor.Red, $"{ex}");
+            //}
+            //finally
+            //{
+            //    await randomUsersFromTenant.ForEachAsync(async user =>
+            //    {
+            //        await userOperations.DeleteUserAsync(user.Id);
+            //    });
+            //}
 
             // Authenticated methods operations
             // await GetUsersAuthenticationMethodsAsync(betaClient);
