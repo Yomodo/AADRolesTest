@@ -61,8 +61,8 @@ namespace ARMApi
                         {
                             "microsoft.directory/applications/basic/read",
                             "microsoft.directory/applications/basic/update"
-                        } ,
-                        ODataType = null // TEMP till bug fixed
+                        } //,
+                       // ODataType = null // TEMP till bug fixed
                     }
                 };
 
@@ -71,8 +71,8 @@ namespace ARMApi
                     Description = "Update basic properties of application registrations",
                     DisplayName = "Application Registration Support Administrator",
                     RolePermissions = rolePermissions,
-                    IsEnabled = false,
-                    ODataType = null // TEMP till bug fixed
+                    IsEnabled = false//,
+                    //ODataType = null // TEMP till bug fixed
                 });
             }
             catch (ServiceException e)
@@ -109,8 +109,8 @@ namespace ARMApi
                 // Update the role definition.
                 updatedroleDefinition = await _graphServiceClient.RoleManagement.Directory.RoleDefinitions[roleDefinitionId].Request().UpdateAsync(new Beta.UnifiedRoleDefinition
                 {
-                    IsEnabled = isEnabled,
-                    ODataType = null // TEMP till bug fixed
+                    IsEnabled = isEnabled//,
+                    //ODataType = null // TEMP till bug fixed
                 });
             }
             catch (ServiceException e)
@@ -262,8 +262,8 @@ namespace ARMApi
                     {
                         PrincipalId = user.Id,
                         RoleDefinitionId = roleDefinition.Id,
-                        ResourceScope = "/",
-                        ODataType = null // TEMP till bug fixed
+                        ResourceScope = "/"//,
+                        //ODataType = null // TEMP till bug fixed
                     });
 
                     newRoleAssignments.Add(newRoleAssignment);

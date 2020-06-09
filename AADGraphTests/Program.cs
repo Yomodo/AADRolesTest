@@ -225,16 +225,38 @@ namespace Common
             //    IEnumerable<Beta.User> allUsersInTenant = await userOperations.GetUsersAsync();
             //    IEnumerable<Beta.User> allNonGuestUsersInTenant = await userOperations.GetNonGuestUsersAsync();
 
-            //    IEnumerable<Beta.User> membersToAdd = GenericUtility<Beta.User>.GetaRandomNumberOfItemsFromList(allNonGuestUsersInTenant, 15);
-            //    IEnumerable<Beta.User> ownersToAdd = GenericUtility<Beta.User>.GetaRandomNumberOfItemsFromList(allNonGuestUsersInTenant, 4);
+            //    IEnumerable<Beta.User> membersToAdd = GenericUtility<Beta.User>.GetaRandomNumberOfItemsFromList(allNonGuestUsersInTenant, 5);
+            //    IList<Beta.User> ownersToAdd = GenericUtility<Beta.User>.GetaRandomNumberOfItemsFromList(allNonGuestUsersInTenant, 2);
 
-            //    IEnumerable<Beta.User> ownersToUpdate = allNonGuestUsersInTenant.Except(ownersToAdd).Take(4);
-            //    IEnumerable<Beta.User> membersToUpdate = allNonGuestUsersInTenant.Except(membersToAdd).Take(15);
+            //    var signedInUser = await userOperations.GetMeAsync();
+            //    if (ownersToAdd.Where(x => x.Id == signedInUser.Id).Count() == 0)
+            //    {
+            //        ownersToAdd.Add(signedInUser);
+            //    }
+
+            //    IEnumerable<Beta.User> ownersToUpdate = allNonGuestUsersInTenant.Except(ownersToAdd).Take(2);
+            //    IEnumerable<Beta.User> membersToUpdate = allNonGuestUsersInTenant.Except(membersToAdd).Take(5);
 
             //    newGroup = await groupOperations.CreateUnifiedGroupAsync(tenant, membersToAdd, ownersToAdd);
-            //    groupCreated = true;
-            //    await groupOperations.PrintGroupDetails(newGroup, true);
 
+            //    // Wait for group to be created
+            //    Beta.Group grp = null;
+
+            //    while (grp == null)
+            //    {
+            //        await Task.Delay(3000);
+            //        grp = await groupOperations.GetGroupByIdAsync(newGroup.Id, true);
+            //        if(grp == null)
+            //        {
+            //            ColorConsole.WriteLine(ConsoleColor.DarkGreen, $"Failed to pick details of the newly created dynamic group. Trying again.. ");
+            //        }
+            //    }
+
+            //    groupCreated = true;
+            //    ColorConsole.WriteLine(ConsoleColor.Green, $"Printing details of the newly created Unified group ");
+            //    Console.WriteLine(await groupOperations.PrintGroupDetails(newGroup, true, true));
+
+            //    ColorConsole.WriteLine(ConsoleColor.Green, $"Updating group's owners and members");
             //    // Update List
             //    foreach (var owner in ownersToUpdate)
             //    {
@@ -246,11 +268,14 @@ namespace Common
             //        await groupOperations.AddMemberToGroup(newGroup, member);
             //    }
 
-            //    await groupOperations.PrintGroupDetails(newGroup, true);
+            //    await Task.Delay(3000); 
+            //    ColorConsole.WriteLine(ConsoleColor.Green, $"Printing details of the newly created Unified group after updating group's owners and members.");
+            //    Console.WriteLine(await groupOperations.PrintGroupDetails(newGroup, true, true));
 
             //    //newGroup = await groupOperations.AllowExternalSendersAsync(newGroup);
 
             //    // Delete a bunch
+            //    ColorConsole.WriteLine(ConsoleColor.Green, $"Deleting a few group's owners and members.");
             //    foreach (var owner in ownersToAdd)
             //    {
             //        await groupOperations.RemoveGroupOwnerAsync(newGroup, owner);
@@ -261,7 +286,9 @@ namespace Common
             //        await groupOperations.RemoveGroupMemberAsync(newGroup, member);
             //    }
 
-            //    await groupOperations.PrintGroupDetails(newGroup, true);
+            //    await Task.Delay(3000);
+            //    ColorConsole.WriteLine(ConsoleColor.Green, $"Printing details of the newly created Unified group after deleting a few group's owners and members.");
+            //    Console.WriteLine(await groupOperations.PrintGroupDetails(newGroup, true, true));
             //}
             //catch (Exception ex)
             //{
@@ -281,7 +308,7 @@ namespace Common
 
             #region Delta Groups operations
 
-            GroupOperations groupOperations = new GroupOperations(betaClient);
+            //GroupOperations groupOperations = new GroupOperations(betaClient);
             //UserOperations userOperations = new UserOperations(betaClient);
 
             //// Prepare to add a new group with members
@@ -302,17 +329,17 @@ namespace Common
             //    ownersToAdd.Add(signedInUser);
             //}
 
-            // Delta operations with groups
-            var groupswithDelta = await groupOperations.ListGroupsForDeltaAsync(true);
-            var groups = groupswithDelta.Item1;
-            string deltaLink = groupswithDelta.Item2;
+            //// Delta operations with groups
+            //var groupswithDelta = await groupOperations.ListGroupsForDeltaAsync(true);
+            //var groups = groupswithDelta.Item1;
+            //string deltaLink = groupswithDelta.Item2;
 
-            ColorConsole.WriteLine(ConsoleColor.Green, $"Delta query fetched {groups.Count()} groups. Delta link is '{deltaLink}'");
+            //ColorConsole.WriteLine(ConsoleColor.Green, $"Delta query fetched {groups.Count()} groups. Delta link is '{deltaLink}'");
 
-            groups.ForEach(async group =>
-            {
-                Console.WriteLine(await groupOperations.PrintGroupDetails(group, false));
-            });
+            //groups.ForEach(async group =>
+            //{
+            //    Console.WriteLine(await groupOperations.PrintGroupDetails(group, false));
+            //});
 
             //// Add a new group
             //Beta.Group newGroup = null;
