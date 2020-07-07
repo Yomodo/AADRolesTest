@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -6,23 +6,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Auth Methods.postman_collection v0.2.json" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0-preview.2.20160.3" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="5.0.0-preview.2.20160.3" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="5.0.0-preview.2.20160.3" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="5.0.0-preview.2.20160.3" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0-preview.2.20160.3" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="3.1.5" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="3.1.5" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.5" />
     <PackageReference Include="Microsoft.Graph.Auth" Version="1.0.0-preview.5" />
     <PackageReference Include="Microsoft.Graph.Beta" Version="0.19.0-preview" />
-    <PackageReference Include="Microsoft.Graph.Core" Version="1.20.1" />
-    <PackageReference Include="Microsoft.Identity.Client" Version="4.15.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AADGraphTests\AADGraphTesting.csproj" />
     <ProjectReference Include="..\Common\Common.csproj" />
   </ItemGroup>
 

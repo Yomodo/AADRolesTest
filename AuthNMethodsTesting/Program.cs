@@ -2,7 +2,6 @@
 
 using Common;
 using AuthNMethodsTesting.Model;
-using Common;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Graph;
 using Microsoft.Graph.Auth;

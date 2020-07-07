@@ -20,6 +20,7 @@ namespace ARMApi
         private DirectoryObjectOperations _directoryObjectOperations;
         private ConcurrentDictionary<string, Beta.GovernanceResource> _CachedGovernanceResources;
 
+
         private HashSet<string> _AllTypes = new HashSet<string>();
         private HashSet<string> _AllStatuses = new HashSet<string>();
 
@@ -39,7 +40,7 @@ namespace ARMApi
         /// List a collection of resources the requestor has access to.
         /// </summary>
         /// <returns></returns>
-        public async Task<List<Beta.GovernanceResource>> DiscoverGovernanceResourcesAsync(int top = 999)
+        public async Task<List<Beta.GovernanceResource>> ListGovernanceResourcesAsync(int top = 999)
         {
             var governanceReources = await _graphServiceClient.PrivilegedAccess["azureResources"].Resources.Request()
                 .Top(top)
@@ -186,17 +187,14 @@ namespace ARMApi
 
         //public async Task<Beta.GovernanceRoleAssignmentRequestObject> CreateGovernanceRoleAssignmentRequestAsync(Beta.GovernanceRoleAssignmentRequestObject governanceRoleAssignmentRequest)
         //{
-
         //}
 
         //public async Task<Beta.GovernanceRoleAssignmentRequestObject> UpdateGovernanceRoleAssignmentRequestAsync(Beta.GovernanceRoleAssignmentRequestObject governanceRoleAssignmentRequest)
         //{
-
         //}
 
         //public async Task<Beta.GovernanceRoleAssignmentRequestObject> CancelGovernanceRoleAssignmentRequestAsync(Beta.GovernanceRoleAssignmentRequestObject governanceRoleAssignmentRequest)
         //{
-
         //}
 
         //public async Task<Beta.GovernanceRoleAssignmentRequestObject> GetGovernanceRoleAssignmentRequestBySubjectIdAsync(Beta.GovernanceRoleAssignmentRequestObject governanceRoleAssignmentRequest)
@@ -245,6 +243,38 @@ namespace ARMApi
                 }
             }
             return null;
+        }
+
+        //    public async Task<Beta.GovernanceRoleSetting> UpdateGovernanceRoleSettingByIdAsync(Beta.GovernanceRoleSetting governanceRoleSetting)
+        //    {
+        //        var governanceRoleSetting = new Beta.GovernanceRoleSetting
+        //        {
+        //            AdminEligibleSettings = new List<Beta.GovernanceRuleSetting>()
+        //{
+        //    new Beta.GovernanceRuleSetting
+        //    {
+        //        RuleIdentifier = "ExpirationRule",
+        //        Setting = "{\"permanentAssignment\":false,\"maximumGrantPeriodInMinutes\":129600}"
+        //    }
+        //}
+        //        };
+
+        //        await _graphServiceClient.PrivilegedAccess["azureResources"].RoleSettings["5fb5aef8-1081-4b8e-bb16-9d5d0385bab5"]
+        //            .Request()
+        //            .UpdateAsync(governanceRoleSetting);
+        //            .UpdateAsync(governanceRoleSetting);
+        //    }
+
+        public string PrintGovernanceResourceSlim(Beta.GovernanceResource governanceResource)
+        {
+            string retVal = string.Empty;
+
+            if(governanceResource != null)
+            {
+                return $"{governanceResource.DisplayName}, {governanceResource.Status}, {governanceResource.Type}, {governanceResource.Id}";
+            }
+            
+            return retVal;
         }
 
         public async Task<string> PrintGovernanceResourceAsync(Beta.GovernanceResource governanceResource, bool printVerbose = false, bool printAssignments = false)
@@ -537,8 +567,6 @@ namespace ARMApi
 
                 if (printVerbose)
                 {
-                   
-
                     if (governanceRoleAssignment.LinkedEligibleRoleAssignment != null)
                     {
                         sb.AppendLine($"\t LinkedEligibleRoleAssignment: {await PrintGovernanceRoleAssignmentAsync(governanceRoleAssignment.LinkedEligibleRoleAssignment)}");

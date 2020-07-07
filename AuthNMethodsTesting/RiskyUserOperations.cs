@@ -55,7 +55,7 @@ namespace AuthNMethodsTesting
 
                 if (verbose)
                 {
-                    toPrint = toPrint + $", Id-{riskyUser.Id}, DisplayName-{riskyUser.UserDisplayName}, IsProcessing-{riskyUser.IsProcessing}, IsGuest-{riskyUser.IsGuest}, IsDeleted-{riskyUser.IsDeleted}";
+                    toPrint = toPrint + $", Id-{riskyUser.Id}, DisplayName-{riskyUser.UserDisplayName}, IsProcessing-{riskyUser.IsProcessing}, IsDeleted-{riskyUser.IsDeleted}";
                     more.AppendLine("");
                 }
 

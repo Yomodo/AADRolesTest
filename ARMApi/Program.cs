@@ -144,8 +144,8 @@ namespace ARMApi
         {
             //return;
 
-            string[] scopes = new string[] { "user.readbasic.all", "RoleManagement.ReadWrite.Directory", "AdministrativeUnit.Read.All", "PrivilegedAccess.ReadWrite.AzureResources"
-                , "Directory.AccessAsUser.All", "Reports.Read.All" };
+            string[] scopes = new string[] { "user.readbasic.all", "RoleManagement.ReadWrite.Directory", "AdministrativeUnit.Read.All", "PrivilegedAccess.ReadWrite.AzureResources" ,
+                "Directory.AccessAsUser.All", "Reports.Read.All" };
 
             // Using appsettings.json as our configuration settings
             var builder = new ConfigurationBuilder()
@@ -184,27 +184,13 @@ namespace ARMApi
             //IList<Beta.ServicePrincipal> randomServicePrincipals = GenericUtility<Beta.ServicePrincipal>.GetaRandomNumberOfItemsFromList(allServicePrincipals, 3);
 
             #region Privileged Identity Management
+            //// https://aka.ms/PIMFeatureUpdateDoc
 
             //PIMOperations pIMOperations = new PIMOperations(betaClient, userOperations, directoryObjectOperations);
             //RoleManagementOperations roleManagementOperations = new RoleManagementOperations(betaClient, userOperations);
 
-            //// Create a custom role
-            //roleManagementOperations.CreateRoleDefinition()
+            //// List governance roles
 
-            //try
-            //{
-
-            //}
-            //catch(Exception ex)
-            //{
-            //    ColorConsole.WriteLine(ConsoleColor.Red, $"{ex}");
-            //}
-            //finally
-            //{
-
-            //}
-
-            // Delete a custom role
 
             //// GetMy assignments (DEFUNCT)
             ////var myassignments = await pIMOperations.GetMyPrivilegedRoleAssignmentsAsync();
@@ -214,86 +200,91 @@ namespace ARMApi
             ////    Console.WriteLine(pIMOperations.PrintPrivilegedRoleAssignment(asn));
             ////});
 
-            //Beta.User currentUser = await userOperations.GetMeAsync();
-            //var myassignments = await pIMOperations.GetGovernanceRoleAssignmentsBySubjectIdAsync(currentUser.Id);
+            ////Beta.User currentUser = await userOperations.GetMeAsync();
+            ////var myassignments = await pIMOperations.GetGovernanceRoleAssignmentsBySubjectIdAsync(currentUser.Id);
 
-            //await myassignments.Where(p=> !p.ExternalId.Contains("providers")).ForEachAsync(async asn =>
-            //{
-            //    Console.WriteLine(await pIMOperations.PrintGovernanceRoleAssignmentAsync(asn));
+            ////await myassignments.Where(p => !p.ExternalId.Contains("providers")).ForEachAsync(async asn =>
+            //// {
+            ////     Console.WriteLine(await pIMOperations.PrintGovernanceRoleAssignmentAsync(asn));
+            //// });
+
+            //// List resources
+            //var governanceResources = await pIMOperations.ListGovernanceResourcesAsync();
+            //ColorConsole.WriteLine(ConsoleColor.Green, $"Discovered a total of {governanceResources.Count} resources that the signed-in user has access to");
+
+            //governanceResources.ForEach(resource =>
+            //{                
+            //    Console.WriteLine(pIMOperations.PrintGovernanceResourceSlim(resource));
             //});
 
-            //// discover resources
-            //var governanceResources = await pIMOperations.DiscoverGovernanceResourcesAsync();
-            //ColorConsole.WriteLine(ConsoleColor.Green, $"Discovered a total of {governanceResources.Count} resources");
-
-            ////governanceResources.ForEach(async resource =>
-            ////{
-            ////    ColorConsole.WriteLine(ConsoleColor.Green, $"----Printing details of Governance Resource-{resource.DisplayName}--");
-            ////    Console.WriteLine(await pIMOperations.PrintGovernanceResourceAsync(resource));
-            ////    ColorConsole.WriteLine(ConsoleColor.Green, "------------------------------------");
-            ////});
-
-            ////Console.WriteLine("All governance resource statuses");
-            ////pIMOperations.AllStatuses.ForEach(x =>
-            ////{
-            ////    ColorConsole.WriteLine(ConsoleColor.Yellow, $"{x}");
-            ////});
-
-            ////Console.WriteLine("All governance resource types");
-            ////pIMOperations.AllTypes.ForEach(x =>
-            ////{
-            ////    ColorConsole.WriteLine(ConsoleColor.Yellow, $"{x}");
-            ////});
-
-            //// Filter Registered resources
-            //var registeredReources = governanceResources.Where(x => x.RegisteredDateTime != null).Take(1).ToList();
-
-            //ColorConsole.WriteLine(ConsoleColor.Green, $"Discovered a total of {registeredReources.Count} registered resources");
-            //registeredReources.ForEach(async resource =>
+            //governanceResources.ForEach(async resource =>
             //{
-            //    ColorConsole.WriteLine(ConsoleColor.Green, $"----Printing details of a registered Governance Resource-{resource.DisplayName}--");
-            //    var regiteredItem = await pIMOperations.GetGovernanceResourceByIdAsync(resource.Id);
-            //    //Console.WriteLine(await pIMOperations.PrintGovernanceResourceAsync(resource, true, true));
-
-            //    ////Roledassignmentsrequests
-            //    //ColorConsole.WriteLine(ConsoleColor.Yellow, $"\tPrinting role assignment requests of governance resource -'{resource.DisplayName}'");
-            //    //var roleassignmentRequests = await pIMOperations.ListGovernanceRoleAssignmentRequestsAsync(resource);
-            //    //roleassignmentRequests.ForEach(async r =>
-            //    //{
-            //    //   ColorConsole.WriteLine(ConsoleColor.Cyan, $"\t\t{await pIMOperations.PrintGovernanceRoleAssignmentRequestAsync(r, true)}");
-            //    //});
-
-            //    ////Role settings
-            //    //ColorConsole.WriteLine(ConsoleColor.Yellow, $"\tPrinting role settings of governance resource -'{resource.DisplayName}'");
-            //    //var roleasettings = await pIMOperations.ListGovernanceRoleSettingsAsync(resource);
-            //    //roleasettings.ForEach(async r =>
-            //    //{
-            //    //   ColorConsole.WriteLine(ConsoleColor.Red, $"\t\t{await pIMOperations.PrintGovernanceRoleSettingAsync(r, true)}");
-            //    //});
-
-            //    ColorConsole.WriteLine(ConsoleColor.Green, "--------------------------------------------------------------------------------");
-            //    return;
+            //    ColorConsole.WriteLine(ConsoleColor.Green, $"----Printing details of Governance Resource-{resource.DisplayName}--");
+            //    Console.WriteLine(await pIMOperations.PrintGovernanceResourceAsync(resource));
+            //    ColorConsole.WriteLine(ConsoleColor.Green, "------------------------------------");
             //});
 
-            //// Register a new governed resource
-
-            //// Unregistered resoruces
-            //var unregisteredReources = governanceResources.Where(x => x.RegisteredDateTime is null && x.Type == "subscription").ToList();
-            //var toregister = GenericUtility<Beta.GovernanceResource>.GetaRandomNumberOfItemsFromList(unregisteredReources, 1);
-
-            //if (toregister.Count > 0)
+            //Console.WriteLine("All governance resource statuses");
+            //pIMOperations.AllStatuses.ForEach(x =>
             //{
-            //    var toRegisterItem = await pIMOperations.GetGovernanceResourceByIdAsync(toregister[0].Id);
-            //    Console.WriteLine($"----Printing details of a unregistered Governance Resource-{toRegisterItem.DisplayName} before registration--");
-            //    Console.WriteLine(await pIMOperations.PrintGovernanceResourceAsync(toRegisterItem, true, true));
+            //    ColorConsole.WriteLine(ConsoleColor.Yellow, $"{x}");
+            //});
 
-            //    ColorConsole.WriteLine(ConsoleColor.Red, $"Registering resource {toRegisterItem.DisplayName}");
-            //    //await pIMOperations.RegisterGovernanceResourceAsync(toRegisterItem.ExternalId);
+            //Console.WriteLine("All governance resource types");
+            //pIMOperations.AllTypes.ForEach(x =>
+            //{
+            //    ColorConsole.WriteLine(ConsoleColor.Yellow, $"{x}");
+            //});
 
-            //    var registeredItem = await pIMOperations.GetGovernanceResourceByIdAsync(toRegisterItem.Id);
-            //    Console.WriteLine($"----Printing details of a  Governance Resource-{registeredItem.DisplayName} after registration--");
-            //    Console.WriteLine(await pIMOperations.PrintGovernanceResourceAsync(registeredItem, true, true));
-            //}
+            ////// Filter Registered resources
+            ////var registeredReources = governanceResources.Where(x => x.RegisteredDateTime != null).Take(1).ToList();
+
+            ////ColorConsole.WriteLine(ConsoleColor.Green, $"Discovered a total of {registeredReources.Count} registered resources");
+            ////registeredReources.ForEach(async resource =>
+            ////{
+            ////    ColorConsole.WriteLine(ConsoleColor.Green, $"----Printing details of a registered Governance Resource-{resource.DisplayName}--");
+            ////    var regiteredItem = await pIMOperations.GetGovernanceResourceByIdAsync(resource.Id);
+            ////    //Console.WriteLine(await pIMOperations.PrintGovernanceResourceAsync(resource, true, true));
+
+            ////    ////Roledassignmentsrequests
+            ////    //ColorConsole.WriteLine(ConsoleColor.Yellow, $"\tPrinting role assignment requests of governance resource -'{resource.DisplayName}'");
+            ////    //var roleassignmentRequests = await pIMOperations.ListGovernanceRoleAssignmentRequestsAsync(resource);
+            ////    //roleassignmentRequests.ForEach(async r =>
+            ////    //{
+            ////    //   ColorConsole.WriteLine(ConsoleColor.Cyan, $"\t\t{await pIMOperations.PrintGovernanceRoleAssignmentRequestAsync(r, true)}");
+            ////    //});
+
+            ////    ////Role settings
+            ////    //ColorConsole.WriteLine(ConsoleColor.Yellow, $"\tPrinting role settings of governance resource -'{resource.DisplayName}'");
+            ////    //var roleasettings = await pIMOperations.ListGovernanceRoleSettingsAsync(resource);
+            ////    //roleasettings.ForEach(async r =>
+            ////    //{
+            ////    //   ColorConsole.WriteLine(ConsoleColor.Red, $"\t\t{await pIMOperations.PrintGovernanceRoleSettingAsync(r, true)}");
+            ////    //});
+
+            ////    ColorConsole.WriteLine(ConsoleColor.Green, "--------------------------------------------------------------------------------");
+            ////    return;
+            ////});
+
+            ////// Register a new governed resource
+
+            ////// Unregistered resoruces
+            ////var unregisteredReources = governanceResources.Where(x => x.RegisteredDateTime is null && x.Type == "subscription").ToList();
+            ////var toregister = GenericUtility<Beta.GovernanceResource>.GetaRandomNumberOfItemsFromList(unregisteredReources, 1);
+
+            ////if (toregister.Count > 0)
+            ////{
+            ////    var toRegisterItem = await pIMOperations.GetGovernanceResourceByIdAsync(toregister[0].Id);
+            ////    Console.WriteLine($"----Printing details of a unregistered Governance Resource-{toRegisterItem.DisplayName} before registration--");
+            ////    Console.WriteLine(await pIMOperations.PrintGovernanceResourceAsync(toRegisterItem, true, true));
+
+            ////    ColorConsole.WriteLine(ConsoleColor.Red, $"Registering resource {toRegisterItem.DisplayName}");
+            ////    //await pIMOperations.RegisterGovernanceResourceAsync(toRegisterItem.ExternalId);
+
+            ////    var registeredItem = await pIMOperations.GetGovernanceResourceByIdAsync(toRegisterItem.Id);
+            ////    Console.WriteLine($"----Printing details of a  Governance Resource-{registeredItem.DisplayName} after registration--");
+            ////    Console.WriteLine(await pIMOperations.PrintGovernanceResourceAsync(registeredItem, true, true));
+            ////}
 
             #endregion Privileged Identity Management
 
@@ -374,7 +365,7 @@ namespace ARMApi
             RoleManagementOperations roleManagementOperations = new RoleManagementOperations(betaClient, userOperations);
             DirectoryRolesOperations directoryRolesOperations = new DirectoryRolesOperations(betaClient, userOperations, servicePrincipalOperations);
 
-            // Delete esiting custom role
+            // Delete existing custom role
             string customRoleName = "Application Registration Support Administrator";
 
             var customroles = await roleManagementOperations.GetRoleDefinitionByDisplayNameAsync(customRoleName);
