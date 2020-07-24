@@ -109,6 +109,9 @@ namespace Common
                         // Page through results
                         foreach (var group in groupsCollectionPage.CurrentPage)
                         {
+                            Beta.IGroupMembersCollectionWithReferencesPage members = group.Members;
+                            Beta.IGroupOwnersCollectionWithReferencesPage owners = group.Owners;
+
                             _cachedGroups[group.Id] = group;
                             allGroups.Add(group);
                         }
@@ -540,6 +543,8 @@ namespace Common
             List<Beta.User> allMembers = new List<Beta.User>();
             Beta.IGroupMembersCollectionWithReferencesPage groupMemberPages = null;
 
+            Beta.IGroupMembersCollectionWithReferencesPage members = group.Members;
+            
             if (group?.Members?.Count() > 0)
             {
                 groupMemberPages = group.Members;
@@ -603,6 +608,8 @@ namespace Common
         {
             List<Beta.User> allOwners = new List<Beta.User>();
             Beta.IGroupOwnersCollectionWithReferencesPage groupOwnersPages = null;
+
+            Beta.IGroupOwnersCollectionWithReferencesPage owners = group.Owners;
 
             if (group?.Owners?.Count() > 0)
             {

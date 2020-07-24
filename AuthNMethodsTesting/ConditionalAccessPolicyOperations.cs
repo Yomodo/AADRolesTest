@@ -28,6 +28,28 @@ namespace AuthNMethodsTesting
             this._namedLocationOperations = new NamedLocationOperations(this._graphServiceClient);
         }
 
+        public async Task<Beta.ConditionalAccessPolicy> GetConditionalAccessPolicyByIdAsync(string policyId)
+        {
+            try
+            {
+                return await _graphServiceClient.Identity.ConditionalAccess.Policies[policyId].Request().GetAsync();
+            }
+            catch (ServiceException gex)
+            {
+                if (gex.StatusCode != System.Net.HttpStatusCode.NotFound)
+                {
+                    throw;
+                }
+            }
+            return null;
+        }
+
+        public async Task<Beta.ConditionalAccessPolicy> GetConditionalAccessPolicyByDisplayNameAsync(string policyName)
+        {
+            var policies = await _graphServiceClient.Identity.ConditionalAccess.Policies.Request().Filter($"displayName eq '{policyName}'").GetAsync();
+            return policies.FirstOrDefault();
+        }
+
         public async Task<List<Beta.ConditionalAccessPolicy>> ListConditionalAccessPoliciesAsync()
         {
             List<Beta.ConditionalAccessPolicy> allPolicies = new List<Beta.ConditionalAccessPolicy>();
@@ -60,22 +82,22 @@ namespace AuthNMethodsTesting
 
             if (conditionalAccessPolicy != null)
             {
-                Console.WriteLine($"Processing CA policy {conditionalAccessPolicy.DisplayName}");
+                Console.WriteLine($"Printing CA policy '{conditionalAccessPolicy.DisplayName}'");
 
-                toPrint = $"DisplayName-{conditionalAccessPolicy.DisplayName}, State-{conditionalAccessPolicy.State}";
+                toPrint = $"DisplayName-'{conditionalAccessPolicy.DisplayName}', State-[{conditionalAccessPolicy.State}]";
 
                 if (verbose)
                 {
-                    toPrint = toPrint + $", Id-{conditionalAccessPolicy.Id}, CreatedDateTime-{conditionalAccessPolicy.CreatedDateTime}, ModifiedDateTime-{conditionalAccessPolicy.ModifiedDateTime}";
+                    toPrint = toPrint + $", Id-'{conditionalAccessPolicy.Id}', CreatedDateTime-'{conditionalAccessPolicy.CreatedDateTime}', ModifiedDateTime-'{conditionalAccessPolicy.ModifiedDateTime}'";
                     more.AppendLine("");
 
                     #region Conditions
 
-                    // applications
-                    more.AppendLine($"\tApplications");
 
                     if (conditionalAccessPolicy.Conditions.Applications.IncludeApplications.Count() > 0)
                     {
+                        // applications
+                        //more.AppendLine($"\tApplications");
                         more.AppendLine($"\t\tIncluded applications");
 
                         await conditionalAccessPolicy.Conditions.Applications.IncludeApplications.ForEachAsync(async appId =>
@@ -86,15 +108,23 @@ namespace AuthNMethodsTesting
                             if (isguid)
                             {
                                 var app = await _servicePrincipalOperations.GetServicePrincipalByAppIdAsync(appId);
-                                more.AppendLine($"\t\t\t{app.DisplayName}");
+                                if (app != null)
+                                {
+                                    more.AppendLine($"\t\t\t[{app.DisplayName}]");
+                                }
+                                else
+                                {
+                                    more.AppendLine($"No app matching appid '{appId}' found !");
+                                }
                             }
                             else
                             {
-                                more.AppendLine($"\t\t\t{appId}");
+                                more.AppendLine($"\t\t\t[{appId}]");
                             }
                         });
                     }
 
+                    // Conditions //
                     if (conditionalAccessPolicy.Conditions.Applications.ExcludeApplications.Count() > 0)
                     {
                         more.AppendLine($"\tExcluded applications");
@@ -107,11 +137,11 @@ namespace AuthNMethodsTesting
                             if (isguid)
                             {
                                 var app = await _servicePrincipalOperations.GetServicePrincipalByAppIdAsync(appId);
-                                more.AppendLine($"\t\t\t{app.DisplayName}");
+                                more.AppendLine($"\t\t\t[{app.DisplayName}]");
                             }
                             else
                             {
-                                more.AppendLine($"\t\t\t{appId}");
+                                more.AppendLine($"\t\t\t[{appId}]");
                             }
                         });
                     }
@@ -122,7 +152,7 @@ namespace AuthNMethodsTesting
 
                         await conditionalAccessPolicy.Conditions.Applications.IncludeUserActions.ForEachAsync(act =>
                         {
-                            more.AppendLine($"\t\t\t{act}");
+                            more.AppendLine($"\t\t\t[{act}]");
                         });
                     }
 
@@ -132,7 +162,7 @@ namespace AuthNMethodsTesting
 
                         await conditionalAccessPolicy.Conditions.Applications.AdditionalData.ForEachAsync(data =>
                         {
-                            more.AppendLine($"\t\t\t{data}");
+                            more.AppendLine($"\t\t\t[{data}]");
                         });
                     }
 
@@ -143,7 +173,40 @@ namespace AuthNMethodsTesting
 
                         await conditionalAccessPolicy.Conditions.ClientAppTypes.ForEachAsync(app =>
                         {
-                            more.AppendLine($"\t\t{app}");
+                            more.AppendLine($"\t\t[{app}]");
+                        });
+                    }
+
+                    // Devices
+                    more.AppendLine($"\tDevices");
+
+                    if (conditionalAccessPolicy.Conditions?.Devices?.IncludeDeviceStates?.Count() > 0)
+                    {
+                        more.AppendLine($"\t Included device states");
+
+                        conditionalAccessPolicy.Conditions?.Devices?.IncludeDeviceStates?.ForEachAsync(state =>
+                        {
+                            more.AppendLine($"\t\t\t{state}");
+                        });
+                    }
+
+                    if (conditionalAccessPolicy.Conditions?.Devices?.ExcludeDeviceStates?.Count() > 0)
+                    {
+                        more.AppendLine($"\t\t Device excluded states");
+
+                        conditionalAccessPolicy.Conditions?.Devices?.ExcludeDeviceStates.ForEachAsync(state =>
+                        {
+                            more.AppendLine($"\t\t\t{state}");
+                        });
+                    }
+
+                    if (conditionalAccessPolicy.Conditions.Devices?.AdditionalData?.Count() > 0)
+                    {
+                        more.AppendLine($"\t Additional Data");
+
+                        conditionalAccessPolicy.Conditions?.Devices?.AdditionalData.ForEachAsync(data =>
+                        {
+                            more.AppendLine($"\t\t\t[{data}]");
                         });
                     }
 
@@ -156,7 +219,7 @@ namespace AuthNMethodsTesting
 
                         conditionalAccessPolicy.Conditions?.DeviceStates?.IncludeStates.ForEachAsync(state =>
                         {
-                            more.AppendLine($"\t\t\t{state}");
+                            more.AppendLine($"\t\t\t[{state}]");
                         });
                     }
 
@@ -166,17 +229,17 @@ namespace AuthNMethodsTesting
 
                         conditionalAccessPolicy.Conditions?.DeviceStates?.ExcludeStates.ForEachAsync(state =>
                         {
-                            more.AppendLine($"\t\t\t{state}");
+                            more.AppendLine($"\t\t\t[{state}]");
                         });
                     }
 
-                    if (conditionalAccessPolicy.Conditions.DeviceStates?.AdditionalData?.Count() > 0)
+                    if (conditionalAccessPolicy.Conditions?.DeviceStates?.AdditionalData?.Count() > 0)
                     {
                         more.AppendLine($"\t AdditionalData");
 
                         conditionalAccessPolicy.Conditions?.DeviceStates?.AdditionalData.ForEachAsync(data =>
                         {
-                            more.AppendLine($"\t\t\t{data}");
+                            more.AppendLine($"\t\t\t[{data}]");
                         });
                     }
 
@@ -195,11 +258,11 @@ namespace AuthNMethodsTesting
                             if (isguid)
                             {
                                 var user = await _userOperations.GetUserByIdAsync(userId);
-                                more.AppendLine($"\t\t\t{ _userOperations.PrintBetaUserDetails(user, false, userId)}");
+                                more.AppendLine($"\t\t\t[{ _userOperations.PrintBetaUserDetails(user, false, userId)}]");
                             }
                             else
                             {
-                                more.AppendLine($"\t\t\t{userId}");
+                                more.AppendLine($"\t\t\t[{userId}]");
                             }
                         });
                     }
@@ -216,11 +279,11 @@ namespace AuthNMethodsTesting
                             if (isguid)
                             {
                                 var user = await _userOperations.GetUserByIdAsync(userId);
-                                more.AppendLine($"\t\t\t{ _userOperations.PrintBetaUserDetails(user, false, userId)}");
+                                more.AppendLine($"\t\t\t[{ _userOperations.PrintBetaUserDetails(user, false, userId)}]");
                             }
                             else
                             {
-                                more.AppendLine($"\t\t\t{userId}");
+                                more.AppendLine($"\t\t\t[{userId}]");
                             }
                         });
                     }
@@ -235,7 +298,7 @@ namespace AuthNMethodsTesting
                         conditionalAccessPolicy.Conditions?.Users.IncludeGroups.ForEachAsync(async grpId =>
                         {
                             var Group = await _groupOperations.GetGroupByIdAsync(grpId);
-                            more.AppendLine($"\t\t\t{_groupOperations.PrintGroupBasic(Group)}");
+                            more.AppendLine($"\t\t\t[{_groupOperations.PrintGroupBasic(Group)}]");
                         });
                     }
 
@@ -246,7 +309,7 @@ namespace AuthNMethodsTesting
                         await conditionalAccessPolicy.Conditions.Users.ExcludeGroups.ForEachAsync(async grpId =>
                         {
                             var Group = await _groupOperations.GetGroupByIdAsync(grpId);
-                            more.AppendLine($"\t\t\t{Group.DisplayName}");
+                            more.AppendLine($"\t\t\t[{Group.DisplayName}]");
                         });
                     }
 
@@ -258,7 +321,7 @@ namespace AuthNMethodsTesting
 
                         await conditionalAccessPolicy.Conditions.Users.IncludeRoles.ForEachAsync(role =>
                         {
-                            more.AppendLine($"\t\t\t{role}");
+                            more.AppendLine($"\t\t\t[{role}]");
                         });
                     }
 
@@ -268,7 +331,7 @@ namespace AuthNMethodsTesting
 
                         await conditionalAccessPolicy.Conditions.Users.ExcludeRoles.ForEachAsync(role =>
                         {
-                            more.AppendLine($"\t\t\t{role}");
+                            more.AppendLine($"\t\t\t[{role}]");
                         });
                     }
 
@@ -278,12 +341,13 @@ namespace AuthNMethodsTesting
 
                         await conditionalAccessPolicy.Conditions.Users.AdditionalData.ForEachAsync(data =>
                         {
-                            more.AppendLine($"\t\t\t{data}");
+                            more.AppendLine($"\t\t\t[{data}]");
                         });
                     }
 
                     // Locations
                     more.AppendLine($"\tLocations");
+
                     if (conditionalAccessPolicy.Conditions?.Locations?.IncludeLocations.Count() > 0)
                     {
                         more.AppendLine($"\t Included locations");
@@ -295,11 +359,12 @@ namespace AuthNMethodsTesting
 
                             if (isguid)
                             {
-                                var location = await this._namedLocationOperations.GetNamedLocationByIdAsync(locationId);
-                                more.AppendLine($"\t\t\t{this._namedLocationOperations.PrintNamedLocation(location)}");
+                                var location = await this._namedLocationOperations.GetNamedLocationByIdAsync(locationId).ConfigureAwait(false);
+                                more.AppendLine($"\t\t\t[{this._namedLocationOperations.PrintNamedLocation(location)}]");
                             }
                         });
                     }
+
 
                     if (conditionalAccessPolicy.Conditions?.Locations?.ExcludeLocations.Count() > 0)
                     {
@@ -312,19 +377,19 @@ namespace AuthNMethodsTesting
 
                             if (isguid)
                             {
-                                var location = await this._namedLocationOperations.GetNamedLocationByIdAsync(locationId);
-                                more.AppendLine($"\t\t\t{this._namedLocationOperations.PrintNamedLocation(location)}");
+                                var location = await this._namedLocationOperations.GetNamedLocationByIdAsync(locationId).ConfigureAwait(false); 
+                                more.AppendLine($"\t\t\t[{this._namedLocationOperations.PrintNamedLocation(location)}]");
                             }
                         });
                     }
 
                     if (conditionalAccessPolicy.Conditions?.Locations?.AdditionalData?.Count() > 0)
                     {
-                        more.AppendLine($"\t AdditionalData");
+                        more.AppendLine($"\t Additional Data");
 
                         await conditionalAccessPolicy.Conditions.Locations.AdditionalData.ForEachAsync(data =>
                         {
-                            more.AppendLine($"\t\t\t{data}");
+                            more.AppendLine($"\t\t\t[{data}]");
                         });
                     }
 
@@ -336,7 +401,7 @@ namespace AuthNMethodsTesting
 
                         conditionalAccessPolicy.Conditions?.Platforms?.IncludePlatforms.ForEachAsync(platform =>
                         {
-                            more.AppendLine($"\t\t\t{platform}");
+                            more.AppendLine($"\t\t\t[{platform}]");
                         });
                     }
 
@@ -346,17 +411,39 @@ namespace AuthNMethodsTesting
 
                         conditionalAccessPolicy.Conditions?.Platforms?.ExcludePlatforms.ForEachAsync(platform =>
                         {
-                            more.AppendLine($"\t\t\t{platform}");
+                            more.AppendLine($"\t\t\t[{platform}]");
                         });
                     }
 
                     if (conditionalAccessPolicy.Conditions?.Platforms?.AdditionalData?.Count() > 0)
                     {
-                        more.AppendLine($"\t AdditionalData");
+                        more.AppendLine($"\t Additional Data");
 
                         conditionalAccessPolicy.Conditions?.Platforms?.AdditionalData.ForEachAsync(data =>
                         {
-                            more.AppendLine($"\t\t\t{data}");
+                            more.AppendLine($"\t\t\t[{data}]");
+                        });
+                    }
+
+                    // SignIn Risk Levels
+                    if (conditionalAccessPolicy.Conditions?.SignInRiskLevels.Count() > 0)
+                    {
+                        more.AppendLine($"\t SignIn Risk Levels");
+
+                        conditionalAccessPolicy.Conditions?.SignInRiskLevels?.ForEachAsync(risklevel =>
+                        {
+                            more.AppendLine($"\t\t\t[{risklevel}]");
+                        });
+                    }
+
+                    // User Risk Levels
+                    if (conditionalAccessPolicy.Conditions?.UserRiskLevels.Count() > 0)
+                    {
+                        more.AppendLine($"\t User Risk Levels");
+
+                        conditionalAccessPolicy.Conditions?.UserRiskLevels?.ForEachAsync(risklevel =>
+                        {
+                            more.AppendLine($"\t\t\t[{risklevel}]");
                         });
                     }
 
@@ -364,7 +451,7 @@ namespace AuthNMethodsTesting
 
                     // Grant controls
                     more.AppendLine($"\tGrant Controls");
-                    more.AppendLine($"\tOperator-{conditionalAccessPolicy?.GrantControls?.Operator}");
+                    more.AppendLine($"\tOperator-[{conditionalAccessPolicy?.GrantControls?.Operator}]");
 
                     if (conditionalAccessPolicy?.GrantControls?.BuiltInControls.Count() > 0)
                     {
@@ -372,7 +459,7 @@ namespace AuthNMethodsTesting
 
                         conditionalAccessPolicy?.GrantControls?.BuiltInControls.ForEachAsync(control =>
                         {
-                            more.AppendLine($"\t\t{control}");
+                            more.AppendLine($"\t\t[{control}]");
                         });
                     }
 
@@ -382,7 +469,7 @@ namespace AuthNMethodsTesting
 
                         conditionalAccessPolicy?.GrantControls?.CustomAuthenticationFactors.ForEachAsync(control =>
                         {
-                            more.AppendLine($"\t\t{control}");
+                            more.AppendLine($"\t\t[{control}]");
                         });
                     }
 
@@ -392,7 +479,7 @@ namespace AuthNMethodsTesting
 
                         conditionalAccessPolicy?.GrantControls?.TermsOfUse.ForEachAsync(control =>
                         {
-                            more.AppendLine($"\t\t{control}");
+                            more.AppendLine($"\t\t[{control}]");
                         });
                     }
 
@@ -402,7 +489,7 @@ namespace AuthNMethodsTesting
 
                         conditionalAccessPolicy?.Conditions.Applications.AdditionalData.ForEachAsync(data =>
                         {
-                            more.AppendLine($"\t\t{data}");
+                            more.AppendLine($"\t\t[{data}]");
                         });
                     }
 
@@ -412,28 +499,28 @@ namespace AuthNMethodsTesting
                     {
                         var signInFrequency = conditionalAccessPolicy.SessionControls.SignInFrequency;
 
-                        more.AppendLine($"\t\t SignInFrequency - IsEnabled-{signInFrequency.IsEnabled}, Type- {signInFrequency.Type}, Value-{signInFrequency?.Type.Value}");
+                        more.AppendLine($"\t\t [SignInFrequency - IsEnabled-{signInFrequency.IsEnabled}, Type- {signInFrequency.Type}, Value-{signInFrequency?.Value}]");
                     }
 
                     if (conditionalAccessPolicy?.SessionControls?.PersistentBrowser != null)
                     {
                         var persistentBrowser = conditionalAccessPolicy.SessionControls.PersistentBrowser;
 
-                        more.AppendLine($"\t\t PersistentBrowser - IsEnabled-{persistentBrowser.IsEnabled}, Mode- {persistentBrowser.Mode}");
+                        more.AppendLine($"\t\t [PersistentBrowser - IsEnabled-{persistentBrowser.IsEnabled}, Mode- {persistentBrowser.Mode}]");
                     }
 
                     if (conditionalAccessPolicy?.SessionControls?.ApplicationEnforcedRestrictions != null)
                     {
                         var appEnforcedRestrictions = conditionalAccessPolicy.SessionControls.ApplicationEnforcedRestrictions;
 
-                        more.AppendLine($"\t\t Application Enforced Restrictions - IsEnabled-{appEnforcedRestrictions.IsEnabled}");
+                        more.AppendLine($"\t\t [Application Enforced Restrictions - IsEnabled-{appEnforcedRestrictions.IsEnabled}]");
                     }
 
                     if (conditionalAccessPolicy?.SessionControls?.CloudAppSecurity != null)
                     {
                         var cloudAppSecurity = conditionalAccessPolicy.SessionControls.CloudAppSecurity;
 
-                        more.AppendLine($"\t\t Cloud App Security - IsEnabled-{cloudAppSecurity.IsEnabled}, Value- {cloudAppSecurity?.CloudAppSecurityType.Value}");
+                        more.AppendLine($"\t\t [Cloud App Security - IsEnabled-{cloudAppSecurity.IsEnabled}, Value- {cloudAppSecurity?.CloudAppSecurityType.Value}]");
                     }
                 }
             }

@@ -39,7 +39,10 @@ namespace Common
             {
                 var servicePrincipals = await _graphServiceClient.ServicePrincipals.Request().Filter(searchFilter).GetAsync();
                 servicePrincipal = servicePrincipals.FirstOrDefault();
-                _cachedServicePrincipals[servicePrincipal.Id] = servicePrincipal;
+                if (servicePrincipal != null)
+                {
+                    _cachedServicePrincipals[servicePrincipal.Id] = servicePrincipal;
+                }
             }
             catch (ServiceException sx)
             {

@@ -56,15 +56,19 @@ namespace AuthNMethodsTesting
             // Conditional Access operations
             ConditionalAccessPolicyOperations conditionalAccessPolicyOperations = new ConditionalAccessPolicyOperations(betaClient, userOperations, servicePrincipalOperations, groupOperations);
 
-            // List
-            Console.WriteLine("Getting CA Policies");
-            IList<Beta.ConditionalAccessPolicy> conditionalAccessPolicies = await conditionalAccessPolicyOperations.ListConditionalAccessPoliciesAsync();
+            //// List
+            //Console.WriteLine("Getting CA Policies");
+            //IList<Beta.ConditionalAccessPolicy> conditionalAccessPolicies = await conditionalAccessPolicyOperations.ListConditionalAccessPoliciesAsync();
 
-            for (int i = 0; i < conditionalAccessPolicies.Count; i++)
-            {
-                Console.WriteLine(await conditionalAccessPolicyOperations.PrintConditionalAccessPolicyAsync(conditionalAccessPolicies[i], true));
-                Console.WriteLine("-------------------------------------------------------------------------------");
-            }
+            //for (int i = 0; i < conditionalAccessPolicies.Count; i++)
+            //{
+            //    Console.WriteLine(await conditionalAccessPolicyOperations.PrintConditionalAccessPolicyAsync(conditionalAccessPolicies[i], true));
+            //    Console.WriteLine("-------------------------------------------------------------------------------");
+            //}
+
+            var policy = await conditionalAccessPolicyOperations.GetConditionalAccessPolicyByDisplayNameAsync("Kalyan test");
+            Console.WriteLine(await conditionalAccessPolicyOperations.PrintConditionalAccessPolicyAsync(policy, true));
+
 
             // Risk detection operations
 

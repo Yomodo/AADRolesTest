@@ -2,6 +2,7 @@
 
 using Microsoft.Graph;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Beta = BetaLib.Microsoft.Graph;
@@ -11,10 +12,12 @@ namespace AuthNMethodsTesting
     public class NamedLocationOperations
     {
         private Beta.GraphServiceClient _graphServiceClient;
+        private ConcurrentDictionary<string, Beta.NamedLocation> _cachedNamedLocations;
 
         public NamedLocationOperations(Beta.GraphServiceClient graphServiceClient)
         {
             this._graphServiceClient = graphServiceClient;
+            _cachedNamedLocations = new ConcurrentDictionary<string, Beta.NamedLocation>();
         }
 
         public async Task<List<Beta.NamedLocation>> ListNamedLocationsAsync()
@@ -89,6 +92,8 @@ namespace AuthNMethodsTesting
                         {
                             //Console.WriteLine($"Role:{namedLocations.DisplayName}");
                             allnamedLocations.Add(namedLocation);
+
+                            _cachedNamedLocations[namedLocation.Id] = namedLocation;
                         }
 
                         // are there more pages (Has a @odata.nextLink ?)

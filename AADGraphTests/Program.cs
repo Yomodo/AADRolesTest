@@ -213,98 +213,101 @@ namespace Common
 
             #endregion appRoleAssignments
 
-            #region Unified Groups operations
+            #region Groups operations
 
-            //GroupOperations groupOperations = new GroupOperations(betaClient);
-            //UserOperations userOperations = new UserOperations(betaClient);
-            //Beta.Group newGroup = null;
-            //bool groupCreated = false;
+            GroupOperations groupOperations = new GroupOperations(betaClient);
+            UserOperations userOperations = new UserOperations(betaClient);
+            Beta.Group newGroup = null;
+            bool groupCreated = false;
 
-            //try
-            //{
-            //    IEnumerable<Beta.User> allUsersInTenant = await userOperations.GetUsersAsync();
-            //    IEnumerable<Beta.User> allNonGuestUsersInTenant = await userOperations.GetNonGuestUsersAsync();
+            try
+            {
+                IEnumerable<Beta.User> allUsersInTenant = await userOperations.GetUsersAsync();
+                IEnumerable<Beta.User> allNonGuestUsersInTenant = await userOperations.GetNonGuestUsersAsync();
 
-            //    IEnumerable<Beta.User> membersToAdd = GenericUtility<Beta.User>.GetaRandomNumberOfItemsFromList(allNonGuestUsersInTenant, 5);
-            //    IList<Beta.User> ownersToAdd = GenericUtility<Beta.User>.GetaRandomNumberOfItemsFromList(allNonGuestUsersInTenant, 2);
+                IEnumerable<Beta.User> membersToAdd = GenericUtility<Beta.User>.GetaRandomNumberOfItemsFromList(allNonGuestUsersInTenant, 5);
+                IList<Beta.User> ownersToAdd = GenericUtility<Beta.User>.GetaRandomNumberOfItemsFromList(allNonGuestUsersInTenant, 2);
 
-            //    var signedInUser = await userOperations.GetMeAsync();
-            //    if (ownersToAdd.Where(x => x.Id == signedInUser.Id).Count() == 0)
-            //    {
-            //        ownersToAdd.Add(signedInUser);
-            //    }
+                var signedInUser = await userOperations.GetMeAsync();
+                if (ownersToAdd.Where(x => x.Id == signedInUser.Id).Count() == 0)
+                {
+                    ownersToAdd.Add(signedInUser);
+                }
 
-            //    IEnumerable<Beta.User> ownersToUpdate = allNonGuestUsersInTenant.Except(ownersToAdd).Take(2);
-            //    IEnumerable<Beta.User> membersToUpdate = allNonGuestUsersInTenant.Except(membersToAdd).Take(5);
+                IEnumerable<Beta.User> ownersToUpdate = allNonGuestUsersInTenant.Except(ownersToAdd).Take(2);
+                IEnumerable<Beta.User> membersToUpdate = allNonGuestUsersInTenant.Except(membersToAdd).Take(5);
 
-            //    newGroup = await groupOperations.CreateUnifiedGroupAsync(tenant, membersToAdd, ownersToAdd);
+                newGroup = await groupOperations.CreateUnifiedGroupAsync(tenant, membersToAdd, ownersToAdd);
 
-            //    // Wait for group to be created
-            //    Beta.Group grp = null;
+                // Wait for group to be created
+                Beta.Group grp = null;
 
-            //    while (grp == null)
-            //    {
-            //        await Task.Delay(3000);
-            //        grp = await groupOperations.GetGroupByIdAsync(newGroup.Id, true);
-            //        if(grp == null)
-            //        {
-            //            ColorConsole.WriteLine(ConsoleColor.DarkGreen, $"Failed to pick details of the newly created dynamic group. Trying again.. ");
-            //        }
-            //    }
+                while (grp == null)
+                {
+                    await Task.Delay(3000);
+                    grp = await groupOperations.GetGroupByIdAsync(newGroup.Id, true);
+                    if (grp == null)
+                    {
+                        ColorConsole.WriteLine(ConsoleColor.DarkGreen, $"Failed to pick details of the newly created dynamic group. Trying again.. ");
+                    }
+                }
 
-            //    groupCreated = true;
-            //    ColorConsole.WriteLine(ConsoleColor.Green, $"Printing details of the newly created Unified group ");
-            //    Console.WriteLine(await groupOperations.PrintGroupDetails(newGroup, true, true));
+                groupCreated = true;
+                ColorConsole.WriteLine(ConsoleColor.Green, $"Printing details of the newly created Unified group ");
+                Console.WriteLine(await groupOperations.PrintGroupDetails(newGroup, true, true));
 
-            //    ColorConsole.WriteLine(ConsoleColor.Green, $"Updating group's owners and members");
-            //    // Update List
-            //    foreach (var owner in ownersToUpdate)
-            //    {
-            //        await groupOperations.AddOwnerToGroupAsync(newGroup, owner);
-            //    }
+                ColorConsole.WriteLine(ConsoleColor.Green, $"Updating group's owners and members");
+                // Update List
+                foreach (var owner in ownersToUpdate)
+                {
+                    await groupOperations.AddOwnerToGroupAsync(newGroup, owner);
+                }
 
-            //    foreach (var member in membersToUpdate)
-            //    {
-            //        await groupOperations.AddMemberToGroup(newGroup, member);
-            //    }
+                foreach (var member in membersToUpdate)
+                {
+                    await groupOperations.AddMemberToGroup(newGroup, member);
+                }
 
-            //    await Task.Delay(3000); 
-            //    ColorConsole.WriteLine(ConsoleColor.Green, $"Printing details of the newly created Unified group after updating group's owners and members.");
-            //    Console.WriteLine(await groupOperations.PrintGroupDetails(newGroup, true, true));
+                await Task.Delay(3000);
+                Beta.Group group = await groupOperations.GetGroupByIdAsync(newGroup.Id, true);
 
-            //    //newGroup = await groupOperations.AllowExternalSendersAsync(newGroup);
+                ColorConsole.WriteLine(ConsoleColor.Green, $"Printing details of the newly created Unified group after updating group's owners and members.");
+                Console.WriteLine(await groupOperations.PrintGroupDetails(group, true, true));
 
-            //    // Delete a bunch
-            //    ColorConsole.WriteLine(ConsoleColor.Green, $"Deleting a few group's owners and members.");
-            //    foreach (var owner in ownersToAdd)
-            //    {
-            //        await groupOperations.RemoveGroupOwnerAsync(newGroup, owner);
-            //    }
+                //newGroup = await groupOperations.AllowExternalSendersAsync(newGroup);
 
-            //    foreach (var member in membersToAdd)
-            //    {
-            //        await groupOperations.RemoveGroupMemberAsync(newGroup, member);
-            //    }
+                // Delete a bunch
+                ColorConsole.WriteLine(ConsoleColor.Green, $"Deleting a few group's owners and members.");
+                foreach (var owner in ownersToAdd)
+                {
+                    await groupOperations.RemoveGroupOwnerAsync(newGroup, owner);
+                }
 
-            //    await Task.Delay(3000);
-            //    ColorConsole.WriteLine(ConsoleColor.Green, $"Printing details of the newly created Unified group after deleting a few group's owners and members.");
-            //    Console.WriteLine(await groupOperations.PrintGroupDetails(newGroup, true, true));
-            //}
-            //catch (Exception ex)
-            //{
-            //    ColorConsole.WriteLine(ConsoleColor.Red, $"{ex}");
-            //}
-            //finally
-            //{
-            //    if (groupCreated)
-            //    {
-            //        ColorConsole.WriteLine(ConsoleColor.Green, "Press any key to delete this group");
-            //        Console.ReadKey();
-            //        await groupOperations.DeleteGroupAsync(newGroup);
-            //    }
-            //}
+                foreach (var member in membersToAdd)
+                {
+                    await groupOperations.RemoveGroupMemberAsync(newGroup, member);
+                }
 
-            #endregion Unified Groups operations
+                await Task.Delay(3000);
+                group = await groupOperations.GetGroupByIdAsync(newGroup.Id, true);
+                ColorConsole.WriteLine(ConsoleColor.Green, $"Printing details of the newly created Unified group after deleting a few group's owners and members.");
+                Console.WriteLine(await groupOperations.PrintGroupDetails(newGroup, true, true));
+            }
+            catch (Exception ex)
+            {
+                ColorConsole.WriteLine(ConsoleColor.Red, $"{ex}");
+            }
+            finally
+            {
+                if (groupCreated)
+                {
+                    ColorConsole.WriteLine(ConsoleColor.Green, "Press any key to delete this group");
+                    Console.ReadKey();
+                    await groupOperations.DeleteGroupAsync(newGroup);
+                }
+            }
+
+            #endregion Groups operations
 
             #region Delta Groups operations
 
@@ -324,7 +327,7 @@ namespace Common
 
             //IList<Beta.User> ownersToAdd = GenericUtility<Beta.User>.GetaRandomNumberOfItemsFromList(allNonGuestUsersInTenant.Except(new List<Beta.User> { signedInUser }), 2);
 
-            //if (ownersToAdd.Where(x=> x.Id == signedInUser.Id).Count() == 0)
+            //if (ownersToAdd.Where(x => x.Id == signedInUser.Id).Count() == 0)
             //{
             //    ownersToAdd.Add(signedInUser);
             //}
