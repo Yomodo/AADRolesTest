@@ -1,16 +1,12 @@
 ﻿extern alias BetaLib;
 
 using Common;
-using AuthNMethodsTesting.Model;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Graph;
 using Microsoft.Graph.Auth;
 using Microsoft.Identity.Client;
-using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Beta = BetaLib.Microsoft.Graph;
 
@@ -46,15 +42,15 @@ namespace AuthNMethodsTesting
             InteractiveAuthenticationProvider authenticationProvider = new InteractiveAuthenticationProvider(app, scopes);
             Beta.GraphServiceClient betaClient = new Beta.GraphServiceClient(authenticationProvider);
 
-            ServicePrincipalOperations servicePrincipalOperations = new ServicePrincipalOperations(betaClient);
-            UserOperations userOperations = new UserOperations(betaClient, "woodgrove.ms");
-            GroupOperations groupOperations = new GroupOperations(betaClient);
+            //ServicePrincipalOperations servicePrincipalOperations = new ServicePrincipalOperations(betaClient);
+            //UserOperations userOperations = new UserOperations(betaClient, "woodgrove.ms");
+            //GroupOperations groupOperations = new GroupOperations(betaClient);
 
             //IEnumerable<Beta.User> allUsersInTenant = await userOperations.GetUsersAsync();
             //IList<Beta.User> randomUsersFromTenant = GenericUtility<Beta.User>.GetaRandomNumberOfItemsFromList(allUsersInTenant, 5);
 
-            // Conditional Access operations
-            ConditionalAccessPolicyOperations conditionalAccessPolicyOperations = new ConditionalAccessPolicyOperations(betaClient, userOperations, servicePrincipalOperations, groupOperations);
+            //// Conditional Access operations
+            //ConditionalAccessPolicyOperations conditionalAccessPolicyOperations = new ConditionalAccessPolicyOperations(betaClient, userOperations, servicePrincipalOperations, groupOperations);
 
             //// List
             //Console.WriteLine("Getting CA Policies");
@@ -66,8 +62,8 @@ namespace AuthNMethodsTesting
             //    Console.WriteLine("-------------------------------------------------------------------------------");
             //}
 
-            var policy = await conditionalAccessPolicyOperations.GetConditionalAccessPolicyByDisplayNameAsync("Kalyan test");
-            Console.WriteLine(await conditionalAccessPolicyOperations.PrintConditionalAccessPolicyAsync(policy, true));
+            //var policy = await conditionalAccessPolicyOperations.GetConditionalAccessPolicyByDisplayNameAsync("Kalyan test");
+            //Console.WriteLine(await conditionalAccessPolicyOperations.PrintConditionalAccessPolicyAsync(policy, true));
 
 
             // Risk detection operations
@@ -189,6 +185,11 @@ namespace AuthNMethodsTesting
             // await GetUsersAuthenticationMethodsAsync(betaClient);
             // await GetUsersPhoneMethodsAsync(betaClient);
 
+            // Device registration policy operations
+            DeviceRegistrationPolicySettingsOperations deviceRegistrationPolicySettingsOperations = new DeviceRegistrationPolicySettingsOperations(betaClient);
+            var deviceregistrationpolicy = await deviceRegistrationPolicySettingsOperations.GetDeviceRegistrationPolicyAsync();
+            Console.WriteLine(deviceRegistrationPolicySettingsOperations.PrintDeviceRegistrationPolicy(deviceregistrationpolicy));
+
             Console.WriteLine("Press any key to exit");
             Console.ReadKey();
         }
@@ -207,40 +208,6 @@ namespace AuthNMethodsTesting
             return false;
         }
 
-        private static async Task GetUsersAuthenticationMethodsAsync(Beta.GraphServiceClient graphServiceClient)
-        {
-            var requestUrl = "https://graph.microsoft.com/beta/me/authentication/methods";
-            HttpHelper httpHelper = new HttpHelper(new ColorConsoleLogger());
-            HttpClient httpClient = await graphServiceClient.GetHttpClientForMSGraphAsync();
-
-            HttpResponseMessage rawResponse = await httpHelper.GetRawHttpResponseAsync(httpClient, async client => await client.GetAsync(requestUrl));
-
-            string jsonresponse = rawResponse.ProcessHttpResponse();
-
-            JObject callresults = JObject.Parse(jsonresponse);
-            // get JSON result objects into a list
-            IList<JToken> results = callresults["value"].Children().ToList();
-
-            authenticationMethod authenticationMethod = results[0].ToObject<authenticationMethod>();
-            ColorConsole.WriteLine(ConsoleColor.Green, $"id-{authenticationMethod.id}, isUsable-{authenticationMethod.isUsable}, phoneNumber-{authenticationMethod.phoneNumber}");
-        }
-
-        private static async Task GetUsersPhoneMethodsAsync(Beta.GraphServiceClient graphServiceClient)
-        {
-            var requestUrl = "https://graph.microsoft.com/beta/me/authentication/phoneMethods";
-            HttpHelper httpHelper = new HttpHelper(new ColorConsoleLogger());
-            HttpClient httpClient = await graphServiceClient.GetHttpClientForMSGraphAsync();
-
-            HttpResponseMessage rawResponse = await httpHelper.GetRawHttpResponseAsync(httpClient, async client => await client.GetAsync(requestUrl));
-
-            string jsonresponse = rawResponse.ProcessHttpResponse();
-
-            JObject callresults = JObject.Parse(jsonresponse);
-            // get JSON result objects into a list
-            IList<JToken> results = callresults["value"].Children().ToList();
-
-            phoneAuthenticationMethod phoneMethod = results[0].ToObject<phoneAuthenticationMethod>();
-            ColorConsole.WriteLine(ConsoleColor.Green, $"phoneType-{phoneMethod.phoneType}, phoneNumber-{phoneMethod.phoneNumber}, smsSignInState-{phoneMethod.smsSignInState}");
-        }
+       
     }
 }

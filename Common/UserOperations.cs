@@ -29,6 +29,20 @@ namespace Common
             return await _graphServiceClient.Me.Request().GetAsync();
         }
 
+        public async Task<List<string>> GetMyMemberObjectsAsync(bool? securityEnabledOnly = true)
+        {
+            // Call /me Api
+            var memberObjects = await _graphServiceClient.Me.GetMemberObjects(securityEnabledOnly).Request().PostAsync();
+            return await ProcessIDirectoryObjectGetMemberObjectsCollectionPage(memberObjects);
+        }
+
+        public async Task<List<string>> GetMyMemberGroupsAsync(bool? securityEnabledOnly = false)
+        {
+            // Call /me Api
+            var memberObjects = await _graphServiceClient.Me.GetMemberGroups(securityEnabledOnly).Request().PostAsync();
+            return await ProcessIDirectoryObjectGetMemberGroupsCollectionPage(memberObjects);
+        }        
+
         public async Task<Beta.User> GetUserByDisplayNameAsync(string displayName, bool useSelect = true)
         {
             Beta.User user = null;
@@ -405,5 +419,80 @@ namespace Common
 
             return allUsers;
         }
+
+        private async Task<List<string>> ProcessIDirectoryObjectGetMemberObjectsCollectionPage(Beta.IDirectoryObjectGetMemberObjectsCollectionPage collectionPage)
+        {
+            List<string> allMemberObjects = new List<string>();
+
+            try
+            {
+                if (collectionPage != null)
+                {
+                    do
+                    {
+                        // Page through results
+                        foreach (var memberObject in collectionPage.CurrentPage)
+                        {
+                            allMemberObjects.Add(memberObject);
+                        }
+
+                        // are there more pages (Has a @odata.nextLink ?)
+                        if (collectionPage.NextPageRequest != null)
+                        {
+                            collectionPage = await collectionPage.NextPageRequest.PostAsync();
+                        }
+                        else
+                        {
+                            collectionPage = null;
+                        }
+                    } while (collectionPage != null);
+                }
+            }
+            catch (ServiceException e)
+            {
+                Console.WriteLine($"We could not process the member objects list: {e}");
+                return null;
+            }
+
+            return allMemberObjects;
+        }
+
+        private async Task<List<string>> ProcessIDirectoryObjectGetMemberGroupsCollectionPage(Beta.IDirectoryObjectGetMemberGroupsCollectionPage collectionPage)
+        {
+            List<string> allMemberObjects = new List<string>();
+
+            try
+            {
+                if (collectionPage != null)
+                {
+                    do
+                    {
+                        // Page through results
+                        foreach (var memberObject in collectionPage.CurrentPage)
+                        {
+                            allMemberObjects.Add(memberObject);
+                        }
+
+                        // are there more pages (Has a @odata.nextLink ?)
+                        if (collectionPage.NextPageRequest != null)
+                        {
+                            collectionPage = await collectionPage.NextPageRequest.PostAsync();
+                        }
+                        else
+                        {
+                            collectionPage = null;
+                        }
+                    } while (collectionPage != null);
+                }
+            }
+            catch (ServiceException e)
+            {
+                Console.WriteLine($"We could not process the member objects list: {e}");
+                return null;
+            }
+
+            return allMemberObjects;
+        }
+
     }
 }

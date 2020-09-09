@@ -82,7 +82,7 @@ namespace AuthNMethodsTesting
 
             if (conditionalAccessPolicy != null)
             {
-                Console.WriteLine($"Printing CA policy '{conditionalAccessPolicy.DisplayName}'");
+                //Console.WriteLine($"Printing CA policy '{conditionalAccessPolicy.DisplayName}'");
 
                 toPrint = $"DisplayName-'{conditionalAccessPolicy.DisplayName}', State-[{conditionalAccessPolicy.State}]";
 

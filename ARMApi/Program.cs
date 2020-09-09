@@ -171,8 +171,9 @@ namespace ARMApi
             UserOperations userOperations = new UserOperations(betaClient);
             ServicePrincipalOperations servicePrincipalOperations = new ServicePrincipalOperations(betaClient);
             GroupOperations groupOperations = new GroupOperations(betaClient);
+            DirectoryRolesOperations directoryRolesOperations = new DirectoryRolesOperations(betaClient, userOperations, servicePrincipalOperations);
 
-            DirectoryObjectOperations directoryObjectOperations = new DirectoryObjectOperations(betaClient, userOperations, groupOperations, servicePrincipalOperations);
+            DirectoryObjectOperations directoryObjectOperations = new DirectoryObjectOperations(betaClient, userOperations, groupOperations, servicePrincipalOperations, directoryRolesOperations);
 
             //RoleManagementOperations roleManagementOperations = new RoleManagementOperations(betaClient, userOperations);
             //DirectoryRolesOperations directoryRolesOperations = new DirectoryRolesOperations(betaClient, userOperations, servicePrincipalOperations);
@@ -182,6 +183,39 @@ namespace ARMApi
 
             //IEnumerable<Beta.ServicePrincipal> allServicePrincipals = await servicePrincipalOperations.GetAllServicePrincipalsAsync();
             //IList<Beta.ServicePrincipal> randomServicePrincipals = GenericUtility<Beta.ServicePrincipal>.GetaRandomNumberOfItemsFromList(allServicePrincipals, 3);
+
+            #region Get member objects
+
+            //foreach (var user in randomUsersFromTenant)
+            //{
+            //    ColorConsole.WriteLine(ConsoleColor.Green, $"Printing member objects of user {userOperations.PrintBetaUserDetails(user, false)}");
+            //    var memberObjects = await userOperations.GetMyMemberObjectsAsync();
+
+            //    foreach (var memberobject in memberObjects)
+            //    {
+            //        var directoryObject = await directoryObjectOperations.GetDirectoryObjectByIdAsync(memberobject);
+            //        //ColorConsole.WriteLine(ConsoleColor.White, $"{memberobject}");
+            //        ColorConsole.WriteLine(ConsoleColor.White, $"{directoryObjectOperations.PrintDirectoryObject(directoryObject)}");
+            //    }
+            //}
+
+            #endregion Get member objects
+
+            #region Get member groups
+
+            foreach (var user in randomUsersFromTenant)
+            {
+                ColorConsole.WriteLine(ConsoleColor.Green, $"Printing member groups of user {userOperations.PrintBetaUserDetails(user, false)}");
+                var memberGroups = await userOperations.GetMyMemberGroupsAsync();
+
+                foreach (var membergroup in memberGroups)
+                {
+                    var directoryObject = await directoryObjectOperations.GetDirectoryObjectByIdAsync(membergroup);
+                    ColorConsole.WriteLine(ConsoleColor.White, $"{directoryObjectOperations.PrintDirectoryObject(directoryObject)}");
+                }
+            }
+
+            #endregion Get member groups
 
             #region Privileged Identity Management
             //// https://aka.ms/PIMFeatureUpdateDoc
@@ -360,98 +394,111 @@ namespace ARMApi
 
             #endregion Directory roles and assignment
 
+            #region Unified role definitions
+
+            //RoleManagementOperations roleManagementOperations = new RoleManagementOperations(betaClient, userOperations);
+
+            //IList<string> builtInRoles = new List<string>() { "User Account Administrator", "Device Administrators", "Application Administrator", "Security Administrator" };
+
+            //foreach (var role in builtInRoles)
+            //{
+            //    var unifiedroledef = await roleManagementOperations.GetRoleDefinitionByDisplayNameAsync(role);
+
+            //    await roleManagementOperations.PrintRoleDefinition(unifiedroledef, true, true);
+            //}
+            #endregion Unified role definitions
+
             #region Unified role definition and assignment
 
-            RoleManagementOperations roleManagementOperations = new RoleManagementOperations(betaClient, userOperations);
-            DirectoryRolesOperations directoryRolesOperations = new DirectoryRolesOperations(betaClient, userOperations, servicePrincipalOperations);
+            //RoleManagementOperations roleManagementOperations = new RoleManagementOperations(betaClient, userOperations);
 
-            // Delete existing custom role
-            string customRoleName = "Application Registration Support Administrator";
+            //// Delete existing custom role
+            //string customRoleName = "Application Registration Support Administrator";
 
-            var customroles = await roleManagementOperations.GetRoleDefinitionByDisplayNameAsync(customRoleName);
+            //var customroles = await roleManagementOperations.GetRoleDefinitionByDisplayNameAsync(customRoleName);
 
-            if (customroles.ToList().Count() > 0)
-            {
-                customroles.ForEach(async x =>
-                {
-                    ColorConsole.WriteLine(ConsoleColor.Green, $"Deleting custom role '{x.DisplayName}'");
-                    await roleManagementOperations.DeleteRoleDefinitionAsync(x.Id);
-                });
-            }
+            //if (customroles.ToList().Count() > 0)
+            //{
+            //    customroles.ForEach(async x =>
+            //    {
+            //        ColorConsole.WriteLine(ConsoleColor.Green, $"Deleting custom role '{x.DisplayName}'");
+            //        await roleManagementOperations.DeleteRoleDefinitionAsync(x.Id);
+            //    });
+            //}
 
-            // Create
-            Console.WriteLine("Creating role definition");
-            var roledefinition = await roleManagementOperations.CreateRoleDefinition();
+            //// Create
+            //Console.WriteLine("Creating role definition");
+            //var roledefinition = await roleManagementOperations.CreateCustomRoleDefinition();
 
-            try
-            {
-                // Get
-                Console.WriteLine("Getting role definition");
-                roledefinition = await roleManagementOperations.GetRoleDefinitionByIdAsync(roledefinition.Id);
-                await roleManagementOperations.PrintRoleDefinition(roledefinition, false);
+            //try
+            //{
+            //    // Get
+            //    Console.WriteLine("Getting role definition");
+            //    roledefinition = await roleManagementOperations.GetRoleDefinitionByIdAsync(roledefinition.Id);
+            //    await roleManagementOperations.PrintRoleDefinition(roledefinition, false);
 
-                // Update
-                Console.WriteLine("Updating role definition");
-                await roleManagementOperations.UpdateRoleDefinitionAsync(roledefinition.Id, true);
+            //    // Update
+            //    Console.WriteLine("Updating role definition");
+            //    await roleManagementOperations.UpdateRoleDefinitionAsync(roledefinition.Id, true);
 
-                Console.WriteLine("Creating role assignments");
-                IList<Beta.UnifiedRoleAssignment> roleAssignments = await roleManagementOperations.CreateRoleAssignment(roledefinition, randomUsersFromTenant);
+            //    Console.WriteLine("Creating role assignments");
+            //    IList<Beta.UnifiedRoleAssignment> roleAssignments = await roleManagementOperations.CreateRoleAssignment(roledefinition, randomUsersFromTenant);
 
-                //Get roleAssignemnt
-                Console.WriteLine("Getting newly created role assignments");
-                foreach (var newroleAssignment in roleAssignments)
-                {
-                    var roleAssignment = await roleManagementOperations.GetRoleAssignmentByIdAsync(newroleAssignment.Id);
-                    Console.WriteLine("\t" + await roleManagementOperations.PrintRoleAssignment(roleAssignment));
-                }
+            //    //Get roleAssignemnt
+            //    Console.WriteLine("Getting newly created role assignments");
+            //    foreach (var newroleAssignment in roleAssignments)
+            //    {
+            //        var roleAssignment = await roleManagementOperations.GetRoleAssignmentByIdAsync(newroleAssignment.Id);
+            //        Console.WriteLine("\t" + await roleManagementOperations.PrintRoleAssignment(roleAssignment));
+            //    }
 
-                // Get
-                Console.WriteLine("Getting role definition with assignments after update");
-                roledefinition = await roleManagementOperations.GetRoleDefinitionByIdAsync(roledefinition.Id);
-                await roleManagementOperations.PrintRoleDefinition(roledefinition, false);
+            //    // Get
+            //    Console.WriteLine("Getting role definition with assignments after update");
+            //    roledefinition = await roleManagementOperations.GetRoleDefinitionByIdAsync(roledefinition.Id);
+            //    await roleManagementOperations.PrintRoleDefinition(roledefinition, false);
 
-                // removing role assignments
-                Console.WriteLine("Removing role assignments");
+            //    // removing role assignments
+            //    Console.WriteLine("Removing role assignments");
 
-                int assignmentsToRemove = roleAssignments.Count - 3;
-                for (int i = 0; i < assignmentsToRemove; i++)
-                {
-                    await roleManagementOperations.DeleteRoleAssignmentAsync(roleAssignments[i].Id);
-                }
-                await roleManagementOperations.PrintRoleDefinition(roledefinition, true);
+            //    int assignmentsToRemove = roleAssignments.Count - 3;
+            //    for (int i = 0; i < assignmentsToRemove; i++)
+            //    {
+            //        await roleManagementOperations.DeleteRoleAssignmentAsync(roleAssignments[i].Id);
+            //    }
+            //    await roleManagementOperations.PrintRoleDefinition(roledefinition, true);
 
-                //List
-                Console.WriteLine("Listing all role definitions");
-                var roleDefinitions = await roleManagementOperations.ListUnifiedRoleDefinitions();
-                roleDefinitions.ForEach(y => ColorConsole.WriteLine(ConsoleColor.Green, $"Role:- DisplayName-{y.DisplayName}, IsBuiltIn-{y.IsBuiltIn},IsEnabled-{y.IsEnabled}Id-{y.Id},Description-{y.Description}"));
-            }
-            catch (Exception ex)
-            {
-                ColorConsole.WriteLine(ConsoleColor.Red, $"{ex}");
-            }
-            finally
-            {
-                // Delete role definition
-                ColorConsole.WriteLine(ConsoleColor.DarkRed, "Deleting role definition");
-                await roleManagementOperations.DeleteRoleDefinitionAsync(roledefinition.Id);
+            //    //List
+            //    Console.WriteLine("Listing all role definitions");
+            //    var roleDefinitions = await roleManagementOperations.ListUnifiedRoleDefinitions();
+            //    roleDefinitions.ForEach(y => ColorConsole.WriteLine(ConsoleColor.Green, $"Role:- DisplayName-{y.DisplayName}, IsBuiltIn-{y.IsBuiltIn},IsEnabled-{y.IsEnabled}Id-{y.Id},Description-{y.Description}"));
+            //}
+            //catch (Exception ex)
+            //{
+            //    ColorConsole.WriteLine(ConsoleColor.Red, $"{ex}");
+            //}
+            //finally
+            //{
+            //    // Delete role definition
+            //    ColorConsole.WriteLine(ConsoleColor.DarkRed, "Deleting role definition");
+            //    await roleManagementOperations.DeleteRoleDefinitionAsync(roledefinition.Id);
 
-                roledefinition = await roleManagementOperations.GetRoleDefinitionByIdAsync(roledefinition.Id);
+            //    roledefinition = await roleManagementOperations.GetRoleDefinitionByIdAsync(roledefinition.Id);
 
-                if (roledefinition == null)
-                {
-                    ColorConsole.WriteLine(ConsoleColor.Green, "Role definition successfully deleted");
-                }
+            //    if (roledefinition == null)
+            //    {
+            //        ColorConsole.WriteLine(ConsoleColor.Green, "Role definition successfully deleted");
+            //    }
 
-                IEnumerable<Beta.UnifiedRoleDefinition> roledefinitionstoDelete = await roleManagementOperations.GetRoleDefinitionByDisplayNameAsync("Application Registration Support Administrator");
+            //    IEnumerable<Beta.UnifiedRoleDefinition> roledefinitionstoDelete = await roleManagementOperations.GetRoleDefinitionByDisplayNameAsync("Application Registration Support Administrator");
 
-                if (roledefinitionstoDelete.Count() > 0)
-                {
-                    foreach (var roleDef in roledefinitionstoDelete)
-                    {
-                        await roleManagementOperations.DeleteRoleDefinitionAsync(roleDef.Id);
-                    }
-                }
-            }
+            //    if (roledefinitionstoDelete.Count() > 0)
+            //    {
+            //        foreach (var roleDef in roledefinitionstoDelete)
+            //        {
+            //            await roleManagementOperations.DeleteRoleDefinitionAsync(roleDef.Id);
+            //        }
+            //    }
+            //}
 
             #endregion Unified role definition and assignment
 

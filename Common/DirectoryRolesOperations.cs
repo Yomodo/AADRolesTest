@@ -1,6 +1,5 @@
 ﻿extern alias BetaLib;
 
-using Common;
 using Microsoft.Graph;
 using System;
 using System.Collections.Generic;
@@ -9,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Beta = BetaLib.Microsoft.Graph;
 
-namespace ARMApi
+namespace Common
 {
     public class DirectoryRolesOperations
     {
@@ -123,6 +122,20 @@ namespace ARMApi
                 Console.WriteLine($"Failed to remove '{directoryObject.Id}' from role '{directoryRole.Id}'");
                 throw;
             }
+        }
+
+        public string PrintDirectoryRoleBasicAsync(Beta.DirectoryRole directoryRole)
+        {
+            string retVal;
+
+            if (directoryRole == null)
+            {
+                retVal = "The provided directory role object is null";
+            }
+
+            retVal = $"DisplayName-'{directoryRole.DisplayName}', Id-'{directoryRole.Id}'";
+
+            return retVal;
         }
 
         public async Task<string> PrintDirectoryRoleAsync(Beta.DirectoryRole directoryRole, bool verbose = false, bool printMembers = true)

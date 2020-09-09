@@ -3,8 +3,6 @@
 using Microsoft.Graph;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Beta = BetaLib.Microsoft.Graph;
@@ -17,16 +15,18 @@ namespace Common
         private UserOperations _userOperations;
         private GroupOperations _groupOperations;
         private ServicePrincipalOperations _servicePrincipalOperations;
+        private DirectoryRolesOperations _directoryRolesOperations;
 
         private ConcurrentDictionary<string, Beta.DirectoryObject> _cachedDirectoryObjects;
 
         public DirectoryObjectOperations(Beta.GraphServiceClient graphServiceClient, UserOperations userOperations
-            , GroupOperations groupOperations, ServicePrincipalOperations servicePrincipalOperations)
+            , GroupOperations groupOperations, ServicePrincipalOperations servicePrincipalOperations, DirectoryRolesOperations directoryRolesOperations)
         {
             this._graphServiceClient = graphServiceClient;
             this._userOperations = userOperations;
             this._groupOperations = groupOperations;
             this._servicePrincipalOperations = servicePrincipalOperations;
+            this._directoryRolesOperations = directoryRolesOperations;
 
             _cachedDirectoryObjects = new ConcurrentDictionary<string, Beta.DirectoryObject>();
         }
@@ -42,9 +42,7 @@ namespace Common
 
             try
             {
-
                 directoryObject = await _graphServiceClient.DirectoryObjects[directoryObjectId].Request().GetAsync();
-
 
                 _cachedDirectoryObjects[directoryObject.Id] = directoryObject;
             }
@@ -72,15 +70,19 @@ namespace Common
             {
                 if (directoryObject is Beta.User)
                 {
-                    sb.AppendLine($"User:{this._userOperations.PrintBetaUserDetails(directoryObject as Beta.User, verbose)}");
+                    sb.Append($"User:{this._userOperations.PrintBetaUserDetails(directoryObject as Beta.User, verbose)}");
                 }
                 else if (directoryObject is Beta.Group)
                 {
-                    sb.AppendLine($"User:{this._groupOperations.PrintGroupBasic(directoryObject as Beta.Group)}");
+                    sb.Append($"Group:{this._groupOperations.PrintGroupBasic(directoryObject as Beta.Group)}");
                 }
                 else if (directoryObject is Beta.ServicePrincipal)
                 {
-                    sb.AppendLine($"App:{this._servicePrincipalOperations.PrintServicePrincipalBasic(directoryObject as Beta.ServicePrincipal)}");
+                    sb.Append($"App:{this._servicePrincipalOperations.PrintServicePrincipalBasic(directoryObject as Beta.ServicePrincipal)}");
+                }
+                else if (directoryObject is Beta.DirectoryRole)
+                {
+                    sb.Append($"DirectoryRole:{this._directoryRolesOperations.PrintDirectoryRoleBasicAsync(directoryObject as Beta.DirectoryRole)}");
                 }
                 else
                 {
@@ -89,7 +91,7 @@ namespace Common
             }
             else
             {
-                sb.AppendLine($"Provided directoryobject is null");
+                sb.Append($"Provided directoryobject is null");
             }
 
             return sb.ToString();

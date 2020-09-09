@@ -1,8 +1,10 @@
 ﻿extern alias BetaLib;
 
 using Common;
+using Microsoft.Azure.Management.Graph.RBAC.Fluent.Models;
 using Microsoft.Graph;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,10 +18,16 @@ namespace ARMApi
         private Beta.GraphServiceClient _graphServiceClient;
         private UserOperations _userOperations;
 
+        private ConcurrentDictionary<string, Beta.UnifiedRoleDefinition> _cachedRolesById;
+        private ConcurrentDictionary<string, Beta.UnifiedRoleDefinition> _cachedRolesByDisplayName;
+
         public RoleManagementOperations(Beta.GraphServiceClient graphServiceClient, UserOperations userOperations)
         {
             this._graphServiceClient = graphServiceClient;
             this._userOperations = userOperations;
+
+            _cachedRolesById = new ConcurrentDictionary<string, Beta.UnifiedRoleDefinition>();
+            _cachedRolesByDisplayName = new ConcurrentDictionary<string, Beta.UnifiedRoleDefinition>();
         }
 
         #region RoleDefinitions
@@ -47,7 +55,7 @@ namespace ARMApi
             return allUnifiedRoleDefinitions;
         }
 
-        public async Task<Beta.UnifiedRoleDefinition> CreateRoleDefinition()
+        public async Task<Beta.UnifiedRoleDefinition> CreateCustomRoleDefinition()
         {
             Beta.UnifiedRoleDefinition newRoleDefinition = null;
 
@@ -86,10 +94,17 @@ namespace ARMApi
 
         public async Task<Beta.UnifiedRoleDefinition> GetRoleDefinitionByIdAsync(string roleDefinitionId)
         {
+            if (_cachedRolesById.ContainsKey(roleDefinitionId))
+            {
+                return _cachedRolesById[roleDefinitionId];
+            }
+
             try
             {
                 var newRoleDefinitions = await _graphServiceClient.RoleManagement.Directory.RoleDefinitions.Request().Filter($"id eq '{roleDefinitionId}'").GetAsync();
-                return newRoleDefinitions?.CurrentPage?.FirstOrDefault();
+                var roledef = newRoleDefinitions?.CurrentPage?.FirstOrDefault();
+                _cachedRolesById[roleDefinitionId] = roledef;
+                return roledef;
             }
             catch (Microsoft.Graph.ServiceException gex)
             {
@@ -133,19 +148,30 @@ namespace ARMApi
             }
         }
 
-        public async Task<IEnumerable<Beta.UnifiedRoleDefinition>> GetRoleDefinitionByDisplayNameAsync(string displayName)
+        public async Task<Beta.UnifiedRoleDefinition> GetRoleDefinitionByDisplayNameAsync(string displayName)
         {
+            if (_cachedRolesByDisplayName.ContainsKey(displayName))
+            {
+                return _cachedRolesByDisplayName[displayName];
+            }
+
             IEnumerable<Beta.UnifiedRoleDefinition> roledefinitions = null;
             try
             {
                 roledefinitions = await _graphServiceClient.RoleManagement.Directory.RoleDefinitions.Request().Filter($"DisplayName eq '{displayName}'").GetAsync();
+                var roledef = roledefinitions.FirstOrDefault();
+
+                this._cachedRolesByDisplayName[displayName] = roledef;
+                this._cachedRolesById[roledef.Id] = roledef;
+
             }
             catch (ServiceException e)
             {
                 Console.WriteLine($"We could not get the Role Definition with name-{displayName}: {e}");
             }
 
-            return roledefinitions;
+
+            return roledefinitions.FirstOrDefault();
         }
 
         public async Task PrintRoleDefinition(Beta.UnifiedRoleDefinition roleDefinition, bool verbose = false, bool printAssignments = true)
@@ -197,7 +223,10 @@ namespace ARMApi
                         // Page through results
                         foreach (var roleDefinition in roledefinitions.CurrentPage)
                         {
-                            Console.WriteLine($"Role:{roleDefinition.DisplayName}");
+                            //Console.WriteLine($"Role:{roleDefinition.DisplayName}");
+                            _cachedRolesByDisplayName[roleDefinition.DisplayName] = roleDefinition;
+                            _cachedRolesById[roleDefinition.Id] = roleDefinition;
+
                             allUnifiedRoleDefinitions.Add(roleDefinition);
                         }
 
@@ -234,7 +263,7 @@ namespace ARMApi
 
             try
             {
-                roleassignments = await _graphServiceClient.RoleManagement.Directory.RoleAssignments.Request().Filter($"roleDefinitionId eq '{roleDefinitionId}'").GetAsync();
+                roleassignments = await _graphServiceClient.RoleManagement.Directory.RoleAssignments.Request().Filter($"roleDefinitionId eq '{roleDefinitionId}'").Expand("principal").GetAsync();
 
                 if (roleassignments != null)
                 {
@@ -313,7 +342,7 @@ namespace ARMApi
 
             if (roleAssignment != null)
             {
-                Beta.User principal = await _userOperations.GetUserByIdAsync(roleAssignment.PrincipalId);
+                Beta.User principal = roleAssignment.Principal as Beta.User ?? await _userOperations.GetUserByIdAsync(roleAssignment.PrincipalId);
                 Beta.UnifiedRoleDefinition roleDefinition = await GetRoleDefinitionByIdAsync(roleAssignment.RoleDefinitionId);
 
                 toPrint = $"Role Assignment:- Role-{roleDefinition.DisplayName}, User-{_userOperations.PrintBetaUserDetails(principal, false, roleAssignment.PrincipalId)}";
