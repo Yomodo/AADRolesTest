@@ -8,6 +8,7 @@ using Microsoft.Graph.Auth;
 using Microsoft.Identity.Client;
 using System;
 using System.Threading.Tasks;
+using System.Timers;
 using Beta = BetaLib.Microsoft.Graph;
 
 namespace AuthNMethodsTesting
@@ -20,7 +21,7 @@ namespace AuthNMethodsTesting
 
         private static async Task Main(string[] args)
         {
-            string[] scopes = new string[] { "user.readbasic.all", "UserAuthenticationMethod.ReadWrite.All", "Policy.Read.All", "IdentityRiskyUser.ReadWrite.All", "IdentityRiskEvent.Read.All" };
+            string[] scopes = new string[] { "user.readbasic.all", "UserAuthenticationMethod.ReadWrite.All", "Policy.Read.All", "Policy.ReadWrite.AuthenticationMethod", "IdentityRiskyUser.ReadWrite.All", "IdentityRiskEvent.Read.All", "SecurityEvents.ReadWrite.All" };
 
             // Using appsettings.json as our configuration settings
             var builder = new ConfigurationBuilder()
@@ -43,7 +44,7 @@ namespace AuthNMethodsTesting
             Beta.GraphServiceClient betaClient = new Beta.GraphServiceClient(authenticationProvider);
 
             //ServicePrincipalOperations servicePrincipalOperations = new ServicePrincipalOperations(betaClient);
-            //UserOperations userOperations = new UserOperations(betaClient, "woodgrove.ms");
+            UserOperations userOperations = new UserOperations(betaClient, "woodgrove.ms");
             //GroupOperations groupOperations = new GroupOperations(betaClient);
 
             //IEnumerable<Beta.User> allUsersInTenant = await userOperations.GetUsersAsync();
@@ -64,7 +65,6 @@ namespace AuthNMethodsTesting
 
             //var policy = await conditionalAccessPolicyOperations.GetConditionalAccessPolicyByDisplayNameAsync("Kalyan test");
             //Console.WriteLine(await conditionalAccessPolicyOperations.PrintConditionalAccessPolicyAsync(policy, true));
-
 
             // Risk detection operations
 
@@ -186,12 +186,137 @@ namespace AuthNMethodsTesting
             // await GetUsersPhoneMethodsAsync(betaClient);
 
             // Device registration policy operations
-            DeviceRegistrationPolicySettingsOperations deviceRegistrationPolicySettingsOperations = new DeviceRegistrationPolicySettingsOperations(betaClient);
-            var deviceregistrationpolicy = await deviceRegistrationPolicySettingsOperations.GetDeviceRegistrationPolicyAsync();
-            Console.WriteLine(deviceRegistrationPolicySettingsOperations.PrintDeviceRegistrationPolicy(deviceregistrationpolicy));
+            //DeviceRegistrationPolicySettingsOperations deviceRegistrationPolicySettingsOperations = new DeviceRegistrationPolicySettingsOperations(betaClient);
+            //var deviceregistrationpolicy = await deviceRegistrationPolicySettingsOperations.GetDeviceRegistrationPolicyAsync();
+            //Console.WriteLine(deviceRegistrationPolicySettingsOperations.PrintDeviceRegistrationPolicy(deviceregistrationpolicy));
+
+            //ColorConsole.WriteLine(ConsoleColor.Green, $"fetching all Alerts");
+
+            //AlertsOperations alertOperations = new AlertsOperations(betaClient);
+
+            //var alerts = await alertOperations.ListAlertsAsync();
+
+            //alerts.ForEach(alert =>
+            //{
+            //    Console.WriteLine(alertOperations.PrintAlert(alert));
+            //});
+
+            //ColorConsole.WriteLine(ConsoleColor.Green, $"End of printing all alerts");
+
+            //// SecureScore operations
+            //ColorConsole.WriteLine(ConsoleColor.Green, $"fetching secure scores");
+
+            //SecureScoresOperations secureScoresOperations = new SecureScoresOperations(betaClient);
+
+            //var secureScores = await secureScoresOperations.ListSecureScoresAsync();
+
+            //secureScores.ForEach(alert =>
+            //{
+            //    Console.WriteLine(secureScoresOperations.PrintSecureScore(alert, true));
+            //    ColorConsole.WriteLine(ConsoleColor.Green, $"-------------------------------------------------");
+            //});
+
+            //ColorConsole.WriteLine(ConsoleColor.Green, $"End of printing secure scores");
+            //// end of SecureScore operations
+
+            //// Temporary Access Pass operations
+
+            //AuthenticationMethodsOperations authenticationMethodsOperations = new AuthenticationMethodsOperations(betaClient);
+
+            //ColorConsole.WriteLine(ConsoleColor.Green, $"fetching current TAP config");
+
+            //var TAPPolicyConfig = await authenticationMethodsOperations.GetTemporaryAccessPassConfigurationAsync();
+
+            //ColorConsole.WriteLine(ConsoleColor.White, authenticationMethodsOperations.PrintTemporaryAccessPassAuthenticationMethodConfiguration(TAPPolicyConfig));
+
+            //// Update TAP config
+            //TAPPolicyConfig.State = "enabled";
+            //TAPPolicyConfig.MaximumLifetimeInMinutes = 1234;
+
+            //ColorConsole.WriteLine(ConsoleColor.Green, $"Updating TAP config");
+            //var serverresponse = await authenticationMethodsOperations.UpdateTemporaryAccessPassConfigurationAsync(TAPPolicyConfig);
+
+            //ColorConsole.WriteLine(ConsoleColor.Yellow, $"Update call result-{serverresponse}");
+
+            //ColorConsole.WriteLine(ConsoleColor.Green, $"fetching TAP config after update");
+
+            //TAPPolicyConfig = await authenticationMethodsOperations.GetTemporaryAccessPassConfigurationAsync();
+
+            //ColorConsole.WriteLine(ConsoleColor.White, authenticationMethodsOperations.PrintTemporaryAccessPassAuthenticationMethodConfiguration(TAPPolicyConfig));
+
+            //// Temporary Access Pass operations end
+
+            // TAP user operations
+            AuthenticationMethodsOperations authenticationMethodsOperations = new AuthenticationMethodsOperations(betaClient);
+
+            // create a random user
+            RandomNames randomNames = new RandomNames(NameType.MaleName);
+
+            var user = await userOperations.CreateUserAsync(
+                givenName: randomNames.GetRandom(),
+                surname: randomNames.GetRandom());
+
+            ColorConsole.WriteLine(ConsoleColor.Green, $"Fetching newly created user after creation");
+            ColorConsole.WriteLine(ConsoleColor.Blue, userOperations.PrintBetaUserDetails(await userOperations.GetUserByIdAsync(user.Id)));
+
+            // Wait 10 seconds
+            await Task.Delay(5000);
+
+            try
+            {
+                ColorConsole.WriteLine(ConsoleColor.Green, $"Checking for an existing TAP for this user");
+                var tap = await authenticationMethodsOperations.GetExistingTemporaryAccessPassForUser(user);
+
+                ColorConsole.WriteLine(ConsoleColor.Green, $"Printing any existing TAP for this user");
+                ColorConsole.WriteLine(ConsoleColor.Blue, authenticationMethodsOperations.PrintTemporaryAccessPass(tap));
+
+                ColorConsole.WriteLine(ConsoleColor.Green, $"Creating a new TAP for this user");
+                var newtap = await authenticationMethodsOperations.GenerateTemporaryAccessPassForUser(user, 60);
+
+                ColorConsole.WriteLine(ConsoleColor.Green, $"Printing the newly generated TAP for this user");
+                ColorConsole.WriteLine(ConsoleColor.Blue, authenticationMethodsOperations.PrintTemporaryAccessPass(newtap));
+
+                Console.WriteLine($"Try the new TAP after {DateTime.Now.AddMinutes(10)} and then press any key to continue..");
+                var timer = new Timer();
+                timer.Interval = 600000;
+
+                // Hook up the Elapsed event for the timer.
+                timer.Elapsed += new ElapsedEventHandler(delegate (Object o, ElapsedEventArgs a)
+                {
+                    ColorConsole.WriteLine(ConsoleColor.Cyan, $"The new TAP can be tried now..");
+                    // Start the timer
+                    timer.Enabled = false;
+                });
+
+                Console.ReadKey();
+
+                ColorConsole.WriteLine(ConsoleColor.Green, $"Deleting the newly generated TAP for this user");
+                await authenticationMethodsOperations.DeleteExistingTemporaryAccessPassForUser(user, newtap.Id);
+
+                ColorConsole.WriteLine(ConsoleColor.Green, $"Checking for an existing TAP for this user");
+                tap = await authenticationMethodsOperations.GetExistingTemporaryAccessPassForUser(user);
+
+                ColorConsole.WriteLine(ConsoleColor.Green, $"Printing any existing TAP for this user");
+                ColorConsole.WriteLine(ConsoleColor.Blue, authenticationMethodsOperations.PrintTemporaryAccessPass(tap));
+            }
+            catch (Exception ex)
+            {
+                ColorConsole.WriteLine(ConsoleColor.Red, $"{ex}");
+            }
+            finally
+            {
+                await userOperations.DeleteUserAsync(user.Id);
+            }
+
+            // TAP user operations end
 
             Console.WriteLine("Press any key to exit");
             Console.ReadKey();
+        }
+
+        private static void OnTimedEvent(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         private static bool TestforMissingRiskEvent(Exception ex)
@@ -207,7 +332,5 @@ namespace AuthNMethodsTesting
 
             return false;
         }
-
-       
     }
 }
