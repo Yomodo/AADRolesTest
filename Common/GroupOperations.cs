@@ -343,7 +343,6 @@ namespace Common
             return newGroupObject;
         }
 
-
         public async Task<Beta.Group> CreateDynamicGroupAsync(
             string tenantDomain = "kkaad.onmicrosoft.com",
             IEnumerable<Beta.User> ownersToAddList = null)
@@ -359,7 +358,6 @@ namespace Common
 
             RandomStrings randstring = new RandomStrings(16);
             randstring.GetRandom(); // Initialize
-
 
             Beta.Group newGroupObject = null;
 
@@ -544,7 +542,7 @@ namespace Common
             Beta.IGroupMembersCollectionWithReferencesPage groupMemberPages = null;
 
             Beta.IGroupMembersCollectionWithReferencesPage members = group.Members;
-            
+
             if (group?.Members?.Count() > 0)
             {
                 groupMemberPages = group.Members;
@@ -554,7 +552,6 @@ namespace Common
                 try
                 {
                     groupMemberPages = await _graphServiceClient.Groups[group.Id].Members.Request().GetAsync();
-
                 }
                 catch (ServiceException gex)
                 {
@@ -620,7 +617,6 @@ namespace Common
                 try
                 {
                     groupOwnersPages = await _graphServiceClient.Groups[group.Id].Owners.Request().GetAsync();
-
                 }
                 catch (ServiceException gex)
                 {
@@ -628,7 +624,7 @@ namespace Common
                     {
                         throw;
                     }
-                }                
+                }
             }
 
             try
